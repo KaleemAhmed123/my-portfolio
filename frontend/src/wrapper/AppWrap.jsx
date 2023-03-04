@@ -1,6 +1,6 @@
 import React from "react";
 import { NavigationDots, SocialMedia } from "../components";
-
+// here HOC to provides fuul height, socia, dots
 const AppWrap = (Component, idName, classNames) =>
   function HOC() {
     return (
