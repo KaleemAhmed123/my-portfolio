@@ -57,7 +57,7 @@ const Work = () => {
           )
         )}
       </div>
-      {/* Card container*/}
+      {/*All Card container*/}
       <motion.div
         animate={animateCard}
         transition={{ duration: 0.5, delayChildren: 0.5 }}
@@ -66,9 +66,10 @@ const Work = () => {
         {/* looping ind. items */}
         {filterWork.map((work, index) => (
           <div className="app__work-item app__flex" key={index}>
+            {/* img */}
             <div className="app__work-img app__flex">
               <img src={urlFor(work?.imgUrl)} alt={work?.name} />
-
+              {/* That hover on img 0.5 transp. */}
               <motion.div
                 whileHover={{ opacity: [0, 1] }}
                 transition={{
@@ -78,7 +79,7 @@ const Work = () => {
                 }}
                 className="app__work-hover app__flex"
               >
-                {/* links to gihub and demo */}
+                {/* links to gihub and demo down div for anime */}
                 <a href={work?.projectLink} target="_blank" rel="noreferrer">
                   <motion.div
                     whileInView={{ scale: [0, 1] }}
@@ -89,6 +90,7 @@ const Work = () => {
                     <AiFillEye />
                   </motion.div>
                 </a>
+                {/* same here */}
                 <a href={work.codeLink} target="_blank" rel="noreferrer">
                   <motion.div
                     whileInView={{ scale: [0, 1] }}
@@ -102,7 +104,7 @@ const Work = () => {
                 {/*  */}
               </motion.div>
             </div>
-
+            {/* that below content */}
             <div className="app__work-content app__flex">
               <h4 className="bold-text">{work?.title}</h4>
               <p className="p-text" style={{ marginTop: 10 }}>
