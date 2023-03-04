@@ -4,10 +4,11 @@ import { NavigationDots, SocialMedia } from "../components";
 const AppWrap = (Component, idName, classNames) =>
   function HOC() {
     return (
+      // implementing css in main.css
       <div id={idName} className={`app__container ${classNames}`}>
         <SocialMedia />
         <div className="app__wrapper app__flex">
-          {/* other comp */}
+          {/* other components gets wrapped with 100vh and centered also */}
           <Component />
 
           <div className="copyright">
