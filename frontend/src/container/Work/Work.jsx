@@ -43,7 +43,7 @@ const Work = () => {
       </h2>
       {/* Tags filter */}
       <div className="app__work-filter">
-        {["UI/UX", "Full Stack App", "React-Redux", "All"].map(
+        {["All", "React-Redux", "Full Stack App", "UI/UX"].map(
           (item, index) => (
             <div
               key={index}
@@ -112,7 +112,7 @@ const Work = () => {
               </p>
 
               <div className="app__work-tag app__flex">
-                <p className="p-text">{work?.tags[0]}</p>
+                <p className="p-text">{work.tags[0]}</p>
               </div>
             </div>
           </div>
