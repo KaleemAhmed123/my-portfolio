@@ -3,8 +3,11 @@ import mobile from "../assets/mobile.png";
 import api from "../assets/api.png";
 import cpp from "../assets/cpp.png";
 import css from "../assets/css.png";
+import Bird from "../assets/BirdLogo.png";
 import figma from "../assets/figma.png";
 import flutter from "../assets/flutter.png";
+import myPic from "../assets/myPic.png";
+import myPic2 from "../assets/myPic2.png";
 import git from "../assets/git.png";
 import graphql from "../assets/graphql.png";
 import html from "../assets/html.png";
@@ -39,9 +42,12 @@ export default {
   email,
   mobile,
   api,
+  Bird,
   cpp,
   css,
   figma,
+  myPic,
+  myPic2,
   flutter,
   git,
   graphql,

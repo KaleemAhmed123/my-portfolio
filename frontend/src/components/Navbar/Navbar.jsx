@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { images } from "../../constants";
 import { HiMenuAlt4, HiX } from "react-icons/hi";
 import { motion } from "framer-motion";
-
+import name from "../../assets/name.jpg";
 import "./Navbar.scss";
 
 const Navbar = () => {
@@ -10,7 +10,8 @@ const Navbar = () => {
   return (
     <nav className="app__navbar">
       <div className="app__navbar-logo">
-        <img src={images.logo} alt="logo" />
+        <p>K.A</p>
+        <img src={images.Bird} alt="logo" />
       </div>
       <ul className="app__navbar-links">
         {["home", "about", "work", "skills", "contact"].map((item) => (
