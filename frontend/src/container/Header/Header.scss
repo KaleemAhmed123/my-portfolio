@@ -162,6 +162,22 @@
             margin: 1rem;
         }
     }
+        @media screen and (max-width: 510px) {
+                    div:nth-child(2) {
+                            width: 45px;
+                            height: 45px;
+                        }
+                    
+                        div:nth-child(3) {
+                            width: 60px;
+                            height: 60px;
+                        }
+                    
+                        div:nth-child(1) {
+                            width: 70px;
+                            height: 70px;
+                        }
+        }
 }
 
 .app__header-img {
