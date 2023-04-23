@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import "./Header.scss";
 import { BsGithub, BsLinkedin, BsTwitter } from "react-icons/bs";
 import { SiLeetcode } from "react-icons/si";
-// import { AppWrap } from "../../wrapper";
+import { AppWrap } from "../../wrapper";
 
 const Header = () => (
   <motion.div
