@@ -10,10 +10,6 @@ const AppWrap = (Component, idName, classNames) =>
         <div className="app__wrapper app__flex">
           {/* other components gets wrapped with 100vh and centered also */}
           <Component />
-
-          <div className="copyright">
-            <p className="p-text">@2023 Kaleem</p>
-          </div>
         </div>
         <NavigationDots active={idName} />
       </div>
