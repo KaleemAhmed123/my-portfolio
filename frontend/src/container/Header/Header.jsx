@@ -20,19 +20,19 @@ const Header = () => (
           </li>
           <li>
             <span class="first-block">Phone:</span>
-            <a href="tel:+91 6306026859">
+            <a href="tel:+91 6306026859" target="__blank">
               <span class="second-block">+91 6306026859</span>
             </a>
           </li>
           <li>
             <span class="first-block">Email:</span>
-            <a href="mailto:shaamidreez@gmail.com">
+            <a href="mailto:shaamidreez@gmail.com" target="__blank">
               <span class="second-block">shaamidreez@gmai.com</span>
             </a>
           </li>
           <li>
             <span class="first-block">Website:</span>
-            <a href="https://kaleem.netlify.app">
+            <a href="https://kaleem.netlify.app" target="__blank">
               <span class="second-block">kaleem.netlify.com</span>
             </a>
           </li>
@@ -94,5 +94,4 @@ const Header = () => (
     </div>
   </motion.div>
 );
-
 export default AppWrap(Header, "home");
