@@ -52,7 +52,7 @@ const Header = () => (
           and hone my ability to work in a team.
         </p>
         <p>
-          I'm an good at Data Structures and Algorithms with a passion for
+          I'm also good at Data Structures and Algorithms with a passion for
           Problem-solving, solved <b>650+</b> coding problems on various
           platforms, I stay up to date with the latest industry trends to tackle
           complex problems and provide creative solutions that impress my peers
