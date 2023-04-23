@@ -7,12 +7,19 @@
 }
 
 .container {
+
+    position: relative;
+    background: url("../../assets/bgIMG.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat;
+
     font-weight: 400;
     font-size: 16px;
     line-height: 1.7;
     color: #4d4d4d;
     margin: 10px 20px;
-
+    // position: relative;
     // .intro {
     //     text-align: center;
     //     font-size: 50px;
@@ -21,7 +28,7 @@
     //     line-height: 1.5;
     //     color: #000;
     // }
-
+       
     .row {
         display: flex;
         gap: 2%;
@@ -91,7 +98,7 @@
 
                         &:hover {
                             color: #fff;
-                            background:rgba(0, 0, 0, 0.6);
+                            background:rgba(0, 0, 0, 0.7);
                         }
 
                     }
