@@ -54,6 +54,13 @@
         overflow: auto;
         color: #000000d4;
     }
+    .p-text::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .p-text::-webkit-scrollbar:hover {
+        display: block;
+    }
 
     @media screen and (min-width: 1800px) {
         width: 370px;

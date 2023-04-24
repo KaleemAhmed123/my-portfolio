@@ -47,6 +47,7 @@
 
 .app__work-portfolio {
     display: grid;
+    max-width: 90%;
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
 
@@ -95,6 +96,13 @@
     .app__work-content{
         p{
             overflow: auto;
+        }
+        p::-webkit-scrollbar {
+            display: none;
+        }
+                /* Show the scrollbar when hovering */
+        p::-webkit-scrollbar:hover {
+            display: block;
         }
     }
 }

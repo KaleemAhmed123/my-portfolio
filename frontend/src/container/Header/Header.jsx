@@ -11,38 +11,47 @@ const Header = () => (
     transition={{ duration: 0.5 }}
     className="container"
   >
-    <div class="row">
-      <div class="left">
-        <ul class="info">
+    <div className="row">
+      <div className="left">
+        <ul className="info">
           <li>
-            <span class="first-block">Full Name:</span>
-            <span class="second-block">Kaleem Ahmed</span>
+            <span className="first-block">Full Name:</span>
+            <span className="second-block">Kaleem Ahmed</span>
           </li>
           <li>
-            <span class="first-block">Phone:</span>
+            <span className="first-block">Phone:</span>
             <a href="tel:+91 6306026859" target="__blank">
-              <span class="second-block">+91 6306026859</span>
+              <span className="second-block">+91 6306026859</span>
             </a>
           </li>
           <li>
-            <span class="first-block">Email:</span>
+            <span className="first-block">Email:</span>
             <a href="mailto:shaamidreez@gmail.com" target="__blank">
-              <span class="second-block">shaamidreez@gmai.com</span>
+              <span className="second-block">shaamidreez@gmai.com</span>
             </a>
           </li>
           <li>
-            <span class="first-block">Website:</span>
+            <span className="first-block">Website:</span>
             <a href="https://kaleem.netlify.app" target="__blank">
-              <span class="second-block">kaleem.netlify.com</span>
+              <span className="second-block">kaleem.netlify.com</span>
             </a>
           </li>
           <li>
-            <span class="first-block">Location:</span>
-            <span class="second-block">UP India 208019</span>
+            <span className="first-block">Location:</span>
+            <span className="second-block">UP India 208019</span>
+          </li>
+          <li>
+            <span className="first-block">Resume:</span>
+            <a
+              href="https://drive.google.com/file/d/1uqTN4vrzsIzuD5stoiMXjO5DFMNBrIV_/view?usp=sharing"
+              target="__blank"
+            >
+              <span className="second-block">Click Here</span>
+            </a>
           </li>
         </ul>
       </div>
-      <div class="right">
+      <div className="right">
         <h2>Hello There!</h2>
         <p>
           I'm Kaleem, I possess a wide range of technical skills and have
@@ -65,7 +74,7 @@ const Header = () => (
           algorithms, or collaborating with teams, I am excited to take on new
           challenges and grow as a developer.
         </p>
-        <ul class="icons">
+        <ul className="icons">
           <li>
             <a
               href="https://www.linkedin.com/in/kaleem-ahmed-"
