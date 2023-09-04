@@ -40,32 +40,24 @@ const Header = () => (
             <span className="first-block">Location:</span>
             <span className="second-block">UP India 208019</span>
           </li>
-          <li>
-            <span className="first-block">Resume:</span>
-            <a
-              href="https://drive.google.com/file/d/1uqTN4vrzsIzuD5stoiMXjO5DFMNBrIV_/view?usp=sharing"
-              target="__blank"
-            >
-              <span className="second-block">Click Here</span>
-            </a>
-          </li>
         </ul>
       </div>
       <div className="right">
         <h2>Hello There!</h2>
         <p>
-          I'm Kaleem, I possess a wide range of technical skills and have
-          demonstrated proficiency in web technologies, I've also gained
-          considerable experience building complex projects using these
-          technologies, which has helped me develop my problem-solving skills
-          and hone my ability to work in a team.
+          I'm Kaleem, I have sound knowledge of Data Structures and Algorithms.
+          With a passion for problem-solving, I've solved <b>1100+</b> coding
+          problems in the past 2.5 years on various platforms like{" "}
+          <b>Leetcode</b>, <b>GFG</b>, <b>Codeforces</b>. I stay up to date with
+          the latest industry trends to tackle complex problems and provide
+          creative solutions that impress my peers and mentors alike. &nbsp;
         </p>
         <p>
-          I'm also good at Data Structures and Algorithms with a passion for
-          Problem-solving, solved <b>650+</b> coding problems on various
-          platforms, I stay up to date with the latest industry trends to tackle
-          complex problems and provide creative solutions that impress my peers
-          and mentors alike. &nbsp;
+          And I possess a wide range of technical skills and have demonstrated
+          proficiency in web technologies, I've also gained considerable
+          experience building projects using latest technologies, which has
+          helped me develop my problem-solving skills and hone my ability to
+          work in a team.
         </p>
         <p>
           Overall, I'm confident in my technical abilities and eager to leverage
