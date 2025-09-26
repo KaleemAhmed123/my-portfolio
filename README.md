@@ -5,10 +5,9 @@
 . Took some inspiration from JSM yt <br/>
 . Sanity Client is used for managing database <br/>
 . Tools and technologies used in project are- <br/>
-. React JS, SCSS, JS, Sanity, Vite
+. React JS, SCSS, JS, Vite, Node/Express, MongoDB
 
 ## Here are same screenshots AND demo link- <a href="https://kaleem.netlify.app"> Click Here </a>
-
 
 ![Screenshot_1](https://user-images.githubusercontent.com/91620720/233975698-a31f0ef4-d8bd-4953-9ff2-b0cdc29dd8cb.png)
 ![Screenshot_2](https://user-images.githubusercontent.com/91620720/233975741-5bde0027-9022-4b49-8ddc-eddbad34fe8a.png)
