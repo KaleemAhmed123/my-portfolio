@@ -1,0 +1,34 @@
+export default {
+    name: 'intro',
+    title: 'Intro',
+    type: 'document',
+    fields: [
+        {
+            name: 'greeting',
+            title: 'Greeting',
+            type: 'string',
+            description: 'e.g., "Hello There!"',
+        },
+        {
+            name: 'section1',
+            title: 'Section 1',
+            type: 'text',
+            description: 'First paragraph about yourself',
+            validation: Rule => Rule.required()
+        },
+        {
+            name: 'section2',
+            title: 'Section 2',
+            type: 'text',
+            description: 'Second paragraph about your skills and experience',
+            validation: Rule => Rule.required()
+        },
+        {
+            name: 'section3',
+            title: 'Section 3',
+            type: 'text',
+            description: 'Third paragraph about your goals and aspirations',
+            validation: Rule => Rule.required()
+        },
+    ],
+};
