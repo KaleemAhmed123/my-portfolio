@@ -39,6 +39,7 @@
         background-color: var(--secondary-color);
         color: #fff;
     }
+
     @media screen and (max-width:480px) {
         margin: 0.8rem 0;
         margin-left: 1.5rem;
@@ -93,14 +94,17 @@
             margin: 1rem;
         }
     }
-    .app__work-content{
-        p{
+
+    .app__work-content {
+        p {
             overflow: auto;
         }
+
         p::-webkit-scrollbar {
             display: none;
         }
-                /* Show the scrollbar when hovering */
+
+        /* Show the scrollbar when hovering */
         p::-webkit-scrollbar:hover {
             display: block;
         }
