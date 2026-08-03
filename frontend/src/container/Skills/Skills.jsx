@@ -34,14 +34,13 @@ const Skills = () => {
               whileInView={{ opacity: [0, 1] }}
               transition={{ duration: 0.5 }}
               className="app__skills-item app__flex"
-              key={skill}
+              key={skill.name || i}
             >
               <div
                 className="app__flex"
                 style={{ backgroundColor: skill.bgColor }}
-                key={skill}
               >
-                <img src={urlFor(skill.icon)} alt={skill.name} />
+                {skill.icon && <img src={urlFor(skill.icon)} alt={skill.name} />}
               </div>
               <p className="p-text">{skill.name}</p>
             </motion.div>
