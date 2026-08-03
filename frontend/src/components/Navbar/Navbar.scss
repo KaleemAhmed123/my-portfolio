@@ -73,6 +73,33 @@
         display: none;
     }
 }
+.app__navbar-cta {
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    background: var(--secondary-color);
+    color: var(--white-color);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        background: #2430af;
+    }
+
+    @media screen and (max-width: 850px) {
+        display: none;
+    }
+}
+
+.app__navbar-menu-cta {
+    color: var(--secondary-color) !important;
+    font-weight: 700 !important;
+}
+
 // mobile menu
 .app__navbar-menu {
     width: 35px;

@@ -69,6 +69,24 @@
         .right {
             width: 70%;
 
+            .header-cred-cta {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin: 10px 0 6px;
+                padding: 0.7rem 1.3rem;
+                border-radius: 8px;
+                background: var(--secondary-color);
+                color: #fff;
+                font-weight: 700;
+                text-decoration: none;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.75);
+                }
+            }
+
             h2 {
                 font-size: 40px;
                 text-align: left;

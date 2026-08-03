@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { images } from "../../constants";
-import logo from "../../assets/BirdLogo2.png";
 import { HiMenuAlt4, HiX } from "react-icons/hi";
 import { motion } from "framer-motion";
 import name from "../../assets/name.jpg";
@@ -12,7 +11,6 @@ const Navbar = () => {
     <nav className="app__navbar">
       <div className="app__navbar-logo">
         <p>K.A</p>
-        <img src={logo} alt="logo" />
       </div>
       <ul className="app__navbar-links">
         {["home", "about", "work", "skills", "contact"].map((item) => (
@@ -22,6 +20,9 @@ const Navbar = () => {
           </li>
         ))}
       </ul>
+      <a className="app__navbar-cta" href="/credentials">
+        Test Access
+      </a>
       {/* for mobile we need a ham-menuj */}
       <div className="app__navbar-menu">
         <HiMenuAlt4 onClick={() => setToggle(!toggle)} />
@@ -39,6 +40,15 @@ const Navbar = () => {
                   </a>
                 </li>
               ))}
+              <li>
+                <a
+                  className="app__navbar-menu-cta"
+                  href="/credentials"
+                  onClick={() => setToggle(!toggle)}
+                >
+                  Test Access
+                </a>
+              </li>
             </ul>
           </motion.div>
         )}

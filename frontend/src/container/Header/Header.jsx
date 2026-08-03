@@ -108,6 +108,9 @@ const Header = () => {
               {intro.section3 && <p>{intro.section3}</p>}
             </>
           )}
+          <a className="header-cred-cta" href="/credentials">
+            🔑 Test Access for Recruiters
+          </a>
           {socialLinks.length > 0 && (
             <ul className="icons">
               {socialLinks.map((link, index) => (
