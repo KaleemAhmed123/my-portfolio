@@ -6,6 +6,22 @@ import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
 import "./Work.scss";
 
+// Inline SVG placeholder shown when a project has no image in Sanity,
+// so every card keeps the same size.
+const FALLBACK_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'>" +
+      "<rect width='400' height='200' fill='#eef1f8'/>" +
+      "<g fill='none' stroke='#aeb6cc' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'>" +
+      "<rect x='150' y='66' width='100' height='70' rx='8'/>" +
+      "<circle cx='176' cy='92' r='9'/>" +
+      "<path d='M156 136 l26 -30 20 18 24 -30 18 22'/>" +
+      "</g>" +
+      "<text x='200' y='172' font-family='monospace' font-size='13' fill='#9aa0ae' text-anchor='middle'>No preview</text>" +
+    "</svg>"
+  );
+
 const Work = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
@@ -65,7 +81,10 @@ const Work = () => {
           <div className="app__work-item app__flex" key={index}>
             {/* img */}
             <div className="app__work-img app__flex">
-              <img src={urlFor(work?.imgUrl)} alt={work?.name} />
+              <img
+                src={work?.imgUrl ? urlFor(work.imgUrl) : FALLBACK_IMG}
+                alt={work?.name || work?.title}
+              />
               {/* That hover on img 0.5 transp. */}
               <motion.div
                 whileHover={{ opacity: [0, 1] }}
@@ -103,14 +122,13 @@ const Work = () => {
             </div>
             {/* that below content */}
             <div className="app__work-content app__flex">
+              {work?.tags?.[0] && (
+                <div className="app__work-tag app__flex">
+                  <p className="p-text">{work.tags[0]}</p>
+                </div>
+              )}
               <h4 className="bold-text">{work?.title}</h4>
-              <p className="p-text" style={{ marginTop: 10 }}>
-                {work?.description}
-              </p>
-
-              <div className="app__work-tag app__flex">
-                <p className="p-text">{work.tags[0]}</p>
-              </div>
+              <p className="p-text">{work?.description}</p>
             </div>
           </div>
         ))}
