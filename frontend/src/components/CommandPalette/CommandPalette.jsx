@@ -9,14 +9,15 @@ const buildCommands = (projects) => {
   (projects || []).forEach((p) => {
     (p.environments || []).forEach((env) => {
       (env.portals || []).forEach((portal) => {
+        const identifier = portal.email || portal.username;
         out.push({
           project: p.name,
           env: env.name,
           role: portal.role,
           url: portal.url,
-          email: portal.email,
+          email: identifier,
           password: portal.password,
-          haystack: `${p.name} ${env.name || ""} ${portal.role} ${portal.email || ""} ${(p.tags || []).join(" ")}`.toLowerCase(),
+          haystack: `${p.name} ${env.name || ""} ${portal.role} ${identifier || ""} ${(p.tags || []).join(" ")}`.toLowerCase(),
         });
       });
     });

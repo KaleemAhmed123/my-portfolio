@@ -19,12 +19,12 @@
 
 export const credentials = [
   {
-    id: "udoro",
-    name: "Udoro",
-    description: "Multi-vendor e-commerce platform — separate portals for admins, sellers, buyers and live monitoring.",
-    tags: ["Full Stack", "E-commerce"],
+    id: "Eudoro",
+    name: "Eudoro",
+    description: "Multi-vendor e-comm for customized products — separate portals for admins, sellers, buyers and live monitoring.",
+    tags: ["Full Stack", "E-commerce", "RBAC"],
     // Optional: a single "main" link for the project (shown as the big CTA).
-    projectLink: "https://udoro.com",
+    projectLink: "https://eudoro.art",
     codeLink: "",
     environments: [
       {
@@ -32,36 +32,36 @@ export const credentials = [
         note: "Sandbox data — safe to create/delete anything. Resets periodically.",
         portals: [
           {
-            role: "Admin",
-            url: "https://admin.udoro.com",
-            email: "admin@demo.udoro.com",
-            password: "Admin@123",
-            note: "Full dashboard: users, vendors, orders, payouts.",
+            role: "User",
+            url: "https://eudoro.art",
+            email: "kaleem@astreait.com",
+            password: "hayat@#1234",
+            note: "Shopper experience: browse, cart, checkout. one can also create account",
           },
           {
             role: "Seller",
-            url: "https://sellers.udoro.com",
-            email: "seller@demo.udoro.com",
-            password: "Seller@123",
+            url: "https://seller.eudoro.art",
+            email: "shaamidreez@gmail.com",
+            password: "Shaam@#1234",
             note: "Storefront management, products, inventory.",
           },
           {
-            role: "User",
-            url: "https://udoro.com",
-            email: "user@demo.udoro.com",
-            password: "User@123",
-            note: "Shopper experience: browse, cart, checkout.",
+            role: "Admin",
+            url: "https://admin.eudoro.art",
+            email: "shaamidreez@gmail.com",
+            password: "hayat@#1234",
+            note: "Full dashboard: users, vendors, orders, payouts.",
           },
           {
             role: "Monitoring",
-            url: "https://monitoring.udoro.com",
-            email: "monitor@demo.udoro.com",
-            password: "Monitor@123",
+            url: "https://monitoring.eudoro.art",
+            email: "",
+            password: "",
             note: "System health, metrics & logs dashboard.",
           },
         ],
       },
-      // When Udoro goes live, add another environment here, e.g.:
+      // When Eudoro goes live, add another environment here, e.g.:
       // {
       //   name: "Live",
       //   note: "Production — please don't place real orders.",
@@ -75,7 +75,7 @@ export const credentials = [
     name: "Gaza 40+",
     description: "Role-based platform with five distinct access levels, each with its own workflow and permissions.",
     tags: ["Full Stack", "RBAC"],
-    projectLink: "https://gaza40plus.com",
+    projectLink: "https://portal.gaza40plus.co.uk/",
     codeLink: "",
     environments: [
       {
@@ -84,38 +84,62 @@ export const credentials = [
         portals: [
           {
             role: "Role 1 — Super Admin",
-            url: "https://gaza40plus.com/login",
-            email: "superadmin@demo.com",
-            password: "Super@123",
+            url: "https://portal.gaza40plus.co.uk/",
+            email: "admin@example.com",
+            password: "AdminSaleem@1416",
             note: "Update with the real role name & permissions.",
           },
           {
-            role: "Role 2 — Manager",
-            url: "https://gaza40plus.com/login",
-            email: "manager@demo.com",
-            password: "Manager@123",
+            role: "Role 3 — Regional Admin",
+            url: "https://portal.gaza40plus.co.uk/",
+            email: "regional.uk@example.com",
+            password: "RegionalAdminSaleem@1416",
             note: "",
           },
           {
-            role: "Role 3 — Staff",
-            url: "https://gaza40plus.com/login",
-            email: "staff@demo.com",
-            password: "Staff@123",
+            role: "Role 2 — Volunteers",
+            url: "https://portal.gaza40plus.co.uk/",
+            email: "volunteer@example.com",
+            password: "MentorSaleem@1416",
             note: "",
           },
           {
-            role: "Role 4 — Partner",
-            url: "https://gaza40plus.com/login",
-            email: "partner@demo.com",
-            password: "Partner@123",
+            role: "Role 4 — Students",
+            url: "https://portal.gaza40plus.co.uk/",
+            email: "student@example.com",
+            password: "Password123!",
             note: "",
           },
+          
+        ],
+      },
+    ],
+  },
+  {
+    id: "Shaza Couple Platform",
+    name: "Shaza Couple Platform",
+    description: "To be added",
+    tags: ["Full Stack", "AI", "RAG", "PWA"],
+    projectLink: "https://shaza-sandbox.vercel.app/welcome",
+    codeLink: "",
+    environments: [
+      {
+        name: "Testing",
+        note: "Sandbox accounts for couples.",
+        portals: [
           {
-            role: "Role 5 — Member",
-            url: "https://gaza40plus.com/login",
-            email: "member@demo.com",
-            password: "Member@123",
-            note: "",
+            role: "Couple Male Account",
+            url: "https://shaza-sandbox.vercel.app/welcome",
+            email: "shaamidreez@gmail.com",
+            password: "Shaam@#1234",
+            note: "To be added",
+          },
+          {
+            role: "Couple Female Account",
+            url: "https://shaza-sandbox.vercel.app/welcome",
+            email: "laraib@allenhouse.ac.in",
+            password: "hayat@#1234",
+            note: "To be added",
           },
         ],
       },

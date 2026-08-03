@@ -25,7 +25,7 @@ const CREDENTIALS_QUERY = `*[_type == "credentials"] | order(order asc, name asc
   environments[]{
     name,
     note,
-    portals[]{ role, url, email, password, note }
+    portals[]{ role, url, email, username, password, token, note }
   }
 }`;
 
@@ -66,11 +66,11 @@ const CopyField = ({ label, value }) => {
   );
 };
 
-// One-click "Copy login" — grabs email + password together.
-const CopyLoginButton = ({ email, password }) => {
+// One-click "Copy login" — grabs the identifier (email/username) + password.
+const CopyLoginButton = ({ identifier, password }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
-    await copyText(`${email}\n${password}`);
+    await copyText(`${identifier}\n${password}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -79,7 +79,7 @@ const CopyLoginButton = ({ email, password }) => {
       type="button"
       className={`cred__portal-copy ${copied ? "is-copied" : ""}`}
       onClick={handleCopy}
-      title="Copy email + password"
+      title="Copy login + password"
     >
       {copied ? <FiCheck /> : <FiLogIn />}
       {copied ? "Copied" : "Copy login"}
@@ -87,49 +87,54 @@ const CopyLoginButton = ({ email, password }) => {
   );
 };
 
-const PortalCard = ({ portal }) => (
-  <div className="cred__portal">
-    <div className="cred__portal-head">
-      <div className="cred__portal-role">
-        <span className="cred__portal-dot" />
-        <h5 className="bold-text">{portal.role}</h5>
-        {portal.url ? (
-          <a
-            className="cred__portal-url p-text"
-            href={portal.url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {portal.url}
-          </a>
-        ) : null}
+const PortalCard = ({ portal }) => {
+  const identifier = portal.email || portal.username;
+  return (
+    <div className="cred__portal">
+      <div className="cred__portal-head">
+        <div className="cred__portal-role">
+          <span className="cred__portal-dot" />
+          <h5 className="bold-text">{portal.role}</h5>
+          {portal.url ? (
+            <a
+              className="cred__portal-url p-text"
+              href={portal.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {portal.url}
+            </a>
+          ) : null}
+        </div>
+        <div className="cred__portal-actions">
+          {identifier && portal.password ? (
+            <CopyLoginButton identifier={identifier} password={portal.password} />
+          ) : null}
+          {portal.url ? (
+            <a
+              className="cred__portal-open"
+              href={portal.url}
+              target="_blank"
+              rel="noreferrer"
+              title={`Open ${portal.url}`}
+            >
+              Open <FiExternalLink />
+            </a>
+          ) : null}
+        </div>
       </div>
-      <div className="cred__portal-actions">
-        {portal.email && portal.password ? (
-          <CopyLoginButton email={portal.email} password={portal.password} />
-        ) : null}
-        {portal.url ? (
-          <a
-            className="cred__portal-open"
-            href={portal.url}
-            target="_blank"
-            rel="noreferrer"
-            title={`Open ${portal.url}`}
-          >
-            Open <FiExternalLink />
-          </a>
-        ) : null}
+
+      <div className="cred__fields">
+        {portal.email ? <CopyField label="Email" value={portal.email} /> : null}
+        {portal.username ? <CopyField label="User" value={portal.username} /> : null}
+        {portal.password ? <CopyField label="Pass" value={portal.password} /> : null}
+        {portal.token ? <CopyField label="Token" value={portal.token} /> : null}
       </div>
-    </div>
 
-    <div className="cred__fields">
-      {portal.email ? <CopyField label="Email" value={portal.email} /> : null}
-      {portal.password ? <CopyField label="Pass" value={portal.password} /> : null}
+      {portal.note ? <p className="cred__portal-note p-text">{portal.note}</p> : null}
     </div>
-
-    {portal.note ? <p className="cred__portal-note p-text">{portal.note}</p> : null}
-  </div>
-);
+  );
+};
 
 const ProjectCard = ({ project, index }) => {
   const [activeEnv, setActiveEnv] = useState(0);
