@@ -9,6 +9,7 @@ import contact from './contact'
 import personalInfo from './personalInfo'
 import intro from './intro'
 import socialLinks from './socialLinks'
+import credentials from './credentials'
 
 export const schemaTypes = [
     works,
@@ -21,5 +22,6 @@ export const schemaTypes = [
     contact,
     personalInfo,
     intro,
-    socialLinks
+    socialLinks,
+    credentials
 ]

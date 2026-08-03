@@ -70,8 +70,10 @@ export default {
                   fields: [
                     { name: 'role', title: 'Role / Portal Name', type: 'string' },
                     { name: 'url', title: 'URL', type: 'string' },
-                    { name: 'email', title: 'Email / Username', type: 'string' },
+                    { name: 'email', title: 'Email', type: 'string' },
+                    { name: 'username', title: 'Username', type: 'string' },
                     { name: 'password', title: 'Password', type: 'string' },
+                    { name: 'token', title: 'Token / API Key', type: 'string' },
                     { name: 'note', title: 'Note', type: 'string' },
                   ],
                   preview: {
