@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { AiFillEye, AiFillGithub } from "react-icons/ai";
+import { AiFillEye } from "react-icons/ai";
 import { motion } from "framer-motion";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
+import WorkModal from "./WorkModal";
 import "./Work.scss";
+import "./WorkModal.scss";
 
 // Inline SVG placeholder shown when a project has no image in Sanity,
 // so every card keeps the same size.
@@ -27,6 +29,9 @@ const Work = () => {
   const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
   const [works, setWorks] = useState([]);
   const [filterWork, setFilterWork] = useState([]);
+  const [activeWork, setActiveWork] = useState(null);
+
+  const imgSrc = (work) => (work?.imgUrl ? urlFor(work.imgUrl) : FALLBACK_IMG);
 
   const handleWorkFilter = (item) => {
     setActiveFilter(item);
@@ -81,43 +86,22 @@ const Work = () => {
           <div className="app__work-item app__flex" key={index}>
             {/* img */}
             <div className="app__work-img app__flex">
-              <img
-                src={work?.imgUrl ? urlFor(work.imgUrl) : FALLBACK_IMG}
-                alt={work?.name || work?.title}
-              />
-              {/* That hover on img 0.5 transp. */}
+              <img src={imgSrc(work)} alt={work?.name || work?.title} />
+              {/* Hover overlay — one eye button opens the preview modal */}
               <motion.div
                 whileHover={{ opacity: [0, 1] }}
-                transition={{
-                  duration: 0.25,
-                  ease: "easeInOut",
-                  staggerChildren: 0.5,
-                }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="app__work-hover app__flex"
+                onClick={() => setActiveWork(work)}
               >
-                {/* links to gihub and demo down div for anime */}
-                <a href={work?.projectLink} target="_blank" rel="noreferrer">
-                  <motion.div
-                    whileInView={{ scale: [0, 1] }}
-                    whileHover={{ scale: [1, 0.9] }}
-                    transition={{ duration: 0.25 }}
-                    className="app__flex"
-                  >
-                    <AiFillEye />
-                  </motion.div>
-                </a>
-                {/* same here */}
-                <a href={work.codeLink} target="_blank" rel="noreferrer">
-                  <motion.div
-                    whileInView={{ scale: [0, 1] }}
-                    whileHover={{ scale: [1, 0.9] }}
-                    transition={{ duration: 0.25 }}
-                    className="app__flex"
-                  >
-                    <AiFillGithub />
-                  </motion.div>
-                </a>
-                {/*  */}
+                <motion.div
+                  whileInView={{ scale: [0, 1] }}
+                  whileHover={{ scale: [1, 0.9] }}
+                  transition={{ duration: 0.25 }}
+                  className="app__flex"
+                >
+                  <AiFillEye />
+                </motion.div>
               </motion.div>
             </div>
             {/* that below content */}
@@ -133,6 +117,12 @@ const Work = () => {
           </div>
         ))}
       </motion.div>
+
+      <WorkModal
+        work={activeWork}
+        imgSrc={activeWork ? imgSrc(activeWork) : ""}
+        onClose={() => setActiveWork(null)}
+      />
     </>
   );
 };
