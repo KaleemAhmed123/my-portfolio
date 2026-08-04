@@ -93,7 +93,15 @@
                 letter-spacing: 2px;
                 color: #000;
                 font-weight: 400;
-                margin-bottom: 20px;
+                margin-bottom: 10px;
+            }
+
+            .header-tagline {
+                font-size: 20px;
+                text-align: left;
+                color: var(--secondary-color);
+                font-weight: 600;
+                margin-bottom: 24px;
             }
 
             p {

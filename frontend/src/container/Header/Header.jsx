@@ -103,6 +103,9 @@ const Header = () => {
           {intro && (
             <>
               {intro.greeting && <h2>{intro.greeting}</h2>}
+              <h3 className="header-tagline">
+                Backend-heavy engineer who owns the whole thing.
+              </h3>
               {intro.section1 && <p>{intro.section1}</p>}
               {intro.section2 && <p>{intro.section2}</p>}
               {intro.section3 && <p>{intro.section3}</p>}
