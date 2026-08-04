@@ -196,7 +196,11 @@ const ProjectCard = ({ project, index }) => {
 };
 
 const Credentials = () => {
-  const [query, setQuery] = useState("");
+  // Seed the search from ?q= so a project card can deep-link a recruiter
+  // straight to its credentials without them typing anything.
+  const [query, setQuery] = useState(
+    () => new URLSearchParams(window.location.search).get("q") || ""
+  );
   const [projects, setProjects] = useState(null); // null = loading
   const [paletteOpen, setPaletteOpen] = useState(false);
 
