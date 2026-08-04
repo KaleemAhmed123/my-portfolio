@@ -87,6 +87,22 @@ const CopyLoginButton = ({ identifier, password }) => {
   );
 };
 
+// Shimmer placeholder shown while credentials load — mirrors the real card.
+const SkeletonCard = () => (
+  <div className="cred__project cred__skeleton" aria-hidden="true">
+    <div className="cred__project-head">
+      <div style={{ flex: 1 }}>
+        <span className="sk sk-title" />
+        <span className="sk sk-line" />
+        <span className="sk sk-line sk-short" />
+      </div>
+    </div>
+    <span className="sk sk-pill" />
+    <span className="sk sk-portal" />
+    <span className="sk sk-portal" />
+  </div>
+);
+
 const PortalCard = ({ portal }) => {
   const identifier = portal.email || portal.username;
   return (
@@ -279,9 +295,7 @@ const Credentials = () => {
 
       <div className="cred__grid">
         {projects === null ? (
-          <div className="cred__empty app__flex">
-            <p className="p-text">Loading credentials…</p>
-          </div>
+          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : filtered.length ? (
           filtered.map((project, i) => (
             <ProjectCard project={project} index={i} key={project.id || project.name || i} />
