@@ -157,3 +157,37 @@
         }
     }
 }
+
+/* ---- Loading skeleton (hero) ---- */
+.header-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+    padding: 8px 0;
+}
+
+.hsk {
+    display: block;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e9ecf5 25%, #dde2ee 37%, #e9ecf5 63%);
+    background-size: 400% 100%;
+    animation: headerShimmer 1.4s ease infinite;
+}
+
+.hsk-row { height: 16px; width: 100%; }
+.hsk-row:nth-child(even) { width: 80%; }
+.hsk-h2 { height: 34px; width: 55%; margin-bottom: 6px; }
+.hsk-tag { height: 20px; width: 70%; margin-bottom: 10px; }
+.hsk-p { height: 12px; width: 100%; }
+.hsk-short { width: 60%; }
+
+@keyframes headerShimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hsk { animation: none; }
+}

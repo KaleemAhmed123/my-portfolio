@@ -54,6 +54,13 @@ const Header = () => {
     >
       <div className="row">
         <div className="left">
+          {!personalInfo && (
+            <div className="header-skeleton" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span className="hsk hsk-row" key={i} />
+              ))}
+            </div>
+          )}
           <ul className="info">
             {personalInfo && (
               <>
@@ -100,6 +107,15 @@ const Header = () => {
           </ul>
         </div>
         <div className="right">
+          {!intro && (
+            <div className="header-skeleton" aria-hidden="true">
+              <span className="hsk hsk-h2" />
+              <span className="hsk hsk-tag" />
+              <span className="hsk hsk-p" />
+              <span className="hsk hsk-p" />
+              <span className="hsk hsk-p hsk-short" />
+            </div>
+          )}
           {intro && (
             <>
               {intro.greeting && <h2>{intro.greeting}</h2>}
@@ -111,9 +127,11 @@ const Header = () => {
               {intro.section3 && <p>{intro.section3}</p>}
             </>
           )}
-          <a className="header-cred-cta" href="/credentials">
-            🔑 Test Access for Recruiters
-          </a>
+          {intro && (
+            <a className="header-cred-cta" href="/credentials">
+              🔑 Test Access for Recruiters
+            </a>
+          )}
           {socialLinks.length > 0 && (
             <ul className="icons">
               {socialLinks.map((link, index) => (
