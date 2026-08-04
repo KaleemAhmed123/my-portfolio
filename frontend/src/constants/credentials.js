@@ -18,10 +18,40 @@
 // ============================================================================
 
 export const credentials = [
+   {
+    id: "Shaza Couple Platform",
+    name: "Shaza Couple Platform",
+    description: "A private real-time app for couples: WebRTC voice and video calls, a synced watch-together room, and an AI companion you can train on your own exported chats so it learns to text like your partner. There's also an AI mediator for arguments, built on a RAG pipeline over MongoDB vector search, and designed so one partner's private words never leak to the other.",
+    tags: ["Full Stack", "AI", "RAG", "PWA"],
+    projectLink: "https://shaza-sandbox.vercel.app/welcome",
+    codeLink: "",
+    environments: [
+      {
+        name: "Testing",
+        note: "Sandbox accounts for couples. try exploring each tab there is a lot to explore",
+        portals: [
+          {
+            role: "Couple Male Account",
+            url: "https://shaza-sandbox.vercel.app/welcome",
+            email: "shaamidreez@gmail.com",
+            password: "Shaam@#1234",
+            note: "One side of the couple. Best experienced by logging into both accounts in two browsers, then starting a call or watch-together and chatting with the AI companion.",
+          },
+          {
+            role: "Couple Female Account",
+            url: "https://shaza-sandbox.vercel.app/welcome",
+            email: "laraib@allenhouse.ac.in",
+            password: "hayat@#1234",
+            note: "The partner account. Open this in a second browser to see the real-time sync: shared calls, the watch-together room, and the mediator that keeps each side's private notes separate.",
+          },
+        ],
+      },
+    ],
+  },
   {
     id: "Eudoro",
     name: "Eudoro",
-    description: "Multi-vendor e-comm for customized products — separate portals for admins, sellers, buyers and live monitoring.",
+    description: "Production Multi-vendor e-comm for customized products, eliminating manual workflow involving many platforms with scattered data — separate portals for admins, sellers, buyers and live monitoring.",
     tags: ["Full Stack", "E-commerce", "RBAC"],
     // Optional: a single "main" link for the project (shown as the big CTA).
     projectLink: "https://eudoro.art",
@@ -29,28 +59,28 @@ export const credentials = [
     environments: [
       {
         name: "Testing",
-        note: "Sandbox data — safe to create/delete anything. Resets periodically.",
+        note: "Sandbox data try not to delete anything, but feel free to click around and explore.",
         portals: [
           {
             role: "User",
             url: "https://eudoro.art",
             email: "kaleem@astreait.com",
             password: "hayat@#1234",
-            note: "Shopper experience: browse, cart, checkout. one can also create account",
+            note: "Shopper experience: browse, cart, checkout, chat support, track order, badges. one can also create account",
           },
           {
             role: "Seller",
             url: "https://seller.eudoro.art",
             email: "shaamidreez@gmail.com",
             password: "Shaam@#1234",
-            note: "Storefront management, products, inventory.",
+            note: "Storefront management, products, inventory, orders, payouts, analytics, chat support.",
           },
           {
             role: "Admin",
             url: "https://admin.eudoro.art",
             email: "shaamidreez@gmail.com",
             password: "hayat@#1234",
-            note: "Full dashboard: users, vendors, orders, payouts.",
+            note: "Full dashboard: users, vendors, orders, payouts, analytics, settings, etc.",
           },
           {
             role: "Monitoring",
@@ -87,62 +117,33 @@ export const credentials = [
             url: "https://portal.gaza40plus.co.uk/",
             email: "admin@example.com",
             password: "AdminSaleem@1416",
-            note: "Update with the real role name & permissions.",
+            note: "Full platform access: all regions, users, applications, documents and the whole case lifecycle. Permissions are enforced on the server, not the token.",
           },
           {
             role: "Role 3 — Regional Admin",
             url: "https://portal.gaza40plus.co.uk/",
             email: "regional.uk@example.com",
             password: "RegionalAdminSaleem@1416",
-            note: "",
+            note: "Scoped to a single region: oversee the volunteers, students, applications and cases for that region only.",
           },
           {
             role: "Role 2 — Volunteers",
             url: "https://portal.gaza40plus.co.uk/",
             email: "volunteer@example.com",
             password: "MentorSaleem@1416",
-            note: "",
+            note: "Collaborate on assigned students: real-time chat, status updates, ticketing and document review.",
           },
           {
             role: "Role 4 — Students",
             url: "https://portal.gaza40plus.co.uk/",
             email: "student@example.com",
             password: "Password123!",
-            note: "",
+            note: "Student-facing view: onboarding, application tracking, document uploads and messages.",
           },
           
         ],
       },
     ],
   },
-  {
-    id: "Shaza Couple Platform",
-    name: "Shaza Couple Platform",
-    description: "To be added",
-    tags: ["Full Stack", "AI", "RAG", "PWA"],
-    projectLink: "https://shaza-sandbox.vercel.app/welcome",
-    codeLink: "",
-    environments: [
-      {
-        name: "Testing",
-        note: "Sandbox accounts for couples.",
-        portals: [
-          {
-            role: "Couple Male Account",
-            url: "https://shaza-sandbox.vercel.app/welcome",
-            email: "shaamidreez@gmail.com",
-            password: "Shaam@#1234",
-            note: "To be added",
-          },
-          {
-            role: "Couple Female Account",
-            url: "https://shaza-sandbox.vercel.app/welcome",
-            email: "laraib@allenhouse.ac.in",
-            password: "hayat@#1234",
-            note: "To be added",
-          },
-        ],
-      },
-    ],
-  },
+ 
 ];

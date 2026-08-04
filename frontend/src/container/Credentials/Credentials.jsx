@@ -166,10 +166,7 @@ const ProjectCard = ({ project, index }) => {
       className="cred__project"
     >
       <div className="cred__project-head">
-        <div>
-          <h3 className="bold-text cred__project-name">{project.name}</h3>
-          <p className="p-text cred__project-desc">{project.description}</p>
-        </div>
+        <h3 className="bold-text cred__project-name">{project.name}</h3>
         {project.tags?.length ? (
           <div className="cred__tags">
             {project.tags.map((tag) => (
@@ -180,6 +177,9 @@ const ProjectCard = ({ project, index }) => {
           </div>
         ) : null}
       </div>
+      {project.description ? (
+        <p className="p-text cred__project-desc">{project.description}</p>
+      ) : null}
 
       {/* Environment switcher — only when there's more than one */}
       {environments.length > 1 ? (
