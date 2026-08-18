@@ -7,7 +7,7 @@
   align-items: flex-start;
   padding: 12vh 1rem 1rem;
 
-  background: rgba(3, 3, 3, 0.45);
+  background: rgba(15, 12, 8, 0.6);
   backdrop-filter: blur(4px);
 }
 
@@ -16,8 +16,7 @@
   max-width: 560px;
   background: var(--white-color);
   border: 1px solid var(--lightGray-color);
-  border-radius: 14px;
-  box-shadow: 0 24px 60px rgba(3, 3, 3, 0.28);
+  box-shadow: 10px 10px 0 rgba(15, 12, 8, 0.5);
   overflow: hidden;
   font-family: var(--font-base);
 }
@@ -58,7 +57,6 @@
   letter-spacing: 0.05em;
   color: var(--gray-color);
   border: 1px solid var(--lightGray-color);
-  border-radius: 5px;
   padding: 0.15rem 0.4rem;
 }
 
@@ -83,11 +81,11 @@
   font-family: var(--font-base);
 
   padding: 0.6rem 0.75rem;
-  border-radius: 9px;
   transition: background 0.12s ease;
 
   &.is-active {
-    background: rgba(124, 92, 255, 0.09);
+    background: var(--accent-soft);
+    box-shadow: inset 2px 0 0 var(--secondary-color);
   }
 }
 
@@ -101,7 +99,8 @@
 .cmdk__row-project {
   font-weight: 700;
   color: var(--black-color);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
 }
 
 .cmdk__row-sep {
@@ -111,7 +110,7 @@
 .cmdk__row-role {
   color: var(--secondary-color);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   white-space: nowrap;
 }
 
@@ -121,7 +120,6 @@
   letter-spacing: 0.04em;
   color: var(--gray-color);
   border: 1px solid var(--lightGray-color);
-  border-radius: 20px;
   padding: 0.1rem 0.5rem;
 }
 
@@ -192,15 +190,14 @@
     font-family: var(--font-base);
     font-size: 0.65rem;
     color: var(--black-color);
-    background: var(--white-color);
+    background: var(--elevated-color);
     border: 1px solid var(--lightGray-color);
-    border-radius: 5px;
 
     svg { width: 11px; height: 11px; }
   }
 }
 
 .cmdk__flash {
-  color: #21a67a;
+  color: var(--ok-color);
   font-weight: 700;
 }

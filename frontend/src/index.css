@@ -1,19 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;500;600;700;800&family=Rubik:ital,wght@0,300;1,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-  --font-base: "Space Mono", Arial, serif;
+  --font-base: "Space Mono", ui-monospace, monospace;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
 
-  --primary-color: #edf2f8;
-  --secondary-color: #313bac;
-  --black-color: #030303;
-  --lightGray-color: #e4e4e4;
-  --gray-color: #6b7688;
-  --brown-color: #46364a;
-  --white-color: #ffffff;
+  /* Chocolate ground / cream ink. Paper sections override these in App.scss. */
+  --primary-color: #1e1a14;
+  --elevated-color: #26211a;
+  --secondary-color: #ff7b5e;
+  --black-color: #ffffe3;
+  --gray-color: #a5a390;
+  --lightGray-color: #3d372c;
+  --white-color: #eeece4;
+  --brown-color: #1a1611;
+
+  --accent-soft: rgba(255, 123, 94, 0.12);
+  --accent-line: rgba(255, 123, 94, 0.4);
+  --ok-color: #6fcf97;
+  --ok-soft: rgba(111, 207, 151, 0.12);
+
+  --shimmer-1: #241f18;
+  --shimmer-2: #2e2820;
+
+  /* graph-paper texture that alternates with the flat chocolate sections */
+  --grid-line: rgba(255, 255, 227, 0.045);
 }
 
 html {
   zoom: 110%;
+}
+
+:root {
+  /* zoom scales the layout but not vh, so a raw 100vh box renders 10% taller
+     than the screen. Every full-height section measures against this instead. */
+  --screen-h: calc(100vh / 1.1);
 }
 
 * {
@@ -21,4 +41,19 @@ html {
   padding: 0;
   margin: 0;
   scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--primary-color);
+  color: var(--black-color);
+}
+
+::selection {
+  background: var(--secondary-color);
+  color: var(--brown-color);
+}
+
+:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
 }
