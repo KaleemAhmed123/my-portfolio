@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AiFillEye } from "react-icons/ai";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { motion } from "framer-motion";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
@@ -14,75 +15,93 @@ const FALLBACK_IMG =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'>" +
-      "<rect width='400' height='200' fill='#eef1f8'/>" +
-      "<g fill='none' stroke='#aeb6cc' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'>" +
-      "<rect x='150' y='66' width='100' height='70' rx='8'/>" +
+      "<rect width='400' height='200' fill='#26211a'/>" +
+      "<g fill='none' stroke='#4a4335' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'>" +
+      "<rect x='150' y='66' width='100' height='70' />" +
       "<circle cx='176' cy='92' r='9'/>" +
       "<path d='M156 136 l26 -30 20 18 24 -30 18 22'/>" +
       "</g>" +
-      "<text x='200' y='172' font-family='monospace' font-size='13' fill='#9aa0ae' text-anchor='middle'>No preview</text>" +
+      "<text x='200' y='172' font-family='monospace' font-size='13' fill='#6b6353' text-anchor='middle'>No preview</text>" +
     "</svg>"
   );
 
 const Work = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [animateCard, setAnimateCard] = useState({ y: 0, opacity: 1 });
   const [works, setWorks] = useState([]);
-  const [filterWork, setFilterWork] = useState([]);
   const [activeWork, setActiveWork] = useState(null);
+  const [reach, setReach] = useState({ start: true, end: true });
+  const rowRef = useRef(null);
+
+  // disable an arrow once that end of the row is reached
+  const syncReach = useCallback(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setReach({ start: el.scrollLeft <= 1, end: el.scrollLeft >= max - 1 });
+  }, []);
+
+  useEffect(() => {
+    syncReach();
+    window.addEventListener("resize", syncReach);
+    return () => window.removeEventListener("resize", syncReach);
+  }, [works, syncReach]);
+
+  const step = (dir) => {
+    const el = rowRef.current;
+    if (!el) return;
+    const card = el.querySelector(".app__work-item");
+    const gap = 24;
+    el.scrollBy({ left: dir * ((card?.offsetWidth || el.clientWidth * 0.8) + gap), behavior: "smooth" });
+  };
 
   const imgSrc = (work) => (work?.imgUrl ? urlFor(work.imgUrl) : FALLBACK_IMG);
-
-  const handleWorkFilter = (item) => {
-    setActiveFilter(item);
-    setAnimateCard([{ y: 100, opacity: 0 }]);
-
-    setTimeout(() => {
-      setAnimateCard([{ y: 0, opacity: 1 }]);
-
-      if (item === "All") {
-        setFilterWork(works);
-      } else {
-        setFilterWork(works.filter((work) => work.tags.includes(item)));
-      }
-    }, 500);
-  };
 
   useEffect(() => {
     const query = '*[_type == "works"]';
 
     client.fetch(query).then((data) => {
       setWorks(data);
-      setFilterWork(data);
     });
   }, []);
 
   return (
     <>
-      <h2 className="head-text">
-        My Project <span>Section</span> <br />
-      </h2>
-      {/* Tags filter */}
-      <div className="app__work-filter">
-        {["All", "Full Stack", "Backend", "Frontend", "Other"].map((item, index) => (
-          <div
-            key={index}
-            onClick={() => handleWorkFilter(item)}
-            className={`app__work-filter-item app__flex p-text ${activeFilter === item ? "item-active" : ""
-              }`}
-          >
-            {item}
+      <div className="section-head">
+        <h2 className="head-text">
+          My <span>Projects</span>
+        </h2>
+        <span className="section-head__rule" />
+        {works.length > 0 && (
+          <span className="section-chip">{works.length} shipped</span>
+        )}
+        <span className="section-chip">Mostly solo</span>
+        {works.length > 0 && (
+          <div className="app__work-nav">
+            <button
+              type="button"
+              onClick={() => step(-1)}
+              disabled={reach.start}
+              aria-label="Previous projects"
+            >
+              <HiChevronLeft />
+            </button>
+            <button
+              type="button"
+              onClick={() => step(1)}
+              disabled={reach.end}
+              aria-label="Next projects"
+            >
+              <HiChevronRight />
+            </button>
           </div>
-        ))}
+        )}
       </div>
-      {/*All Card container*/}
-      <motion.div
-        animate={animateCard}
-        transition={{ duration: 0.5, delayChildren: 0.5 }}
-        className="app__work-portfolio"
+      {/* Four fit the row; anything past that scrolls sideways */}
+      <div
+        ref={rowRef}
+        onScroll={syncReach}
+        className={`app__work-portfolio app__section-body ${works.length > 4 ? "has-overflow" : ""}`}
       >
-        {/* looping ind. items */}
-        {filterWork.map((work, index) => (
+        {works.map((work, index) => (
           <div className="app__work-item app__flex" key={index}>
             {/* img */}
             <div className="app__work-img app__flex">
@@ -116,7 +135,7 @@ const Work = () => {
             </div>
           </div>
         ))}
-      </motion.div>
+      </div>
 
       <WorkModal
         work={activeWork}

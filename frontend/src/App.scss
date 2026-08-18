@@ -3,19 +3,48 @@
 .app {
   background-color: var(--primary-color);
   font-family: var(--font-base);
+  color: var(--black-color);
 }
 
-.app__whitebg {
+// Paper sections + panels that sit on paper. Re-point the tokens instead of
+// restyling every child: everything downstream inherits the light palette.
+.app__whitebg,
+.cmdk__panel,
+.work-modal {
+  --primary-color: #e4e1d6;
+  --elevated-color: #fffffc;
+  --black-color: #1a1611;
+  --gray-color: #6c6c58;
+  --lightGray-color: #c9c5b4;
+  --brown-color: #1a1611;
+  --shimmer-1: #e4e1d6;
+  --shimmer-2: #d8d4c6;
+  --ok-color: #1f8a5b;
+  --ok-soft: rgba(31, 138, 91, 0.1);
+  --grid-line: rgba(26, 22, 17, 0.06);
+
   background-color: var(--white-color);
+  color: var(--black-color);
 }
 
 .app__primarybg {
   background-color: var(--primary-color);
 }
 
+// graph-paper grid, the light half of the reference system
+.app__whitebg,
+.app__gridbg {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: -1px -1px;
+}
+
 .app__container {
+  position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: var(--screen-h);
 
   display: flex;
   flex-direction: row;
@@ -30,12 +59,26 @@
 .app__wrapper {
   flex: 1;
   width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+
   flex-direction: column;
-  padding: 4rem 2rem;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  padding: 7rem clamp(1.5rem, 5.5vw, 7rem) 3rem;
 
   @media screen and (max-width: 450px) {
-    padding: 4rem 1rem 2rem;
+    padding: 5.5rem 1rem 2rem;
   }
+}
+
+// the section body grows into whatever height is left, so sections fill the
+// screen instead of floating in the middle of it. Growth only, never display:
+// each section keeps its own grid or row layout.
+.app__section-body {
+  flex: 1;
+  min-height: 0;
 }
 
 .copyright {
@@ -53,10 +96,60 @@
   }
 }
 
+/* Section header: left title, hairline rule, factual meta chips.
+   Replaces the big centered title that ate ~140px of every screen. */
+.section-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+
+  .head-text {
+    flex: none;
+    font-size: 2.4rem;
+    text-align: left;
+
+    @media screen and (min-width: 2000px) {
+      font-size: 3.5rem;
+    }
+
+    @media screen and (max-width: 560px) {
+      font-size: 1.6rem;
+    }
+  }
+
+  &__rule {
+    flex: 1;
+    min-width: 24px;
+    height: 1px;
+    background-color: var(--lightGray-color);
+  }
+}
+
+.section-chip {
+  flex: none;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--lightGray-color);
+  border-radius: 999px;
+  color: var(--gray-color);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .head-text {
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
   text-align: center;
+  text-wrap: balance;
   color: var(--black-color);
   text-transform: capitalize;
 
@@ -65,11 +158,11 @@
   }
 
   @media screen and (min-width: 2000px) {
-    font-size: 4rem;
+    font-size: 4.5rem;
   }
 
   @media screen and (max-width: 450px) {
-    font-size: 1.25rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -111,8 +204,7 @@
   div {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    background-color: var(--white-color);
+    background-color: transparent;
     margin: 0.25rem 0;
     border: 1px solid var(--lightGray-color);
 
@@ -133,7 +225,7 @@
       border-color: var(--secondary-color);
 
       svg {
-        color: var(--white-color);
+        color: var(--brown-color);
       }
     }
 
@@ -152,6 +244,12 @@
 }
 
 .app__navigation {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 1;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -160,10 +258,10 @@
   padding: 1rem;
 
   .app__navigation-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #cbcbcb;
+    width: 9px;
+    height: 9px;
+    background-color: var(--lightGray-color);
+    border: 1px solid var(--gray-color);
     margin: 0.5rem;
 
     transition: background-color 0.2s ease-in-out;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Tooltip as ReactTooltip } from "react-tooltip";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
@@ -9,6 +8,10 @@ import "./Skills.scss";
 const Skills = () => {
   const [experiences, setExperiences] = useState([]);
   const [skills, setSkills] = useState([]);
+  const [openRoles, setOpenRoles] = useState({});
+
+  const toggleRole = (key) =>
+    setOpenRoles((prev) => ({ ...prev, [key]: !prev[key] }));
 
   useEffect(() => {
     const query = '*[_type == "experiences"]';
@@ -25,9 +28,22 @@ const Skills = () => {
 
   return (
     <>
-      <h2 className="head-text">Skills & Experiences</h2>
+      <div className="section-head">
+        <h2 className="head-text">
+          Skills &amp; <span>Experience</span>
+        </h2>
+        <span className="section-head__rule" />
+        {experiences.length > 0 && (
+          <span className="section-chip">
+            {experiences.length} {experiences.length === 1 ? "role" : "roles"}
+          </span>
+        )}
+        {skills.length > 0 && (
+          <span className="section-chip">{skills.length} tools</span>
+        )}
+      </div>
 
-      <div className="app__skills-container">
+      <div className="app__skills-container app__section-body">
         <motion.div className="app__skills-list">
           {skills.map((skill, i) => (
             <motion.div
@@ -54,29 +70,41 @@ const Skills = () => {
                 <p className="bold-text">{experience.year}</p>
               </div>
               <motion.div className="app__skills-exp-works">
-                {experience.works.map((work) => (
-                  <>
+                {experience.works.map((work) => {
+                  const key = `${experience.year}-${work.name}`;
+                  const isOpen = Boolean(openRoles[key]);
+                  // long roles collapse to a few lines so the section stays
+                  // readable in one screen; the visitor opts in to the detail
+                  const isLong = (work.company || "").length > 260;
+
+                  return (
                     <motion.div
                       whileInView={{ opacity: [0, 1] }}
                       transition={{ duration: 0.5 }}
                       className="app__skills-exp-work"
-                      data-tip
-                      data-for={work.name}
-                      key={work.name}
+                      key={key}
                     >
                       <h4 className="bold-text">{work.name}</h4>
-                      <p className="p-text">{work.company}</p>
+                      <p
+                        className={`p-text app__skills-exp-desc ${
+                          isLong && !isOpen ? "is-clamped" : ""
+                        }`}
+                      >
+                        {work.company}
+                      </p>
+                      {isLong && (
+                        <button
+                          type="button"
+                          className="app__skills-exp-more"
+                          aria-expanded={isOpen}
+                          onClick={() => toggleRole(key)}
+                        >
+                          {isOpen ? "Show less" : "Read more"}
+                        </button>
+                      )}
                     </motion.div>
-                    <ReactTooltip
-                      id={work.name}
-                      effect="solid"
-                      arrowColor="#fff"
-                      className="skills-tooltip"
-                    >
-                      {work.desc}
-                    </ReactTooltip>
-                  </>
-                ))}
+                  );
+                })}
               </motion.div>
             </motion.div>
           ))}

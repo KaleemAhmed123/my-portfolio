@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import "./Header.scss";
-import { BsGithub, BsLinkedin, BsTwitter, BsFacebook, BsInstagram } from "react-icons/bs";
-import { SiLeetcode, SiStackoverflow } from "react-icons/si";
 import { AppWrap } from "../../wrapper";
 import { client } from "../../client";
+import { socialIconFor } from "../../constants/socialIcons";
 
 const Header = () => {
   const [personalInfo, setPersonalInfo] = useState(null);
@@ -30,21 +29,6 @@ const Header = () => {
       setSocialLinks(data);
     });
   }, []);
-
-  // Icon mapping for social platforms
-  const getIcon = (platform) => {
-    const icons = {
-      linkedin: BsLinkedin,
-      github: BsGithub,
-      twitter: BsTwitter,
-      stackoverflow: SiStackoverflow,
-      leetcode: SiLeetcode,
-      facebook: BsFacebook,
-      instagram: BsInstagram,
-    };
-    const IconComponent = icons[platform.toLowerCase()] || BsGithub;
-    return <IconComponent />;
-  };
 
   return (
     <motion.div
@@ -127,24 +111,39 @@ const Header = () => {
               {intro.section3 && <p>{intro.section3}</p>}
             </>
           )}
-          {intro && (
-            <a className="header-cred-cta" href="/credentials">
-              🔑 Test Access for Recruiters
-            </a>
-          )}
-          {socialLinks.length > 0 && (
-            <ul className="icons">
-              {socialLinks.map((link, index) => (
-                <li key={index}>
-                  <a href={link.url} target="__blank" rel="noopener noreferrer">
-                    {getIcon(link.platform)}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="header-actions">
+            {socialLinks.length > 0 && (
+              <ul className="icons">
+                {socialLinks.map((link, index) => {
+                  const { Icon, label } = socialIconFor(link);
+                  return (
+                    <li key={index}>
+                      <a
+                        href={link.url}
+                        target="__blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        title={label}
+                      >
+                        <Icon />
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {intro && (
+              <a className="header-cred-cta" href="/credentials">
+                🔑 Test Credential for Project
+              </a>
+            )}
+          </div>
         </div>
       </div>
+      <a className="header-scroll-cue" href="#skills">
+        <span>Skills, projects and live logins below</span>
+        <span className="header-scroll-cue__arrow" aria-hidden="true" />
+      </a>
     </motion.div>
   );
 };

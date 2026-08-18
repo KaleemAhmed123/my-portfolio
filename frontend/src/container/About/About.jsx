@@ -17,12 +17,15 @@ const About = () => {
 
   return (
     <>
-      <h2 className="head-text">
-        <span>Areas </span>
-        of <span>Skills</span>
-      </h2>
+      <div className="section-head">
+        <h2 className="head-text">
+          Areas of <span>Skills</span>
+        </h2>
+        <span className="section-head__rule" />
+        <span className="section-chip">What I actually do</span>
+      </div>
 
-      <div className="app__profiles">
+      <div className="app__profiles app__section-body">
         {abouts.map((about, index) => (
           <motion.div
             whileInView={{ opacity: 1 }}
@@ -31,13 +34,13 @@ const About = () => {
             className="app__profile-item"
             key={about.title + index}
           >
-            {about.imgUrl && <img src={urlFor(about.imgUrl)} alt={about.title} />}
-            <h2 className="bold-text" style={{ marginTop: 20 }}>
-              {about.title}
-            </h2>
-            <p className="p-text" style={{ marginTop: 10 }}>
-              {about.description}
-            </p>
+            <h3 className="bold-text app__profile-title">{about.title}</h3>
+            <div className="app__profile-body">
+              {about.imgUrl && (
+                <img src={urlFor(about.imgUrl)} alt="" aria-hidden="true" />
+              )}
+              <p className="p-text">{about.description}</p>
+            </div>
           </motion.div>
         ))}
       </div>
