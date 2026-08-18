@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { BsTwitter, BsGithub, BsLinkedin, BsFacebook, BsInstagram } from "react-icons/bs";
-import { SiLeetcode, SiStackoverflow } from "react-icons/si";
 import { client } from "../client";
+import { socialIconFor } from "../constants/socialIcons";
 
 const SocialMedia = () => {
   const [socialLinks, setSocialLinks] = useState([]);
@@ -15,30 +14,24 @@ const SocialMedia = () => {
     });
   }, []);
 
-  // Icon mapping for social platforms
-  const getIcon = (platform) => {
-    const icons = {
-      linkedin: BsLinkedin,
-      github: BsGithub,
-      twitter: BsTwitter,
-      stackoverflow: SiStackoverflow,
-      leetcode: SiLeetcode,
-      facebook: BsFacebook,
-      instagram: BsInstagram,
-    };
-    const IconComponent = icons[platform.toLowerCase()] || BsGithub;
-    return <IconComponent />;
-  };
-
   return (
     <div className="app__social">
-      {socialLinks.map((link, index) => (
-        <div key={index}>
-          <a href={link.url} target="__blank" rel="noopener noreferrer">
-            {getIcon(link.platform)}
-          </a>
-        </div>
-      ))}
+      {socialLinks.map((link, index) => {
+        const { Icon, label } = socialIconFor(link);
+        return (
+          <div key={index}>
+            <a
+              href={link.url}
+              target="__blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              title={label}
+            >
+              <Icon />
+            </a>
+          </div>
+        );
+      })}
     </div>
   );
 };

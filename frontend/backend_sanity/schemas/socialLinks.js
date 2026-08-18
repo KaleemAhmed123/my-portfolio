@@ -15,6 +15,8 @@ export default {
                     { title: 'GitHub', value: 'github' },
                     { title: 'Twitter', value: 'twitter' },
                     { title: 'Stack Overflow', value: 'stackoverflow' },
+                    { title: 'LeetCode', value: 'leetcode' },
+                    { title: 'GeeksForGeeks', value: 'geeksforgeeks' },
                     { title: 'Facebook', value: 'facebook' },
                     { title: 'Instagram', value: 'instagram' },
                     { title: 'Other', value: 'other' },
