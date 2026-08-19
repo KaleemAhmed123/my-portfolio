@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { FiArrowLeft, FiExternalLink, FiGithub, FiChevronDown } from "react-icons/fi";
 import { HiOutlineKey } from "react-icons/hi";
 
@@ -26,6 +26,7 @@ const ProjectPage = () => {
   const [state, setState] = useState("loading");
   // mobile only: the accordion collapses everything by default
   const [openMobile, setOpenMobile] = useState(null);
+  const headRef = useRef(null);
 
   useEffect(() => {
     client
@@ -50,6 +51,23 @@ const ProjectPage = () => {
       navigate(`/work/${slug}/${active.id}`, { replace: true });
     }
   }, [active, tabParam, slug, navigate]);
+
+  // The page scrolls now, not the panel, so switching tabs has to reset it. If the
+  // header is already scrolled away, land under the pinned bar rather than yanking
+  // the reader back up to the title they just scrolled past.
+  //
+  // Two traps here, both from global CSS:
+  //   html { zoom: 110% } puts offsetHeight (layout px) and scrollY (visual px) 1.1x
+  //   apart, so measuring with offsetHeight scrolls ~21px short and leaves the header
+  //   peeking. getBoundingClientRect is in the same space as scrollY, so add the two.
+  //   * { scroll-behavior: smooth } would turn this into a ~600ms glide that the tab
+  //   swap runs straight through, so the reset has to say instant.
+  useLayoutEffect(() => {
+    const head = headRef.current;
+    if (!head) return;
+    const target = Math.max(0, Math.round(head.getBoundingClientRect().bottom + window.scrollY));
+    window.scrollTo({ top: window.scrollY > target ? target : 0, behavior: "instant" });
+  }, [active?.id]);
 
   useEffect(() => {
     if (!study?.title) return undefined;
@@ -84,7 +102,7 @@ const ProjectPage = () => {
   return (
     <div className="case app__whitebg">
       {/* ---------------------------------------------------------- header */}
-      <header className="case__head">
+      <header className="case__head" ref={headRef}>
         <Link to="/#work" className="case__back">
           <FiArrowLeft /> Projects
         </Link>
@@ -129,43 +147,48 @@ const ProjectPage = () => {
         </div>
       </header>
 
-      {/* ------------------------------------------------ tabs, desktop only */}
-      <nav className="case__tabs">
-        {groups.map((group) => (
-          <div className="case__tabgroup" key={group.name}>
-            <span className="case__tabgroup-name">{group.name}</span>
-            <div className="case__tabrow">
-              {group.tabs.map((t) => (
-                <Link
-                  key={t.id}
-                  to={`/work/${slug}/${t.id}`}
-                  className={`case__tab ${t.id === active.id ? "is-active" : ""}`}
-                >
-                  {t.label}
-                </Link>
-              ))}
+      {/* ---------------------- tabs, desktop only — pinned once the head scrolls */}
+      <div className="case__tabsbar">
+        <nav className="case__tabs">
+          {groups.map((group) => (
+            <div className="case__tabgroup" key={group.name}>
+              <span className="case__tabgroup-name">{group.name}</span>
+              <div className="case__tabrow">
+                {group.tabs.map((t) => (
+                  <Link
+                    key={t.id}
+                    to={`/work/${slug}/${t.id}`}
+                    aria-current={t.id === active.id ? "page" : undefined}
+                    className={`case__tab ${t.id === active.id ? "is-active" : ""}`}
+                  >
+                    {t.label}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
+      </div>
 
       {/* ------------------------------------------------------ panel, one tab */}
-      <AnimatePresence mode="wait">
-        <motion.section
-          key={active.id}
-          className="case__panel"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-        >
-          <div className="case__panel-inner">
-            <h2 className="case__panel-title">{active.label}</h2>
-            {active.diagramDebt ? <DiagramDebt /> : null}
-            <Blocks blocks={active.blocks} />
-          </div>
-        </motion.section>
-      </AnimatePresence>
+      {/* No AnimatePresence: an exit animation unmounts this panel and mounts the
+          next one ~180ms later, and in that gap the document has no content, so the
+          browser clamps the scroll position. Swapping on `key` in one commit keeps
+          the page tall throughout, which is what makes the scroll reset above land
+          where it is told. The enter animation survives; only the exit is gone. */}
+      <motion.section
+        key={active.id}
+        className="case__panel"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+      >
+        <div className="case__panel-inner">
+          <h2 className="case__panel-title">{active.label}</h2>
+          {active.diagramDebt ? <DiagramDebt /> : null}
+          <Blocks blocks={active.blocks} />
+        </div>
+      </motion.section>
 
       {/* -------------------------------------- accordion, mobile replacement */}
       <div className="case__accordion">

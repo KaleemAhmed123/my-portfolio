@@ -1,0 +1,3 @@
+# Browser automation scratch: screenshots, snapshots and console logs written by
+# the Playwright MCP server when driving the site locally.
+.playwright-mcp/

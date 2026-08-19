@@ -1,17 +1,16 @@
-// Case study page. Paper palette (tokens come from .app__whitebg in App.scss),
-// header and tabs pinned, only the panel scrolls, so the page itself never grows
-// past one screen.
+// Case study page. Paper palette (tokens come from .app__whitebg in App.scss).
+// The page scrolls normally: the title, tagline and stack scroll away and only the
+// tab bar pins, so reading a tab gets the screen instead of ~60% of it.
 
 .case {
   // Same column as every home section (.app__wrapper).
   --case-max: 1560px;
   --case-pad: clamp(1.25rem, 5vw, 5rem);
 
-  height: var(--screen-h);
+  min-height: var(--screen-h);
   display: flex;
   flex-direction: column;
   font-family: var(--font-base);
-  overflow: hidden;
 
   // one rule instead of repeating the padding on every band
   &__head,
@@ -162,14 +161,25 @@
   }
 
   /* -------------------------------------------------------------------- tabs */
-  &__tabs {
+  // Full-bleed wrapper so the pinned strip's background and rule span the viewport,
+  // not just the 1560px column. The nav inside keeps the column.
+  &__tabsbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
     flex: none;
+    background: var(--primary-color);
+    border-bottom: 1px solid var(--lightGray-color);
+  }
+
+  // Compact on purpose: this band is on screen the whole time you read, so every
+  // row of padding here is a row taken off 21 tabs' worth of content.
+  &__tabs {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--lightGray-color);
+    gap: 0.2rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   &__tabgroup {
@@ -181,10 +191,10 @@
   // the group label is the thing that makes 15 tabs readable instead of a soup
   &__tabgroup-name {
     flex: none;
-    width: 8.5rem;
+    width: 7.5rem;
     font-family: var(--font-display);
     font-style: italic;
-    font-size: 0.86rem;
+    font-size: 0.8rem;
     color: var(--black-color);
     opacity: 0.55;
   }
@@ -192,11 +202,11 @@
   &__tabrow {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.15rem 0.35rem;
+    gap: 0.1rem 0.3rem;
   }
 
   &__tab {
-    padding: 0.3rem 0.6rem;
+    padding: 0.22rem 0.5rem;
     border: 1px solid transparent;
     border-radius: 4px;
     color: var(--gray-color);
@@ -219,10 +229,11 @@
 
   /* ------------------------------------------------------------------- panel */
   &__panel {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    flex: 1 0 auto;
+    // Keeps every tab tall enough to scroll the header away, so a short tab lands
+    // in the same place as a long one instead of snapping back to the full header.
+    // --screen-h, not 100vh: html is zoomed 110%, so a raw 100vh box overshoots.
+    min-height: var(--screen-h);
   }
 
   // Prose is capped per-block (see .cs-p etc) rather than by squeezing the whole
@@ -248,11 +259,7 @@
   }
 
   @media screen and (max-width: 768px) {
-    height: auto;
-    min-height: var(--screen-h);
-    overflow: visible;
-
-    &__tabs,
+    &__tabsbar,
     &__panel {
       display: none;
     }
