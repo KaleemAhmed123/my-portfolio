@@ -12,6 +12,9 @@ const live = [
   "Eudoro: Multi-Vendor Personalized Commerce Platform",
 ];
 
+// a card with no written study, to keep the generated-fallback path covered
+const unwritten = "Some Older Build: No Case Study Yet";
+
 const slugs = live.map((title) => slugForWork({ title }));
 
 assert.deepEqual(slugs, [
@@ -27,17 +30,19 @@ assert.equal(new Set(slugs).size, slugs.length, "slug collision");
 // written studies vs generated fallbacks
 assert.equal(hasFullStudy({ title: live[3] }), true);
 assert.equal(hasFullStudy({ title: live[0] }), true);
+assert.equal(hasFullStudy({ title: live[2] }), true);
+assert.equal(hasFullStudy({ title: unwritten }), false);
 
 // a fallback still produces a usable page from Sanity fields alone
 const fallback = studyFor({
-  title: live[2],
+  title: unwritten,
   description: "desc",
   problem: "prob",
   highlights: ["a", "b"],
   tags: ["Next.js"],
   projectLink: "https://example.com",
 });
-assert.equal(fallback.title, "Data Sync ETL Hub");
+assert.equal(fallback.title, "Some Older Build");
 assert.equal(fallback.liveUrl, "https://example.com");
 assert.ok(fallback.tabs.length >= 3, "fallback needs tabs to render");
 
@@ -52,6 +57,7 @@ for (const study of [
   studyFor({ title: live[3] }),
   studyFor({ title: live[1] }),
   studyFor({ title: live[0] }),
+  studyFor({ title: live[2] }),
 ]) {
   const ids = study.tabs.map((t) => t.id);
   assert.equal(new Set(ids).size, ids.length, `duplicate tab id in ${study.slug}`);
