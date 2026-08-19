@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AiFillEye } from "react-icons/ai";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
-import WorkModal from "./WorkModal";
+import { slugForWork } from "../../content/projects";
 import "./Work.scss";
-import "./WorkModal.scss";
 
 // Inline SVG placeholder shown when a project has no image in Sanity,
 // so every card keeps the same size.
@@ -27,9 +27,9 @@ const FALLBACK_IMG =
 
 const Work = () => {
   const [works, setWorks] = useState([]);
-  const [activeWork, setActiveWork] = useState(null);
   const [reach, setReach] = useState({ start: true, end: true });
   const rowRef = useRef(null);
+  const navigate = useNavigate();
 
   // disable an arrow once that end of the row is reached
   const syncReach = useCallback(() => {
@@ -111,7 +111,7 @@ const Work = () => {
                 whileHover={{ opacity: [0, 1] }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="app__work-hover app__flex"
-                onClick={() => setActiveWork(work)}
+                onClick={() => navigate(`/work/${slugForWork(work)}`)}
               >
                 <motion.div
                   whileInView={{ scale: [0, 1] }}
@@ -136,12 +136,6 @@ const Work = () => {
           </div>
         ))}
       </div>
-
-      <WorkModal
-        work={activeWork}
-        imgSrc={activeWork ? imgSrc(activeWork) : ""}
-        onClose={() => setActiveWork(null)}
-      />
     </>
   );
 };
