@@ -1,0 +1,623 @@
+// Case study page. Paper palette (tokens come from .app__whitebg in App.scss),
+// header and tabs pinned, only the panel scrolls, so the page itself never grows
+// past one screen.
+
+.case {
+  // Same column as every home section (.app__wrapper).
+  --case-max: 1560px;
+  --case-pad: clamp(1.25rem, 5vw, 5rem);
+
+  height: var(--screen-h);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-base);
+  overflow: hidden;
+
+  // one rule instead of repeating the padding on every band
+  &__head,
+  &__tabs,
+  &__panel-inner {
+    width: 100%;
+    max-width: var(--case-max);
+    margin: 0 auto;
+    padding-left: var(--case-pad);
+    padding-right: var(--case-pad);
+  }
+
+  &__loading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    color: var(--gray-color);
+    font-size: 0.85rem;
+  }
+
+  /* ------------------------------------------------------------------ header */
+  &__head {
+    flex: none;
+    padding-top: 1.5rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--lightGray-color);
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+    color: var(--gray-color);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--secondary-color);
+    }
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.9rem;
+
+    .head-text {
+      font-size: 2.6rem;
+      text-align: left;
+
+      @media screen and (max-width: 560px) {
+        font-size: 1.9rem;
+      }
+    }
+  }
+
+  &__pill {
+    padding: 0.28rem 0.75rem;
+    border: 1px solid var(--lightGray-color);
+    border-radius: 999px;
+    color: var(--gray-color);
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &--live {
+      border-color: var(--ok-color);
+      background: var(--ok-soft);
+      color: var(--ok-color);
+    }
+  }
+
+  &__tagline {
+    margin-top: 0.6rem;
+    color: var(--gray-color);
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.95rem;
+  }
+
+  &__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.85rem;
+
+    span {
+      color: var(--gray-color);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+
+      & + span::before {
+        content: "·";
+        margin-right: 0.85rem;
+        color: var(--lightGray-color);
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.42rem 0.85rem;
+      border: 1px solid var(--lightGray-color);
+      border-radius: 999px;
+      color: var(--black-color);
+      font-size: 0.7rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      &:hover {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+      }
+    }
+
+    &--key {
+      border-color: var(--secondary-color) !important;
+      background: var(--accent-soft);
+    }
+  }
+
+  /* -------------------------------------------------------------------- tabs */
+  &__tabs {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--lightGray-color);
+  }
+
+  &__tabgroup {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  // the group label is the thing that makes 15 tabs readable instead of a soup
+  &__tabgroup-name {
+    flex: none;
+    width: 8.5rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.86rem;
+    color: var(--black-color);
+    opacity: 0.55;
+  }
+
+  &__tabrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.35rem;
+  }
+
+  &__tab {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--gray-color);
+    font-size: 0.73rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+
+    &:hover {
+      color: var(--black-color);
+      background: rgba(26, 22, 17, 0.04);
+    }
+
+    &.is-active {
+      background: var(--secondary-color);
+      border-color: var(--secondary-color);
+      color: var(--brown-color);
+    }
+  }
+
+  /* ------------------------------------------------------------------- panel */
+  &__panel {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  // Prose is capped per-block (see .cs-p etc) rather than by squeezing the whole
+  // panel, so tables, diagrams and card grids get the full column.
+  &__panel-inner {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+
+  &__panel-title {
+    margin-bottom: 1.4rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.9rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--black-color);
+  }
+
+  /* --------------------------------------------------------------- accordion */
+  &__accordion {
+    display: none;
+  }
+
+  @media screen and (max-width: 768px) {
+    height: auto;
+    min-height: var(--screen-h);
+    overflow: visible;
+
+    &__tabs,
+    &__panel {
+      display: none;
+    }
+
+    &__accordion {
+      display: block;
+      padding: 0 0 3rem;
+    }
+
+    &__acc {
+      border-bottom: 1px solid var(--lightGray-color);
+
+      button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.95rem 1.25rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--font-base);
+
+        svg {
+          margin-left: auto;
+          color: var(--gray-color);
+          transition: transform 0.2s ease;
+        }
+      }
+
+      &.is-open button svg {
+        transform: rotate(180deg);
+      }
+
+      &.is-open button .case__acc-label {
+        color: var(--secondary-color);
+      }
+    }
+
+    &__acc-group {
+      flex: none;
+      width: 6.5rem;
+      color: var(--gray-color);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    &__acc-label {
+      color: var(--black-color);
+      font-size: 0.88rem;
+    }
+
+    &__acc-body {
+      padding: 0 1.25rem 1.75rem;
+    }
+  }
+}
+
+/* ===========================================================================
+   Blocks. Shared by the desktop panel and the mobile accordion.
+   Generous spacing on purpose: the fastest way to make a case study unreadable
+   is to pack it.
+   =========================================================================== */
+
+// Chapter break in a long tab. Big top margin is the point: it's the thing that
+// stops 3000 words reading as one slab.
+.cs-h {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin: 3.25rem 0 1.35rem;
+  font-weight: 400;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &__num {
+    flex: none;
+    color: var(--secondary-color);
+    font-family: var(--font-base);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+  }
+
+  &__text {
+    flex: none;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    color: var(--black-color);
+
+    @media screen and (max-width: 560px) {
+      font-size: 1.2rem;
+    }
+  }
+
+  &__rule {
+    flex: 1;
+    min-width: 20px;
+    height: 1px;
+    background: var(--lightGray-color);
+  }
+}
+
+.cs-lead {
+  margin-bottom: 1.15rem;
+  color: var(--black-color);
+  font-size: 1rem;
+  line-height: 1.65;
+  opacity: 0.92;
+}
+
+.cs-p {
+  margin-bottom: 1.05rem;
+  color: var(--gray-color);
+  font-size: 0.85rem;
+  line-height: 1.75;
+}
+
+.cs-list {
+  margin-bottom: 1.9rem;
+
+  // Group heading. Bold and a size up from the body so a tab made of six lists
+  // reads as six sections rather than one long run of bullets.
+  &__title {
+    margin-bottom: 0.75rem;
+    color: var(--black-color);
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+
+    @media screen and (max-width: 560px) {
+      font-size: 0.78rem;
+    }
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  li {
+    position: relative;
+    padding-left: 1.1rem;
+    color: var(--gray-color);
+    font-size: 0.83rem;
+    line-height: 1.65;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0.62rem;
+      left: 0;
+      width: 5px;
+      height: 1px;
+      background: var(--secondary-color);
+    }
+  }
+}
+
+.cs-pre {
+  margin-bottom: 1.6rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--lightGray-color);
+  border-left: 2px solid var(--secondary-color);
+  background: var(--elevated-color);
+  overflow-x: auto;
+
+  pre {
+    color: var(--gray-color);
+    font-family: var(--font-base);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    white-space: pre;
+  }
+}
+
+.cs-table {
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--lightGray-color);
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+  }
+
+  th {
+    padding: 0.7rem 0.9rem;
+    background: var(--elevated-color);
+    border-bottom: 1px solid var(--lightGray-color);
+    color: var(--black-color);
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--lightGray-color);
+    color: var(--gray-color);
+    font-size: 0.79rem;
+    line-height: 1.6;
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  td:first-child {
+    color: var(--black-color);
+    opacity: 0.85;
+  }
+}
+
+// Short cards flow into as many columns as fit. No align-items here on purpose:
+// grid items stretch by default, so every card in a row ends at the same height
+// and a short one pads itself out instead of leaving a hole beside a tall one.
+// That holds however the content changes.
+.cs-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.6rem;
+
+  // set by Blocks.jsx when any card carries labelled rows
+  &--stack {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cs-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.05rem 1.2rem;
+  border: 1px solid var(--lightGray-color);
+  background: var(--elevated-color);
+
+  h4 {
+    margin-bottom: 0.5rem;
+    color: var(--black-color);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.02rem;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  p {
+    color: var(--gray-color);
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+
+  &__row {
+    display: flex;
+    gap: 0.85rem;
+    margin-top: 0.7rem;
+
+    @media screen and (max-width: 620px) {
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+  }
+
+  &__label {
+    flex: none;
+    width: 6.5rem;
+    padding-top: 0.12rem;
+    color: var(--secondary-color);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+}
+
+.cs-video {
+  margin: 0 0 1.6rem;
+
+  video {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    border: 1px solid var(--lightGray-color);
+    background: var(--brown-color);
+  }
+
+  figcaption {
+    margin-top: 0.55rem;
+    color: var(--gray-color);
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+}
+
+.cs-note {
+  margin-bottom: 1.6rem;
+  padding: 0.95rem 1.15rem;
+  border-left: 2px solid var(--secondary-color);
+  background: var(--accent-soft);
+  color: var(--black-color);
+  font-size: 0.83rem;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+.cs-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem 2.5rem;
+  margin: 0.4rem 0 1.6rem;
+  padding: 1.15rem 0;
+  border-top: 1px solid var(--lightGray-color);
+  border-bottom: 1px solid var(--lightGray-color);
+}
+
+.cs-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  &__value {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--black-color);
+  }
+
+  &__label {
+    color: var(--gray-color);
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+}
+
+// Named gap rather than a silently missing visual.
+.cs-debt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px dashed var(--lightGray-color);
+  color: var(--gray-color);
+  font-size: 0.72rem;
+  line-height: 1.6;
+
+  svg {
+    flex: none;
+    margin-top: 0.15rem;
+    width: 13px;
+    height: 13px;
+  }
+}
