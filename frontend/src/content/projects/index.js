@@ -2,11 +2,12 @@
 import eudoro from "./eudoro/index.js";
 import shaza from "./shaza/index.js";
 import gaza40 from "./gaza40/index.js";
+import dataSync from "./dataSync/index.js";
 
 // Projects with a written playbook get a full case study. Everything else falls
 // back to a short one built from the Sanity fields the card already carries, so
 // deleting the old modal doesn't leave those projects with nowhere to go.
-const studies = [eudoro, shaza, gaza40];
+const studies = [eudoro, shaza, gaza40, dataSync];
 
 export const slugify = (s) =>
   String(s || "")
