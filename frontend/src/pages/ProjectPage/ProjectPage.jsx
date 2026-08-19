@@ -110,8 +110,13 @@ const ProjectPage = () => {
         <div className="case__title-row">
           <h1 className="head-text">{study.title}</h1>
           {study.role ? <span className="case__pill">{study.role}</span> : null}
+          {/* the green pill means live. Anything else (UAT, archived) stays neutral. */}
           {study.status ? (
-            <span className="case__pill case__pill--live">{study.status}</span>
+            <span
+              className={`case__pill${study.status === "Live" ? " case__pill--live" : ""}`}
+            >
+              {study.status}
+            </span>
           ) : null}
         </div>
 
