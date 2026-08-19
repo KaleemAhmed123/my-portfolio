@@ -9,8 +9,7 @@
 // Paper sections + panels that sit on paper. Re-point the tokens instead of
 // restyling every child: everything downstream inherits the light palette.
 .app__whitebg,
-.cmdk__panel,
-.work-modal {
+.cmdk__panel {
   --primary-color: #e4e1d6;
   --elevated-color: #fffffc;
   --black-color: #1a1611;
