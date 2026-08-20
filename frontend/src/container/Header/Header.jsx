@@ -4,7 +4,6 @@ import "./Header.scss";
 import { AppWrap } from "../../wrapper";
 import { client } from "../../client";
 import { socialIconFor } from "../../constants/socialIcons";
-import { ClampedText } from "../../components";
 
 const Header = () => {
   const [personalInfo, setPersonalInfo] = useState(null);
@@ -119,16 +118,9 @@ const Header = () => {
               {/* {intro.tagline && (
                 <h3 className="header-tagline">{intro.tagline}</h3>
               )} */}
-              {/* Collapses to 12 lines, same control as the roles in Skills. */}
-              <ClampedText
-                lines={12}
-                className="header-intro"
-                buttonClassName="header-intro-more"
-              >
-                {intro.section1 && <p>{intro.section1}</p>}
-                {intro.section2 && <p>{intro.section2}</p>}
-                {intro.section3 && <p>{intro.section3}</p>}
-              </ClampedText>
+              {intro.section1 && <p>{intro.section1}</p>}
+              {intro.section2 && <p>{intro.section2}</p>}
+              {intro.section3 && <p>{intro.section3}</p>}
               {/* Stat strip hidden; the figures live in the intro copy for now.
                   Data is still in Sanity, so uncommenting restores it. */}
               {/* {intro.stats?.length > 0 && (
