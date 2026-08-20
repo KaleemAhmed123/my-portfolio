@@ -2,7 +2,7 @@
 //  TEST-ACCESS CREDENTIALS  —  LOCAL FALLBACK / SEED ONLY.
 // ----------------------------------------------------------------------------
 //  The live source of truth is Sanity (document type "credentials", schema at
-//  backend_sanity/schemas/credentials.js). The /credentials page fetches from
+//  studio/schemas/credentials.js). The /credentials page fetches from
 //  Sanity; this file is only used as a fallback while the CMS has no
 //  credentials documents yet, and as a shape reference for what to enter in
 //  Sanity Studio.
@@ -14,7 +14,7 @@
 //    • DEMO data only — never put real secrets here or in the CMS.
 //
 //  To manage real content: add "Test Access Credentials" documents in Sanity
-//  Studio (cd backend_sanity && npm run dev).
+//  Studio (cd studio && npm run dev).
 // ============================================================================
 
 export const credentials = [
