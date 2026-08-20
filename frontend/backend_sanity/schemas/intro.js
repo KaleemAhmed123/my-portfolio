@@ -4,6 +4,32 @@ export default {
     type: 'document',
     fields: [
         {
+            name: 'roleLabel',
+            title: 'Role Label',
+            type: 'string',
+            description: 'Shown under the greeting, e.g. "Full-Stack AI Engineer".',
+        },
+        {
+            name: 'tagline',
+            title: 'Tagline',
+            type: 'string',
+            description: 'One line under the role label.',
+        },
+        {
+            name: 'stats',
+            title: 'Stat Strip',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'value', title: 'Value', type: 'string' },
+                    { name: 'label', title: 'Label', type: 'string' },
+                ],
+                preview: { select: { title: 'value', subtitle: 'label' } },
+            }],
+            description: 'Figures shown as a strip under the intro.',
+        },
+        {
             name: 'greeting',
             title: 'Greeting',
             type: 'string',
