@@ -1,43 +1,54 @@
 import React, { useState } from "react";
 
-import { images } from "../../constants";
+import emailIcon from "../../assets/email.png";
+import phoneIcon from "../../assets/mobile.png";
 import { AppWrap, MotionWrap } from "../../wrapper";
-import { client } from "../../client";
 import "./Footer.scss";
 
 const Footer = () => {
+  // The key here used to be `name` while the input read `username`, which left
+  // the field uncontrolled on first render and posted undefined to Sanity.
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     message: "",
   });
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  // for input element cause they take individual
+  const [error, setError] = useState("");
   const { username, email, message } = formData;
 
   const handleChangeInput = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  // Writes go through the serverless function, not the browser client: the
+  // Sanity write token has to stay server-side.
+  const handleSubmit = async () => {
+    if (!username.trim() || !message.trim()) {
+      setError("Name and message are required.");
+      return;
+    }
+    setError("");
     setLoading(true);
-    // sanity way
-    const contact = {
-      _type: "contact",
-      name: formData.username,
-      email: formData.email,
-      message: formData.message,
-    };
-    // post method
-    client
-      .create(contact)
-      .then(() => {
-        setLoading(false);
-        setIsFormSubmitted(true);
-      })
-      .catch((err) => console.log(err));
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: username, email, message }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Something went wrong.");
+      }
+      setIsFormSubmitted(true);
+    } catch (err) {
+      // Whatever happens, the button has to stop saying "Sending...".
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,13 +57,13 @@ const Footer = () => {
 
       <div className="app__footer-cards">
         <div className="app__footer-card ">
-          <img src={images.email} alt="email" />
+          <img src={emailIcon} alt="email" />
           <a href="mailto:shaamidreez@gmail.com" className="p-text">
             shaamidreez@gmail.com
           </a>
         </div>
         <div className="app__footer-card">
-          <img src={images.mobile} alt="phone" />
+          <img src={phoneIcon} alt="phone" />
           <a href="tel:+916306026859" className="p-text">
             +916306026859
           </a>
@@ -90,9 +101,19 @@ const Footer = () => {
               onChange={handleChangeInput}
             />
           </div>
-          <button type="button" className="p-text" onClick={handleSubmit}>
+          <button
+            type="button"
+            className="p-text"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
             {!loading ? "Send Message" : "Sending..."}
           </button>
+          {error ? (
+            <p className="p-text app__footer-error" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
       ) : (
         <div>
