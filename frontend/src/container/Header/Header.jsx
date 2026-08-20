@@ -102,13 +102,31 @@ const Header = () => {
           )}
           {intro && (
             <>
+              {/* The visible headline is a decorative greeting, so the real
+                  page h1 lives here for crawlers and screen readers. */}
+              <h1 className="sr-only">
+                Kaleem Ahmed — {intro.roleLabel || "Backend & Full-Stack Engineer"}
+              </h1>
               {intro.greeting && <h2>{intro.greeting}</h2>}
-              <h3 className="header-tagline">
-                Backend-heavy engineer who owns the whole thing.
-              </h3>
+              {intro.roleLabel && (
+                <p className="header-role">{intro.roleLabel}</p>
+              )}
+              {intro.tagline && (
+                <h3 className="header-tagline">{intro.tagline}</h3>
+              )}
               {intro.section1 && <p>{intro.section1}</p>}
               {intro.section2 && <p>{intro.section2}</p>}
               {intro.section3 && <p>{intro.section3}</p>}
+              {intro.stats?.length > 0 && (
+                <ul className="header-stats">
+                  {intro.stats.map((s, i) => (
+                    <li key={s._key || i}>
+                      <strong>{s.value}</strong>
+                      <span>{s.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </>
           )}
           <div className="header-actions">

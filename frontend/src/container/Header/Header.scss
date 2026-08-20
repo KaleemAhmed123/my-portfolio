@@ -112,6 +112,16 @@
                 margin-bottom: 14px;
             }
 
+            .header-role {
+                font-size: 0.72rem;
+                text-align: left;
+                color: var(--gray-color);
+                font-weight: 700;
+                letter-spacing: 0.24em;
+                text-transform: uppercase;
+                margin: 0 0 10px;
+            }
+
             .header-tagline {
                 font-size: 0.8rem;
                 text-align: left;
@@ -120,6 +130,36 @@
                 letter-spacing: 0.2em;
                 text-transform: uppercase;
                 margin-bottom: 28px;
+            }
+
+            .header-stats {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px 26px;
+                list-style: none;
+                margin: 4px 0 28px;
+                padding: 14px 0 0;
+                border-top: 1px solid var(--lightGray-color);
+
+                li {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+
+                strong {
+                    font-size: 1.05rem;
+                    line-height: 1;
+                    font-weight: 700;
+                    color: var(--secondary-color);
+                }
+
+                span {
+                    font-size: 0.62rem;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    color: var(--gray-color);
+                }
             }
 
             p {
