@@ -2,17 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
+import { ClampedText } from "../../components";
 import { urlFor, client } from "../../client";
 import "./Skills.scss";
 
 const Skills = () => {
   const [experiences, setExperiences] = useState([]);
   const [skills, setSkills] = useState([]);
-  const [openRoles, setOpenRoles] = useState({});
-
-  const toggleRole = (key) =>
-    setOpenRoles((prev) => ({ ...prev, [key]: !prev[key] }));
-
   useEffect(() => {
     const query = '*[_type == "experiences"]';
     const skillsQuery = '*[_type == "skills"] | order(order asc)';
@@ -72,10 +68,6 @@ const Skills = () => {
               <motion.div className="app__skills-exp-works">
                 {experience.works.map((work) => {
                   const key = `${experience.year}-${work.name}`;
-                  const isOpen = Boolean(openRoles[key]);
-                  // long roles collapse to a few lines so the section stays
-                  // readable in one screen; the visitor opts in to the detail
-                  const isLong = (work.company || "").length > 260;
 
                   return (
                     <motion.div
@@ -85,23 +77,13 @@ const Skills = () => {
                       key={key}
                     >
                       <h4 className="bold-text">{work.name}</h4>
-                      <p
-                        className={`p-text app__skills-exp-desc ${
-                          isLong && !isOpen ? "is-clamped" : ""
-                        }`}
+                      <ClampedText
+                        lines={12}
+                        className="p-text app__skills-exp-desc"
+                        buttonClassName="app__skills-exp-more"
                       >
                         {work.company}
-                      </p>
-                      {isLong && (
-                        <button
-                          type="button"
-                          className="app__skills-exp-more"
-                          aria-expanded={isOpen}
-                          onClick={() => toggleRole(key)}
-                        >
-                          {isOpen ? "Show less" : "Read more"}
-                        </button>
-                      )}
+                      </ClampedText>
                     </motion.div>
                   );
                 })}
