@@ -8,6 +8,7 @@ import { client } from "../../client";
 import { slugForWork, studyFor } from "../../content/projects";
 import Blocks, { DiagramDebt } from "./Blocks";
 import "./ProjectPage.scss";
+import { useDocumentHead } from "../../seo";
 
 // Tabs are declared per project, so the group rail only renders groups that a
 // given project actually has content for.
@@ -69,14 +70,21 @@ const ProjectPage = () => {
     window.scrollTo({ top: window.scrollY > target ? target : 0, behavior: "instant" });
   }, [active?.id]);
 
-  useEffect(() => {
-    if (!study?.title) return undefined;
-    const previous = document.title;
-    document.title = `${study.title} — case study`;
-    return () => {
-      document.title = previous;
-    };
-  }, [study]);
+  // An unknown slug renders a "no case study here" screen, which must not be
+  // indexed as a real page. Note this keys off state === "missing" and not
+  // !study: while the Sanity fetch is in flight study is also null, and a
+  // transient noindex is something Googlebot's renderer can genuinely catch.
+  const missing = state === "missing";
+  useDocumentHead({
+    title: study?.title
+      ? `${study.title} — case study by Kaleem Ahmed`
+      : missing
+        ? "Case study not found — Kaleem Ahmed"
+        : "Loading case study — Kaleem Ahmed",
+    description: study?.tagline || undefined,
+    path: study ? `/work/${slug}` : undefined,
+    noindex: missing,
+  });
 
   if (state === "loading") {
     return (

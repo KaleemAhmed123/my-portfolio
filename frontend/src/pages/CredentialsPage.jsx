@@ -5,10 +5,18 @@ import { FiArrowLeft } from "react-icons/fi";
 import Credentials from "../container/Credentials/Credentials";
 import logo from "../assets/BirdLogo2.png";
 import "./CredentialsPage.scss";
+import { useDocumentHead } from "../seo";
 
 // Standalone page (route: /credentials) — deliberately NOT part of the
 // single-page portfolio scroll. Recruiters open this as its own shareable URL.
-const CredentialsPage = () => (
+const CredentialsPage = () => {
+  useDocumentHead({
+    title: "Test credentials — Kaleem Ahmed",
+    description: "Demo logins for evaluating the projects in my portfolio.",
+    noindex: true,
+  });
+
+  return (
   <div className="credpage">
     <header className="credpage__bar">
       <a className="credpage__logo" href="/">
@@ -35,6 +43,7 @@ const CredentialsPage = () => (
       </p>
     </footer>
   </div>
-);
+  );
+};
 
 export default CredentialsPage;
