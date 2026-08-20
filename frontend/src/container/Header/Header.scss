@@ -21,13 +21,13 @@
 
     .row {
         display: flex;
-        gap: 3%;
+        gap: clamp(2rem, 3vw, 3.5rem);
         padding-top: 10px;
 
         .left {
-            flex: 0 0 clamp(260px, 20%, 340px);
-            margin-top: 4.2rem;
-            padding: 20px;
+            flex: 0 0 clamp(232px, 17%, 288px);
+            margin-top: 0;
+            padding: clamp(12px, 1.6vh, 20px);
             align-self: flex-start;
             border: 1px solid var(--lightGray-color);
             background-color: var(--elevated-color);
@@ -75,7 +75,7 @@
                 align-items: center;
                 flex-wrap: wrap;
                 gap: 1rem 2.5rem;
-                margin-top: 30px;
+                margin-top: clamp(12px, 2.2vh, 30px);
             }
 
             .header-cred-cta {
@@ -103,7 +103,7 @@
             h2 {
                 font-family: var(--font-display);
                 font-style: italic;
-                font-size: 64px;
+                font-size: clamp(28px, 4.4vh, 48px);
                 line-height: 0.95;
                 text-align: left;
                 letter-spacing: -0.01em;
@@ -112,14 +112,26 @@
                 margin-bottom: 14px;
             }
 
+            .header-greet {
+                display: flex;
+                align-items: baseline;
+                flex-wrap: wrap;
+                gap: 0.4rem 1.6rem;
+                margin-bottom: clamp(10px, 2.6vh, 30px);
+
+                h2 {
+                    margin-bottom: 0;
+                }
+            }
+
             .header-role {
-                font-size: 0.72rem;
+                font-size: clamp(0.6rem, 0.85vh, 0.72rem);
                 text-align: left;
-                color: var(--gray-color);
+                color: var(--secondary-color);
                 font-weight: 700;
                 letter-spacing: 0.24em;
                 text-transform: uppercase;
-                margin: 0 0 10px;
+                margin: 0;
             }
 
             .header-tagline {
@@ -162,8 +174,30 @@
                 }
             }
 
-            p {
-                margin-bottom: 20px;
+            // The three intro paragraphs have to fit one screen down to
+            // 1366x768. Height is roughly proportional to font-size squared,
+            // so sizing off vh is the only lever that keeps up. Floor is 10px.
+            // ponytail: hand-fitted linear ramp, re-measure if the copy length
+            // changes much.
+            .header-intro {
+                max-width: var(--hero-measure);
+
+                // Collapsed state: 12 lines, then Read more. Same mechanism as
+                // .app__skills-exp-desc.is-clamped in the Skills section.
+                &.is-clamped {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 12;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                p {
+                    font-size: var(--hero-copy);
+                    // 1.4 rather than 1.55: the 15% larger type needs the
+                    // leading back. Bigger glyphs, tighter lines.
+                    line-height: 1.4;
+                    margin-bottom: 0.9em;
+                }
             }
 
             .icons {
@@ -196,7 +230,7 @@
 
                 h2 {
                     margin-top: 2rem;
-                    font-size: 2.5rem;
+                    font-size: 2rem;
                 }
             }
         }
@@ -277,7 +311,7 @@
 
 .hsk-row { height: 16px; width: 100%; }
 .hsk-row:nth-child(even) { width: 80%; }
-.hsk-h2 { height: 44px; width: 55%; margin-bottom: 6px; }
+.hsk-h2 { height: 34px; width: 55%; margin-bottom: 6px; }
 .hsk-tag { height: 16px; width: 70%; margin-bottom: 10px; }
 .hsk-p { height: 12px; width: 100%; }
 .hsk-short { width: 60%; }
@@ -289,4 +323,90 @@
 
 @media (prefers-reduced-motion: reduce) {
     .hsk { animation: none; }
+}
+
+/* ---- Hero claims more of the screen than the shared section wrapper ----
+   Scoped to #home so the other sections keep their current rhythm until the
+   mobile pass. */
+#home {
+    /* One knob drives the hero. All three intro paragraphs have to hold a
+       single screen, and block height falls off roughly as the square of the
+       font-size, so ramping size with viewport height is the only lever that
+       keeps up. Hand-fitted line: ~13.2px at a 1080p window, bottoming out at
+       the 10px floor around 830px of usable viewport. The floor itself is
+       deliberately NOT scaled with the ramp: short viewports cannot absorb a
+       larger minimum, so they stay at 10px.
+       ponytail: re-measure this ramp if the copy length changes much. */
+    --hero-copy: clamp(10px, calc(1.802vh - 1.92px), 18.4px);
+
+    /* A 126-character line. Space Mono's advance is 0.6124em, measured off the
+       rendered text rather than assumed, so this is an exact character count.
+       Widening also shortens the block, which is what pays for the top padding
+       below: fewer lines at the same size. */
+    --hero-measure: calc(126 * 0.6124 * var(--hero-copy));
+}
+
+/* ---- Hero claims more of the screen than the shared section wrapper ----
+   Scoped to #home so the other sections keep their current rhythm until the
+   mobile pass. Width is derived from the measure plus the info card, gap and
+   padding, so the block hugs its copy instead of stranding dead space to the
+   right of it. */
+#home .app__wrapper {
+    max-width: calc(var(--hero-measure) + 448px);
+    /* The navbar is position: fixed, so it overlays the hero rather than
+       pushing it down. The old 4.5rem left only ~20px of daylight under it and
+       the greeting read as clipped; this clears it by ~60px. */
+    padding: clamp(7rem, 12vh, 9.5rem) clamp(1.25rem, 4.5vw, 5rem) clamp(0.75rem, 2vh, 3rem);
+}
+
+/* Short viewports: the cue is the first thing to go, it costs ~85px. */
+@media screen and (max-height: 1000px) {
+    .header-scroll-cue {
+        display: none;
+    }
+}
+
+/* Below ~700px of usable viewport the copy cannot both fit one screen and keep
+   a comfortable measure, because the font-size ramp has already bottomed out at
+   its 10px floor. Fitting wins: release the cap so lines run full width, which
+   trades reading comfort for the ~80px that makes it fit. */
+@media screen and (max-height: 700px) {
+
+    .container .row .right .header-intro,
+    #home .app__wrapper {
+        max-width: none;
+    }
+
+    /* Neither the generous top padding nor the wide gap survives here: both
+       cost column width or height the 10px floor can no longer absorb. */
+    #home .app__wrapper {
+        padding-top: clamp(5rem, 9vh, 6rem);
+    }
+
+    #home .row {
+        gap: 2rem;
+    }
+}
+
+/* Matches .app__skills-exp-more so the two Read more controls read as one
+   component. */
+.header-intro-more {
+    margin-top: 0.8rem;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+
+    font-family: var(--font-base);
+    font-size: clamp(0.68rem, 0.58vw, 0.8rem);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    border-bottom: 1px solid var(--accent-line);
+    transition: border-color 0.2s ease;
+
+    &:hover {
+        border-bottom-color: var(--secondary-color);
+    }
 }

@@ -9,6 +9,7 @@ const Header = () => {
   const [personalInfo, setPersonalInfo] = useState(null);
   const [intro, setIntro] = useState(null);
   const [socialLinks, setSocialLinks] = useState([]);
+  const [introOpen, setIntroOpen] = useState(false);
 
   useEffect(() => {
     // Fetch personal info
@@ -29,6 +30,14 @@ const Header = () => {
       setSocialLinks(data);
     });
   }, []);
+
+  // 12 lines at the hero's widest measure is roughly 1500 characters. Past
+  // that the copy is collapsed behind a Read more, matching the heuristic the
+  // Skills section already uses for long roles.
+  const introIsLong =
+    [intro?.section1, intro?.section2, intro?.section3]
+      .filter(Boolean)
+      .join(" ").length > 1400;
 
   return (
     <motion.div
@@ -94,7 +103,6 @@ const Header = () => {
           {!intro && (
             <div className="header-skeleton" aria-hidden="true">
               <span className="hsk hsk-h2" />
-              <span className="hsk hsk-tag" />
               <span className="hsk hsk-p" />
               <span className="hsk hsk-p" />
               <span className="hsk hsk-p hsk-short" />
@@ -107,17 +115,42 @@ const Header = () => {
               <h1 className="sr-only">
                 Kaleem Ahmed — {intro.roleLabel || "Backend & Full-Stack Engineer"}
               </h1>
-              {intro.greeting && <h2>{intro.greeting}</h2>}
-              {intro.roleLabel && (
-                <p className="header-role">{intro.roleLabel}</p>
-              )}
-              {intro.tagline && (
+              {/* Greeting and role share one baseline row so the role fills
+                  the dead space beside the headline instead of costing a line. */}
+              <div className="header-greet">
+                {intro.greeting && <h2>{intro.greeting}</h2>}
+                {intro.roleLabel && (
+                  <p className="header-role">{intro.roleLabel}</p>
+                )}
+              </div>
+              {/* Tagline stays hidden; the intro copy needs the room. */}
+              {/* {intro.tagline && (
                 <h3 className="header-tagline">{intro.tagline}</h3>
+              )} */}
+              {/* The copy collapses to 12 lines and the visitor opts into the
+                  rest, same pattern as the roles in the Skills section. */}
+              <div
+                className={`header-intro ${
+                  introIsLong && !introOpen ? "is-clamped" : ""
+                }`}
+              >
+                {intro.section1 && <p>{intro.section1}</p>}
+                {intro.section2 && <p>{intro.section2}</p>}
+                {intro.section3 && <p>{intro.section3}</p>}
+              </div>
+              {introIsLong && (
+                <button
+                  type="button"
+                  className="header-intro-more"
+                  aria-expanded={introOpen}
+                  onClick={() => setIntroOpen((o) => !o)}
+                >
+                  {introOpen ? "Show less" : "Read more"}
+                </button>
               )}
-              {intro.section1 && <p>{intro.section1}</p>}
-              {intro.section2 && <p>{intro.section2}</p>}
-              {intro.section3 && <p>{intro.section3}</p>}
-              {intro.stats?.length > 0 && (
+              {/* Stat strip hidden; the figures live in the intro copy for now.
+                  Data is still in Sanity, so uncommenting restores it. */}
+              {/* {intro.stats?.length > 0 && (
                 <ul className="header-stats">
                   {intro.stats.map((s, i) => (
                     <li key={s._key || i}>
@@ -126,7 +159,7 @@ const Header = () => {
                     </li>
                   ))}
                 </ul>
-              )}
+              )} */}
             </>
           )}
           <div className="header-actions">
