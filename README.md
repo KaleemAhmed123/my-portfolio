@@ -1,25 +1,68 @@
-# This is my Portfolio Website
+# kaleemahmed.in
 
-. It is a dynamic portfolio where content can be modified <br/>
-. So my portfolio grows as i grow <br/>
-. Took some inspiration from JSM yt <br/>
-. Sanity Client is used for managing database <br/>
-. Tools and technologies used in project are- <br/>
-. React JS, SCSS, JS, Vite, Node/Express, MongoDB
+Personal site and engineering case studies. React + Vite on the front, Sanity as
+the CMS, deployed on Vercel.
 
-## Here are same screenshots AND demo link- <a href="https://kaleem.netlify.app"> Click Here </a>
+```
+frontend/          the site
+  api/             Vercel serverless functions (the contact form write)
+  public/          static files served as-is (og image, robots, sitemap, clips)
+  scripts/         build-time scripts (sitemap generation)
+  src/
+    components/    reusable UI (Navbar, CommandPalette, ClampedText, …)
+    container/     the homepage sections (Header, Skills, Work, About, Footer)
+    content/       hand-written case studies, one folder per project
+    pages/         routed pages (/credentials, /developer, /work/:slug/:tab)
+    wrapper/       the section HOCs (full-height + scroll-in animation)
+studio/            Sanity Studio, the CMS
+docs/              working notes and paste-ready CMS copy
+```
 
-![Screenshot_1](https://user-images.githubusercontent.com/91620720/233975698-a31f0ef4-d8bd-4953-9ff2-b0cdc29dd8cb.png)
-![Screenshot_2](https://user-images.githubusercontent.com/91620720/233975741-5bde0027-9022-4b49-8ddc-eddbad34fe8a.png)
-![Screenshot_3](https://user-images.githubusercontent.com/91620720/233975785-9869b89e-84f4-444a-b4db-a61311952912.png)
-![Screenshot_6](https://user-images.githubusercontent.com/91620720/233975822-00a51246-a2e9-4177-93b2-4d9ea9fc29fa.png)
-![Screenshot_5](https://user-images.githubusercontent.com/91620720/233975923-7a88de91-a31b-4612-a29d-82b217d883b5.png)
-![Screenshot_4](https://user-images.githubusercontent.com/91620720/233975968-d9f262d5-6ad5-4b42-9d4b-1501795a0103.png)
-![Screenshot_7](https://user-images.githubusercontent.com/91620720/233978421-feff9105-2dfb-4083-8dc5-cd5af9d31c37.png)
-![Screenshot_8](https://user-images.githubusercontent.com/91620720/233978440-6f4e4f53-f34f-4aa0-8edc-f3d391663978.png)
-![Screenshot_9](https://user-images.githubusercontent.com/91620720/233978446-8e56f6d0-484c-481c-8dc4-1368d5bd3179.png)
-![Screenshot_11](https://user-images.githubusercontent.com/91620720/233978492-c35a8587-4d5d-4759-bc8e-41e5915b93f9.png)
-![Screenshot_12](https://user-images.githubusercontent.com/91620720/233978496-58e0cbaf-8ebd-436c-a636-1c5ca114f207.png)
-![Screenshot_13](https://user-images.githubusercontent.com/91620720/233978503-1479205c-4bc4-45f4-b124-da4ff879b0a0.png)
-![Screenshot_14](https://user-images.githubusercontent.com/91620720/233978514-1a5fae77-2650-4b3f-a193-9638766989b0.png)
-![Screenshot_15](https://user-images.githubusercontent.com/91620720/233978520-6effb38c-fc43-4e12-b160-8837e9d432fb.png)
+## Running it
+
+```bash
+cd frontend
+npm install
+cp .env.example .env     # fill in VITE_APP_SANITY_PROJECT_ID
+npm run dev
+```
+
+The Studio is a separate app:
+
+```bash
+cd studio && npm install && npm run dev
+```
+
+## Environment
+
+`frontend/.env.example` lists what is needed and, more importantly, which side
+of the wire each value belongs on. **Anything prefixed `VITE_` is inlined into
+the JavaScript bundle and is therefore public.** The Sanity write token is not
+`VITE_`-prefixed for that reason: it is read only by `frontend/api/contact.js`,
+which runs on Vercel, and is configured in the Vercel dashboard.
+
+## Content
+
+Copy lives in Sanity, not in the repo, so the site can change without a deploy.
+The exception is the long-form case studies under `frontend/src/content/projects/`,
+which are prose with structure (tables, diagrams, stat blocks) that a CMS field
+would flatten.
+
+Each study exports tabs of typed blocks rendered by
+[`Blocks.jsx`](frontend/src/pages/ProjectPage/Blocks.jsx). Slug resolution is the
+one piece of real logic in there — if it breaks, every project card links to a
+404 and the build still passes — so it has a self-check:
+
+```bash
+node frontend/src/content/projects/check.mjs
+```
+
+## Build
+
+```bash
+cd frontend && npm run build
+```
+
+This regenerates `public/sitemap.xml` from the live Sanity project list before
+running Vite. It fails soft: if Sanity is unreachable the sitemap still emits the
+static routes rather than breaking the build.

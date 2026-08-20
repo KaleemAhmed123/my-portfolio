@@ -1,3 +1,29 @@
+node_modules/
+dist/
+
+# Sanity Studio build output and local runtime cache
+studio/dist/
+studio/.sanity/
+
+# Environment secrets. Never commit these: VITE_* values get inlined into the
+# client bundle, and everything else here is a server credential.
+.env
+.env.*
+!.env.example
+
 # Browser automation scratch: screenshots, snapshots and console logs written by
 # the Playwright MCP server when driving the site locally.
 .playwright-mcp/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
