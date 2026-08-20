@@ -178,6 +178,19 @@
         overflow: hidden;
     }
 
+    .app__work-role {
+        align-self: flex-start;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--lightGray-color);
+        border-radius: 999px;
+        color: var(--gray-color);
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
     p {
         text-align: left;
         color: var(--gray-color);

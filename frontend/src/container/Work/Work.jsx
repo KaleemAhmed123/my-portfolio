@@ -56,7 +56,7 @@ const Work = () => {
   const imgSrc = (work) => (work?.imgUrl ? urlFor(work.imgUrl) : FALLBACK_IMG);
 
   useEffect(() => {
-    const query = '*[_type == "works"]';
+    const query = '*[_type == "works"] | order(order asc)';
 
     client.fetch(query).then((data) => {
       setWorks(data);
@@ -73,7 +73,6 @@ const Work = () => {
         {works.length > 0 && (
           <span className="section-chip">{works.length} shipped</span>
         )}
-        <span className="section-chip">Mostly solo</span>
         {works.length > 0 && (
           <div className="app__work-nav">
             <button
@@ -131,6 +130,7 @@ const Work = () => {
                 </div>
               )}
               <h4 className="bold-text">{work?.title}</h4>
+              {work?.role && <span className="app__work-role">{work.role}</span>}
               <p className="p-text">{work?.description}</p>
             </div>
           </div>
