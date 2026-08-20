@@ -1,3 +1,29 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.kaleemahmed.in"
+        }
+      ],
+      "destination": "https://kaleemahmed.in/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/credentials",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/work/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/work/:slug/:tab",
+      "destination": "/index.html"
+    }
+  ]
 }
