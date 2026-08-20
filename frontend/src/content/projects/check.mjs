@@ -3,7 +3,8 @@
 // card links to a 404 and the build still passes. Titles below are the live
 // Sanity values.
 import assert from "node:assert/strict";
-import { slugForWork, hasFullStudy, studyFor } from "./index.js";
+import studies, { slugForWork, hasFullStudy, studyFor } from "./index.js";
+import SLUGS from "./slugs.js";
 
 const live = [
   "Gaza40+ Student Portal: Humanitarian Operations Platform",
@@ -14,6 +15,14 @@ const live = [
 
 // a card with no written study, to keep the generated-fallback path covered
 const unwritten = "Some Older Build: No Case Study Yet";
+
+// slugs.js is a hand-kept copy of each study's slug/match so the homepage can
+// build links without loading the studies. If they drift, /work links 404.
+assert.deepEqual(
+  SLUGS.map((s) => ({ slug: s.slug, match: s.match })),
+  studies.map((s) => ({ slug: s.slug, match: s.match })),
+  "slugs.js has drifted from the case study files"
+);
 
 const slugs = live.map((title) => slugForWork({ title }));
 

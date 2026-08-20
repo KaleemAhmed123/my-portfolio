@@ -7,7 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { slugForWork } from '../src/content/projects/index.js';
+import { slugForWork } from '../src/content/projects/slugs.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, '..', 'public', 'sitemap.xml');

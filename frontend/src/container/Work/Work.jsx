@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AppWrap, MotionWrap } from "../../wrapper";
 import { urlFor, client } from "../../client";
-import { slugForWork } from "../../content/projects";
+import { slugForWork } from "../../content/projects/slugs.js";
 import "./Work.scss";
 
 // Inline SVG placeholder shown when a project has no image in Sanity,
@@ -58,9 +58,10 @@ const Work = () => {
   useEffect(() => {
     const query = '*[_type == "works"] | order(order asc)';
 
-    client.fetch(query).then((data) => {
-      setWorks(data);
-    });
+    client
+      .fetch(query)
+      .then(setWorks)
+      .catch(() => setWorks([]));
   }, []);
 
   return (

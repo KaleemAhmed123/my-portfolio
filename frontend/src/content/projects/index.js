@@ -3,30 +3,20 @@ import eudoro from "./eudoro/index.js";
 import shaza from "./shaza/index.js";
 import gaza40 from "./gaza40/index.js";
 import dataSync from "./dataSync/index.js";
+import { slugify, shortTitle, slugForWork } from "./slugs.js";
+
+// re-exported so callers that already have the studies loaded need one import
+export { slugify, slugForWork };
 
 // Projects with a written playbook get a full case study. Everything else falls
 // back to a short one built from the Sanity fields the card already carries, so
 // deleting the old modal doesn't leave those projects with nowhere to go.
 const studies = [eudoro, shaza, gaza40, dataSync];
 
-export const slugify = (s) =>
-  String(s || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-// "Eudoro: Multi-Vendor Personalized Commerce Platform" -> "Eudoro".
-// Splits on a colon or a *spaced* dash, so hyphenated words survive.
-const shortTitle = (title) =>
-  String(title || "").split(/\s*[:—–]\s+|\s+-\s+/)[0].trim();
-
 const studyForTitle = (title) => {
   const t = String(title || "").toLowerCase();
   return studies.find((s) => s.match.some((m) => t.includes(m))) || null;
 };
-
-export const slugForWork = (work) =>
-  studyForTitle(work?.title)?.slug || slugify(shortTitle(work?.title));
 
 export const hasFullStudy = (work) => Boolean(studyForTitle(work?.title));
 
