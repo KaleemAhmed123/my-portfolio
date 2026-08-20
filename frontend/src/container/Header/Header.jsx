@@ -4,12 +4,12 @@ import "./Header.scss";
 import { AppWrap } from "../../wrapper";
 import { client } from "../../client";
 import { socialIconFor } from "../../constants/socialIcons";
+import { ClampedText } from "../../components";
 
 const Header = () => {
   const [personalInfo, setPersonalInfo] = useState(null);
   const [intro, setIntro] = useState(null);
   const [socialLinks, setSocialLinks] = useState([]);
-  const [introOpen, setIntroOpen] = useState(false);
 
   useEffect(() => {
     // Fetch personal info
@@ -30,14 +30,6 @@ const Header = () => {
       setSocialLinks(data);
     });
   }, []);
-
-  // 12 lines at the hero's widest measure is roughly 1500 characters. Past
-  // that the copy is collapsed behind a Read more, matching the heuristic the
-  // Skills section already uses for long roles.
-  const introIsLong =
-    [intro?.section1, intro?.section2, intro?.section3]
-      .filter(Boolean)
-      .join(" ").length > 1400;
 
   return (
     <motion.div
@@ -127,27 +119,16 @@ const Header = () => {
               {/* {intro.tagline && (
                 <h3 className="header-tagline">{intro.tagline}</h3>
               )} */}
-              {/* The copy collapses to 12 lines and the visitor opts into the
-                  rest, same pattern as the roles in the Skills section. */}
-              <div
-                className={`header-intro ${
-                  introIsLong && !introOpen ? "is-clamped" : ""
-                }`}
+              {/* Collapses to 12 lines, same control as the roles in Skills. */}
+              <ClampedText
+                lines={12}
+                className="header-intro"
+                buttonClassName="header-intro-more"
               >
                 {intro.section1 && <p>{intro.section1}</p>}
                 {intro.section2 && <p>{intro.section2}</p>}
                 {intro.section3 && <p>{intro.section3}</p>}
-              </div>
-              {introIsLong && (
-                <button
-                  type="button"
-                  className="header-intro-more"
-                  aria-expanded={introOpen}
-                  onClick={() => setIntroOpen((o) => !o)}
-                >
-                  {introOpen ? "Show less" : "Read more"}
-                </button>
-              )}
+              </ClampedText>
               {/* Stat strip hidden; the figures live in the intro copy for now.
                   Data is still in Sanity, so uncommenting restores it. */}
               {/* {intro.stats?.length > 0 && (

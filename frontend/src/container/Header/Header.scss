@@ -186,7 +186,7 @@
                 // .app__skills-exp-desc.is-clamped in the Skills section.
                 &.is-clamped {
                     display: -webkit-box;
-                    -webkit-line-clamp: 12;
+                    -webkit-line-clamp: var(--clamp-lines, 12);
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
