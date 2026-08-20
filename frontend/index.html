@@ -6,6 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/portfolio.png" />
 
+  <!-- The fonts used to be an @import at the top of index.css, which meant the
+       browser had to fetch and parse that file before it even learned about
+       them. As links they start downloading immediately. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" />
+
+  <!-- Critical bits, inline so they apply on the very first paint rather than
+       after the stylesheet arrives: the dark canvas (otherwise the browser
+       flashes its default white) and the rule that keeps the crawler fallback
+       below off screen. -->
+  <style>
+    :root { color-scheme: dark; }
+    html { background-color: #1e1a14; }
+    body { background-color: #1e1a14; color: #ffffe3; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+  </style>
+
   <title>Kaleem Ahmed — Backend & Full-Stack Engineer, Noida</title>
   <meta name="description"
     content="Kaleem Ahmed is a backend-heavy full-stack engineer in Noida, India. Node, TypeScript, Python and FastAPI, microservices, RabbitMQ and event-driven systems. Case studies of what I have actually built." />
@@ -111,6 +133,7 @@
     need for it entirely.
   -->
   <div id="root">
+    <div class="sr-only">
     <h1>Kaleem Ahmed — Backend &amp; Full-Stack Engineer</h1>
     <p>
       Backend systems, end to end. I am a backend-heavy full-stack engineer based in
@@ -130,6 +153,7 @@
       <li><a href="https://leetcode.com/Kaleem_Ahmed/">LeetCode</a></li>
       <li><a href="https://www.geeksforgeeks.org/user/kaleem530/">GeeksforGeeks</a></li>
     </ul>
+    </div>
   </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

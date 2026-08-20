@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+/* Fonts are loaded as <link> tags in index.html, not imported here: an
+   @import made the browser parse this file before it could even start
+   fetching them. */
 
 :root {
   --font-base: "Space Mono", ui-monospace, monospace;
