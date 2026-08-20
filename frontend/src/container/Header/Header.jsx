@@ -13,21 +13,15 @@ const Header = () => {
   useEffect(() => {
     // Fetch personal info
     const personalInfoQuery = '*[_type == "personalInfo"][0]';
-    client.fetch(personalInfoQuery).then((data) => {
-      setPersonalInfo(data);
-    });
+    client.fetch(personalInfoQuery).then(setPersonalInfo).catch(() => setPersonalInfo(null));
 
     // Fetch intro
     const introQuery = '*[_type == "intro"][0]';
-    client.fetch(introQuery).then((data) => {
-      setIntro(data);
-    });
+    client.fetch(introQuery).then(setIntro).catch(() => setIntro(null));
 
     // Fetch social links, ordered by 'order' field
     const socialLinksQuery = '*[_type == "socialLinks"] | order(order asc)';
-    client.fetch(socialLinksQuery).then((data) => {
-      setSocialLinks(data);
-    });
+    client.fetch(socialLinksQuery).then(setSocialLinks).catch(() => setSocialLinks([]));
   }, []);
 
   return (
@@ -57,7 +51,7 @@ const Header = () => {
                 {personalInfo.phone && (
                   <li>
                     <span className="first-block">Phone:</span>
-                    <a href={`tel:${personalInfo.phone}`} target="__blank">
+                    <a href={`tel:${personalInfo.phone}`}>
                       <span className="second-block">{personalInfo.phone}</span>
                     </a>
                   </li>
@@ -65,7 +59,7 @@ const Header = () => {
                 {personalInfo.email && (
                   <li>
                     <span className="first-block">Email:</span>
-                    <a href={`mailto:${personalInfo.email}`} target="__blank">
+                    <a href={`mailto:${personalInfo.email}`}>
                       <span className="second-block">{personalInfo.email}</span>
                     </a>
                   </li>
@@ -73,7 +67,7 @@ const Header = () => {
                 {personalInfo.website && (
                   <li>
                     <span className="first-block">Website:</span>
-                    <a href={personalInfo.website} target="__blank">
+                    <a href={personalInfo.website} target="_blank" rel="noopener noreferrer">
                       <span className="second-block">
                         {personalInfo.website.replace(/^https?:\/\//, '')}
                       </span>
@@ -144,7 +138,7 @@ const Header = () => {
                     <li key={index}>
                       <a
                         href={link.url}
-                        target="__blank"
+                        target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}
                         title={label}

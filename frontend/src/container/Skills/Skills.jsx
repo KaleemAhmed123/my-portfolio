@@ -13,13 +13,8 @@ const Skills = () => {
     const query = '*[_type == "experiences"]';
     const skillsQuery = '*[_type == "skills"] | order(order asc)';
 
-    client.fetch(query).then((data) => {
-      setExperiences(data);
-    });
-
-    client.fetch(skillsQuery).then((data) => {
-      setSkills(data);
-    });
+    client.fetch(query).then(setExperiences).catch(() => setExperiences([]));
+    client.fetch(skillsQuery).then(setSkills).catch(() => setSkills([]));
   }, []);
 
   return (
