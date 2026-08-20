@@ -4,6 +4,12 @@ export default {
     type: 'document',
     fields: [
       {
+        name: 'order',
+        title: 'Order',
+        type: 'number',
+        description: 'Lower numbers show first.',
+      },
+      {
         name: 'title',
         title: 'Title',
         type: 'string',
