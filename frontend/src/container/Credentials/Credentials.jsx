@@ -13,6 +13,7 @@ import { client } from "../../client";
 import { credentials as seedCredentials } from "../../constants/credentials";
 import CommandPalette from "../../components/CommandPalette/CommandPalette";
 import "./Credentials.scss";
+import { copyText } from "../../copyText";
 
 // GROQ: pull every credentials document with its nested environments → portals.
 const CREDENTIALS_QUERY = `*[_type == "credentials"] | order(order asc, name asc){
@@ -28,19 +29,6 @@ const CREDENTIALS_QUERY = `*[_type == "credentials"] | order(order asc, name asc
     portals[]{ role, url, email, username, password, token, note }
   }
 }`;
-
-const copyText = async (value) => {
-  try {
-    await navigator.clipboard.writeText(value);
-  } catch {
-    const el = document.createElement("textarea");
-    el.value = value;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-  }
-};
 
 // A copyable email / password chip.
 const CopyField = ({ label, value }) => {
