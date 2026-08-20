@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiSearch, FiCornerDownLeft, FiExternalLink } from "react-icons/fi";
 import "./CommandPalette.scss";
+import { copyText } from "../../copyText";
 
 // Flatten projects → environments → portals into a flat list of "commands".
 const buildCommands = (projects) => {
@@ -23,19 +24,6 @@ const buildCommands = (projects) => {
     });
   });
   return out;
-};
-
-const copyText = async (value) => {
-  try {
-    await navigator.clipboard.writeText(value);
-  } catch {
-    const el = document.createElement("textarea");
-    el.value = value;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-  }
 };
 
 const CommandPalette = ({ open, onClose, projects }) => {
