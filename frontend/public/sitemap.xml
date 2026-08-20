@@ -6,6 +6,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://kaleemahmed.in/developer</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://kaleemahmed.in/work/data-sync-etl-hub</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

@@ -52,7 +52,11 @@ const run = async () => {
   }
 
   // /credentials is excluded on purpose, matching robots.txt.
-  const urls = [urlTag(`${ORIGIN}/`, '1.0', 'weekly')];
+  const urls = [
+    urlTag(`${ORIGIN}/`, '1.0', 'weekly'),
+    // Linked from the footer of the live products, so it picks up real traffic.
+    urlTag(`${ORIGIN}/developer`, '0.7', 'monthly'),
+  ];
 
   const slugs = [...new Set(works.map(slugForWork).filter(Boolean))].sort();
   for (const slug of slugs) {
