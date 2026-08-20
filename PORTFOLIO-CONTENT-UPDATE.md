@@ -1,3 +1,7 @@
+> SUPERSEDED 2026-08-19. The live homepage copy is in Sanity and no longer matches this
+> file: positioning moved back to backend-heavy full-stack, AI is framed as adaptability,
+> and the Acordly/Primble project was removed entirely. Kept only for history.
+
 # Portfolio Content Update (paste-ready for Sanity Studio)
 
 Voice: written to sound like you, not like generated marketing copy. No em dashes, no buzzwords, first person.
@@ -73,7 +77,7 @@ I build the frontend too, in React, Next.js and Tailwind, and not just the prett
 ## 3) WORKS (document type: `works`) — 5 projects
 
 Set **title**, **description**, **projectLink**, **codeLink**, **tags** on each. Add tags as SEPARATE entries (that's what caused `"RBAC, Case Management"` to render as one messy tag). Delete the old **Helping Crypto** doc.
-Order: Eudoro, Acordly, Forever Yours, Gaza40+, ETL Hub.
+Order: Eudoro, Forever Yours, Gaza40+, ETL Hub.
 
 ### Work 1 — Eudoro (your current "Personalized Wallah" doc)
 **title**
@@ -87,19 +91,6 @@ Built this one solo. It's a multi-vendor marketplace for personalized products: 
 **projectLink**: `‹eudoro.art if you want it public; it's pre-launch, so blank is fine›`
 **codeLink**: `https://github.com/KaleemAhmed123/personalized-wallah-monorepo`
 **tags** (one per entry): `Microservices` · `RabbitMQ` · `Next.js` · `TypeScript` · `Razorpay` · `Docker`
-
-### Work 2 — Acordly (your current "AI Insurance Form Automation" doc)
-**title**
-```
-Acordly — AI Insurance Document Automation
-```
-**description**
-```
-I'm the lead architect on this. It auto-fills 17 ACORD insurance forms, some over 1100 fields, from an uploaded policy PDF. Most of the filling happens with no LLM at all, through deterministic rules and alias maps, and then one shared LLM pass handles whatever's actually still empty across every selected form at once. The real work was making a model trustworthy on 600k-character legal documents. It stays blank instead of guessing, rejects a value that doesn't match the field's type, and sizes its own context budget to the model window. The rule the whole thing follows: blank is better than wrong. FastAPI, Google Vision OCR, OpenAI, Postgres, Stripe, and a Redis-based limiter to stay under rate limits.
-```
-**projectLink**: `https://app.acordly.ai`
-**codeLink**: `‹blank — private repo›`
-**tags** (one per entry): `Python` · `FastAPI` · `LLM` · `OCR` · `Prompt Engineering` · `OpenAI`
 
 ### Work 3 — Forever Yours / Shaza  (NEW — add this document)
 **title**
@@ -150,7 +141,7 @@ Your current data stores the paragraph in the **company** field, with **name** h
 **name (role):** `Software Engineer — Astrea IT Services`
 **description:**
 ```
-Backend systems, cloud, AI workflows and full-stack work with Node, Python, Docker, AWS, React/Next.js and Salesforce. Built the ETL hub that keeps SAP, Salesforce and ecommerce in sync. Lead architect on Acordly, the AI insurance-form platform (OCR and LLM extraction, auth, Stripe, Dockerized deployment). Also built a Salesforce to Airtable sync and a few other integrations. Most of what I care about here is reliability: good logging, real error handling, CI/CD, and code the next person can actually work with.
+Backend systems, cloud, AI workflows and full-stack work with Node, Python, Docker, AWS, React/Next.js and Salesforce. Built the ETL hub that keeps SAP, Salesforce and ecommerce in sync. Also built a Salesforce to Airtable sync and a few other integrations. Most of what I care about here is reliability: good logging, real error handling, CI/CD, and code the next person can actually work with.
 ```
 
 ### Freelance Web Developer — `2023 – 2024`
