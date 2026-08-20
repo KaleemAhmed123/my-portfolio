@@ -23,6 +23,7 @@ const gaza40 = {
   credentialsKey: "Gaza 40+",
   stack: ["Next.js 16", "React 19", "Express", "Prisma", "MongoDB", "Cloudflare R2", "Socket.IO", "Docker", "Nginx"],
   stats: [
+    ["500+", "daily active users"],
     ["5", "roles"],
     ["8", "authorization layers"],
     ["30", "audited actions"],
