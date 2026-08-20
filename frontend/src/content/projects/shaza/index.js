@@ -11,7 +11,7 @@ const shaza = {
   role: "Sole engineer",
   status: "Live",
   liveUrl: "https://shaza-sandbox.vercel.app",
-  credentialsKey: "Forever Yours",
+  credentialsKey: "Shaza",
   stack: ["TypeScript", "Next.js 15", "Express 5", "MongoDB Atlas Vector Search", "Socket.IO", "WebRTC", "Gemini", "Groq", "Jina"],
   stats: [
     ["17k", "backend lines"],
