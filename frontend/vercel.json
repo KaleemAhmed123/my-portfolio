@@ -1,6 +1,17 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.kaleemahmed.in"
+        }
+      ],
+      "destination": "https://kaleemahmed.in/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {
@@ -13,6 +24,10 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/developer",
+      "destination": "/index.html"
+    },
     {
       "source": "/credentials",
       "destination": "/index.html"
