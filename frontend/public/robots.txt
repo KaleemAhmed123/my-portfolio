@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# The credentials page holds shared demo logins for evaluators. It is linked
+# from the site on purpose, but there is nothing there worth ranking.
+Disallow: /credentials
+
+Sitemap: https://kaleemahmed.in/sitemap.xml
