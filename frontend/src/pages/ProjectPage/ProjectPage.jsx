@@ -143,11 +143,22 @@ const ProjectPage = () => {
                 <FiExternalLink /> Live
               </a>
             ) : null}
+            {/* Eudoro and Shaza are products rather than portfolio pieces, so
+                their source is private. Say so plainly instead of leaving a
+                gap where a Code button would sit. */}
             {study.codeUrl ? (
               <a href={study.codeUrl} target="_blank" rel="noreferrer">
                 <FiGithub /> Code
               </a>
-            ) : null}
+            ) : (
+              <a
+                className="case__actions--muted"
+                href="mailto:shaamidreez@gmail.com?subject=Source%20access%20request"
+                title="The source is private. Email me and I'll walk you through it or grant read access."
+              >
+                <FiGithub /> Source on request
+              </a>
+            )}
             {study.credentialsKey ? (
               <Link
                 className="case__actions--key"

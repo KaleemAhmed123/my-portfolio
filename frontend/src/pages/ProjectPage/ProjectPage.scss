@@ -158,6 +158,12 @@
       border-color: var(--secondary-color) !important;
       background: var(--accent-soft);
     }
+
+    // "Source on request" — present, but visibly not one of the real buttons.
+    &--muted {
+      color: var(--gray-color) !important;
+      border-style: dashed !important;
+    }
   }
 
   /* -------------------------------------------------------------------- tabs */
