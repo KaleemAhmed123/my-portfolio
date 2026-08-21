@@ -127,6 +127,7 @@
   }
 
   &__actions {
+    position: relative;
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
@@ -154,15 +155,84 @@
       }
     }
 
-    &--key {
+    // One filled button, not three. Live is the strongest proof a project has,
+    // so it gets the only solid fill; if everything is orange, nothing is.
+    &--primary {
       border-color: var(--secondary-color) !important;
-      background: var(--accent-soft);
+      background: var(--secondary-color);
+      color: var(--brown-color) !important;
+      font-weight: 700;
+
+      &:hover {
+        color: var(--brown-color) !important;
+        filter: brightness(1.08);
+      }
     }
 
-    // "Source on request" — present, but visibly not one of the real buttons.
-    &--muted {
-      color: var(--gray-color) !important;
-      border-style: dashed !important;
+    // Test access and source access: the two things a reader can act on that
+    // are not just "look at the site". Same weight as each other on purpose,
+    // and solid-bordered so neither reads as disabled.
+    &--offer {
+      border-color: var(--accent-line) !important;
+      background: var(--accent-soft);
+      color: var(--secondary-color) !important;
+      font-weight: 700;
+
+      &:hover {
+        border-color: var(--secondary-color) !important;
+        background: var(--secondary-color);
+        color: var(--brown-color) !important;
+      }
+    }
+  }
+
+  // The button plus its explainer. A permanent paragraph here cost three lines
+  // of above-the-fold height on every case study for a message most readers do
+  // not need, so it only appears on hover or keyboard focus. Not a title="":
+  // that is unstyleable, slow, and invisible to crawlers.
+  &__source {
+    display: inline-flex;
+  }
+
+  &__source-tip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 6;
+    width: max-content;
+    max-width: min(26rem, 80vw);
+
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--accent-line);
+    border-radius: 0.5rem;
+    background: var(--elevated-color);
+    box-shadow: 0 6px 20px rgba(26, 22, 17, 0.13);
+
+    color: var(--gray-color);
+    font-size: 0.68rem;
+    line-height: 1.55;
+    text-align: left;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-3px);
+    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+  }
+
+  // :focus-within covers the keyboard path, so tabbing to the button explains
+  // it too rather than only the mouse getting the answer.
+  &__source:hover &__source-tip,
+  &__source:focus-within &__source-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  // Touch has no hover and tapping fires the mailto, so the tip would flash and
+  // vanish. Suppressed there: the button label plus the drafted email carry it.
+  @media (hover: none) {
+    &__source-tip {
+      display: none;
     }
   }
 

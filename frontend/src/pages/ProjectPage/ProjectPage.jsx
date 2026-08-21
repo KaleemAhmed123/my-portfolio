@@ -10,6 +10,25 @@ import Blocks, { DiagramDebt } from "./Blocks";
 import "./ProjectPage.scss";
 import { useDocumentHead } from "../../seo";
 
+// The source-access mailto. Prefilled with named blank fields rather than a
+// polite paragraph: the whole point is that granting access needs a GitHub
+// username, and asking for it in the draft saves a round trip.
+const sourceRequestMailto = (title) => {
+  const subject = `Read access request - ${title}`;
+  const body = [
+    "Hi Kaleem,",
+    "",
+    `I'd like read-only access to the ${title} source.`,
+    "",
+    "GitHub username:",
+    "Who I am (company / role):",
+    "What I'd most like to look at:",
+    "",
+    "Thanks,",
+  ].join("\n");
+  return `mailto:shaamidreez@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
+
 // Tabs are declared per project, so the group rail only renders groups that a
 // given project actually has content for.
 const groupsOf = (tabs) =>
@@ -139,29 +158,50 @@ const ProjectPage = () => {
 
           <div className="case__actions">
             {study.liveUrl ? (
-              <a href={study.liveUrl} target="_blank" rel="noreferrer">
+              <a
+                className="case__actions--primary"
+                href={study.liveUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <FiExternalLink /> Live
               </a>
             ) : null}
             {/* Eudoro and Shaza are products rather than portfolio pieces, so
-                their source is private. Say so plainly instead of leaving a
-                gap where a Code button would sit. */}
+                their source is private. This used to be a dashed grey pill,
+                which every other site on the web uses to mean "disabled" —
+                people read it as a dead button instead of an open offer. */}
             {study.codeUrl ? (
-              <a href={study.codeUrl} target="_blank" rel="noreferrer">
+              <a
+                className="case__actions--offer"
+                href={study.codeUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <FiGithub /> Code
               </a>
             ) : (
-              <a
-                className="case__actions--muted"
-                href="mailto:shaamidreez@gmail.com?subject=Source%20access%20request"
-                title="The source is private. Email me and I'll walk you through it or grant read access."
-              >
-                <FiGithub /> Source on request
-              </a>
+              // The explainer is a real element rather than a title="" so it
+              // stays in the DOM for screen readers and crawlers, and rather
+              // than a permanent paragraph so it stops eating three lines
+              // above the fold on every case study.
+              <span className="case__source">
+                <a
+                  className="case__actions--offer"
+                  href={sourceRequestMailto(study.title)}
+                >
+                  <FiGithub /> Request source access
+                </a>
+                <span className="case__source-tip" role="tooltip">
+                  Private because it is a live product. Clicking drafts the
+                  email, I just need your GitHub username to send a read-only
+                  invite.
+                </span>
+              </span>
             )}
             {study.credentialsKey ? (
               <Link
-                className="case__actions--key"
+                className="case__actions--offer"
                 to={`/credentials?q=${encodeURIComponent(study.credentialsKey)}`}
               >
                 <HiOutlineKey /> Test access
@@ -169,6 +209,7 @@ const ProjectPage = () => {
             ) : null}
           </div>
         </div>
+
       </header>
 
       {/* ---------------------- tabs, desktop only — pinned once the head scrolls */}
