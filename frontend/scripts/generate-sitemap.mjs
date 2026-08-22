@@ -63,6 +63,19 @@ const run = async () => {
     urls.push(urlTag(`${ORIGIN}/work/${slug}`, '0.8', 'monthly'));
   }
 
+  // /dev/notes is plain static HTML copied out of public/, unlinked from the nav.
+  // Globbing the folder means a new note gets indexed on the next deploy without
+  // anyone editing this list. index.html is the folder root, not /dev/notes/index.
+  const NOTES_DIR = path.join(HERE, '..', 'public', 'dev', 'notes');
+  const notes = fs.existsSync(NOTES_DIR)
+    ? fs.readdirSync(NOTES_DIR).filter((f) => f.endsWith('.html')).sort()
+    : [];
+  for (const file of notes) {
+    const slug = file.slice(0, -'.html'.length);
+    const loc = slug === 'index' ? `${ORIGIN}/dev/notes` : `${ORIGIN}/dev/notes/${slug}`;
+    urls.push(urlTag(loc, '0.5', 'monthly'));
+  }
+
   const doc =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
@@ -71,6 +84,7 @@ const run = async () => {
 
   fs.writeFileSync(OUT, doc);
   console.log(`[sitemap] wrote ${urls.length} urls -> public/sitemap.xml`);
+  console.log(`[sitemap] ${notes.length} of those are /dev/notes pages`);
   if (!slugs.length) console.warn('[sitemap] no project URLs found — check Sanity access.');
 };
 
