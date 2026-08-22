@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soft Skills & Communication Notes</title>
+<meta name="description" content="The 60-second pitch, STAR behavioral stories, reverse interviewing, and spotting red flags in an interview.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/soft-skills-communication-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Soft Skills</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#pitch"><span class="nav-num">01</span>The Pitch</a>
+    <a class="nav-item" href="#star"><span class="nav-num">02</span>STAR Method</a>
+    <a class="nav-item" href="#questions"><span class="nav-num">05</span>Questions to Ask</a>
+    <a class="nav-item" href="#flags"><span class="nav-num">06</span>Red Flags</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Behavioral - Leadership - Communication</div>
+      <h1>Soft Skills & Communication <span>Notes</span></h1>
+      <p>The non-technical prep most engineers skip. Master your elevator pitch, behavioral STAR stories, negotiation tactics, and how to evaluate a company's engineering culture.</p>
+      <div class="tags"><span class="tag">Behavioral</span><span class="tag">STAR Method</span><span class="tag">Leadership</span><span class="tag">Culture</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="pitch">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Introduction</div><h2>Tell me about yourself</h2><div class="subtitle">Your 60-90 second hook.</div></div></div>
+        <div class="study-box">
+          <h3>The Framework</h3>
+          <p><strong>Present:</strong> "I'm currently a Software Developer at Astrea IT, focusing on backend systems and cloud deployments."<br>
+          <strong>Past (Highlight 1):</strong> "Recently, I built the DataSync ETL Hub, tying together SAP, Salesforce, and ecommerce systems into a single source of truth."<br>
+          <strong>Past (Highlight 2):</strong> "Before that, I led the architecture for Eudoro, a multi-vendor marketplace with 12 microservices and an immutable payment ledger."<br>
+          <strong>Future:</strong> "What excites me now is building highly resilient, data-intensive systems, which is why I'm so interested in the challenges your team is solving with [insert company specific detail]."</p>
+        </div>
+      </section>
+
+      <section class="section" id="star">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Behavioral</div><h2>The STAR Method</h2><div class="subtitle">Situation, Task, Action, Result.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Conflict / Pushback</h3><p><strong>Situation:</strong> Team wanted to deploy a large feature at once. <br><strong>Action:</strong> I proposed putting it behind a feature flag and dark-launching it to 5% of traffic. <br><strong>Result:</strong> Caught a massive DB lock issue in production without impacting 95% of users.</p></div>
+          <div class="card"><h3>Failure</h3><p><strong>Situation:</strong> Eudoro missed some order creations during a traffic spike. <br><strong>Action:</strong> I rewrote the checkout flow to decouple order creation using a Razorpay webhook and RabbitMQ. <br><strong>Result:</strong> Zero dropped orders since, and introduced a DLQ for failed retries.</p></div>
+          <div class="card"><h3>Leadership (Without Title)</h3><p><strong>Situation:</strong> DataSync error logs were silent on failure. <br><strong>Action:</strong> I built a standardized error handler that writes failures back to Salesforce records. <br><strong>Result:</strong> The support team can now see exactly why an integration failed without asking an engineer to check server logs.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="questions">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Reverse Interview</div><h2>Questions to Ask Them</h2><div class="subtitle">Interviewing is a two-way street.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Who you are asking</th><th>The Question</th><th>What it actually reveals</th></tr></thead>
+            <tbody>
+              <tr><td>Engineering Manager</td><td>"What is the ratio of planned work to unplanned firefighting?"</td><td>Is the system on fire? Is technical debt drowning the team?</td></tr>
+              <tr><td>Senior Engineer</td><td>"Walk me through the journey of a commit from laptop to production."</td><td>Do they have CI/CD? Are deploys painful and manual, or automated and safe?</td></tr>
+              <tr><td>Product Manager</td><td>"How are engineering estimates factored into product deadlines?"</td><td>Is this a feature factory that dictates deadlines, or a collaborative environment?</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="flags">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Evaluation</div><h2>Red Flags</h2><div class="subtitle">When to walk away.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>"We work hard and play hard."</strong> Translation: Expect 60-hour weeks and weekend deployments.</div>
+          <div class="check"><strong>No automated testing.</strong> "We are moving too fast for tests." Translation: You will be terrified to deploy on Fridays.</div>
+          <div class="check"><strong>The interviewer is distracted or rude.</strong> If they don't respect your time during the interview, they won't respect it when you work there.</div>
+          <div class="check"><strong>Exploding offers.</strong> "You have 24 hours to sign." This is an intimidation tactic to prevent you from comparing offers.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

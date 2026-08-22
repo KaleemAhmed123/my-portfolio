@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Networking & Protocols Notes</title>
+<meta name="description" content="TCP handshakes, HTTP/2 multiplexing, TLS, DNS resolution, and WebSocket scaling.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/networking-protocols-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Networking</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#tcpip"><span class="nav-num">01</span>TCP/IP Basics</a>
+    <a class="nav-item" href="#http"><span class="nav-num">02</span>HTTP Evolution</a>
+    <a class="nav-item" href="#tls"><span class="nav-num">03</span>TLS/SSL</a>
+    <a class="nav-item" href="#dns"><span class="nav-num">04</span>DNS Architecture</a>
+    <a class="nav-item" href="#websockets"><span class="nav-num">05</span>WebSockets</a>
+    <a class="nav-item" href="#apis"><span class="nav-num">06</span>API Protocols</a>
+    <a class="nav-item" href="#debugging"><span class="nav-num">07</span>Real-World Debugging</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">TCP - HTTP - WebSockets - DNS</div>
+      <h1>Networking & Protocols <span>Interview Notes</span></h1>
+      <p>Master how the internet works under the hood. Covers the TCP handshake, HTTP/1 vs 2 vs 3, WebSockets for real-time systems (like Shaza), DNS resolution, and practical network debugging.</p>
+      <div class="tags"><span class="tag">WebSockets</span><span class="tag">HTTP/2</span><span class="tag">DNS</span><span class="tag">TLS</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="tcpip">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Transport</div><h2>TCP/IP Basics</h2><div class="subtitle">The reliable pipe of the internet.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>TCP vs UDP</h3><p><strong>TCP:</strong> Reliable, ordered, error-checked, connection-oriented. High overhead. (Used for HTTP, SSH).<br><strong>UDP:</strong> Unreliable, unordered, connectionless. Fast. (Used for WebRTC media streams, DNS).</p></div>
+          <div class="card"><h3>The 3-Way Handshake</h3><p>Client sends <code>SYN</code> (synchronize).<br>Server replies with <code>SYN-ACK</code>.<br>Client replies with <code>ACK</code> (acknowledge). Connection established.</p></div>
+          <div class="card"><h3>Congestion Control</h3><p>TCP slows down if it detects dropped packets, ensuring the network isn't overwhelmed. (Slow Start phase).</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="http">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Web</div><h2>HTTP Evolution</h2><div class="subtitle">How the web got faster.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Version</th><th>Key Features</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td>HTTP/1.1</td><td>Keep-Alive, Chunked Transfers, Head-of-Line Blocking</td><td>Multiple connections needed for concurrent assets.</td></tr>
+              <tr><td>HTTP/2</td><td>Multiplexing (single TCP connection), Header Compression (HPACK), Binary Framing, Server Push</td><td>Massively speeds up loading many small assets (images, CSS, JS). Solves HTTP HoL blocking.</td></tr>
+              <tr><td>HTTP/3</td><td>Runs over QUIC (UDP) instead of TCP. Solves TCP HoL blocking, 0-RTT handshakes.</td><td>Better performance on unreliable networks (mobile).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="tls">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Security</div><h2>TLS/SSL</h2><div class="subtitle">Encryption in transit.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>TLS Handshake</h3>
+            <p>1. Client Hello (cipher suites supported). 2. Server Hello + Certificate (public key). 3. Client verifies cert. 4. Key Exchange (symmetric session key created). 5. Encrypted communication begins.</p>
+          </div>
+          <div class="deep-item">
+            <h3>mTLS (Mutual TLS)</h3>
+            <p>Not just the client verifying the server, but the server also verifying the client's certificate. Common in zero-trust architectures and service-to-service communication.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="dns">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Resolution</div><h2>DNS Architecture</h2><div class="subtitle">The phonebook of the internet.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">1. Check local browser cache, then OS cache.</div>
+          <div class="flow-step">2. OS queries the ISP's Recursive Resolver.</div>
+          <div class="flow-step">3. Resolver queries the Root Nameserver (<code>.</code>), which points to the TLD (<code>.com</code>).</div>
+          <div class="flow-step">4. TLD Nameserver points to the Authoritative Nameserver (<code>example.com</code>).</div>
+          <div class="flow-step">5. Authoritative Server returns the A Record (IP address). Resolver caches it.</div>
+        </div>
+        <div class="grid" style="margin-top: 1rem;">
+          <div class="card"><h3>A vs AAAA</h3><p>A maps to IPv4. AAAA maps to IPv6.</p></div>
+          <div class="card"><h3>CNAME vs ALIAS</h3><p>CNAME maps a domain to another domain. Cannot be used at the root (apex) level. ALIAS/ANAME solves this.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="websockets">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Real-time</div><h2>WebSockets & Real-time</h2><div class="subtitle">Used in Forever Yours & Gaza40+.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>The Upgrade</h3>
+            <p>Starts as a standard HTTP/1.1 request with the <code>Upgrade: websocket</code> header. If the server accepts (101 Switching Protocols), the TCP connection stays open.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Scaling WebSockets (The hard part)</h3>
+            <p>Since connections are stateful, load balancers must use Sticky Sessions or be configured for long-lived connections. When running multiple server instances, you must use a pub/sub backplane (like Redis) so an event on Server A reaches a client connected to Server B.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="apis">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Interfaces</div><h2>API Protocols</h2><div class="subtitle">REST, GraphQL, gRPC, webhooks — and the question that actually picks between them.</div></div></div>
+
+        <p>These get compared as if one is modern and the others are legacy. The more useful framing is that each one optimizes a different axis, and the choice follows from who the client is and what the traffic looks like. Say that first and the comparison becomes a design discussion instead of a preference.</p>
+
+        <table>
+          <thead><tr><th>Style</th><th>Optimizes for</th><th>Costs you</th><th>Natural fit</th></tr></thead>
+          <tbody>
+            <tr><td><strong>REST</strong></td><td>Cacheability and universality. Resources plus HTTP verbs, so proxies, CDNs, and browsers already understand it.</td><td>Over- and under-fetching. A screen needing three resources makes three round trips, each returning more than it needs.</td><td>Public APIs, CRUD, anything that benefits from HTTP caching.</td></tr>
+            <tr><td><strong>GraphQL</strong></td><td>Client control. One endpoint, the client declares exactly the shape it wants, one round trip.</td><td>HTTP caching (everything is a <code>POST</code> to one URL), and the N+1 problem, which you solve with batching. Query cost becomes an attack surface.</td><td>Many different clients over one graph; mobile screens assembling data from several sources.</td></tr>
+            <tr><td><strong>gRPC</strong></td><td>Throughput and contract. Binary Protobuf over HTTP/2, generated stubs, streaming in both directions.</td><td>Not natively callable from a browser; payloads are not human-readable, so debugging needs tooling.</td><td>Service-to-service inside your own network, especially chatty or high-volume paths.</td></tr>
+            <tr><td><strong>Webhooks</strong></td><td>Not polling. The provider calls you when something happens.</td><td>You now run an endpoint that must be public, verified, idempotent, and fast. Delivery is at-least-once, so duplicates are normal.</td><td>Third-party events: payments, CI, messaging.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>The HTTP semantics people get wrong</h3>
+        <p><strong>Safe</strong> means the call does not change state — <code>GET</code>, <code>HEAD</code>. <strong>Idempotent</strong> means making the call twice leaves the same state as making it once. These are different properties and the second one is the one that matters operationally.</p>
+
+        <p><code>PUT</code> and <code>DELETE</code> are idempotent by definition: setting a resource to a value twice, or deleting it twice, ends in the same state. <code>POST</code> is not, which is exactly why double-clicking a submit button can create two orders. Every retry mechanism — a client retry, a load balancer retry, a queue redelivery — depends on idempotency, so if the operation is not naturally idempotent you have to make it so with an <strong>idempotency key</strong>: the client sends a unique id, the server records it with the result, and a repeat of the same key returns the stored result instead of doing the work again. This is how payment APIs stay safe under retries, and it is a strong thing to mention unprompted.</p>
+
+        <div class="callout">
+          <div class="callout-title">Status codes that carry real information</div>
+          <p><code>201</code> with a <code>Location</code> header for a created resource. <code>202</code> when you accepted the work but have not done it yet — the honest answer for anything queued. <code>409</code> for a conflict with current state, which is the right answer for a duplicate submission. <code>422</code> when the request parsed but the contents are invalid, as opposed to <code>400</code> for malformed. <code>429</code> with <code>Retry-After</code>, which turns a rate limit into something a client can obey. The difference between <code>401</code> (I do not know who you are) and <code>403</code> (I know, and no) gets asked often.</p>
+        </div>
+
+        <h3>Versioning</h3>
+        <p>The decision is less about URL versus header and more about what counts as a breaking change. Adding an optional field is safe if clients ignore unknown fields; removing a field, renaming one, tightening validation, or changing a default is not. URL versioning (<code>/v1/</code>) is explicit, trivially routable, and what most public APIs use. Header versioning keeps URLs stable and is tidier in theory, but it is easier to get wrong in caches and harder to debug from a browser. Pick URL versioning unless you have a specific reason, and treat additive change as the way to avoid needing a new version at all.</p>
+
+        <h3>Pagination</h3>
+        <p>Offset pagination (<code>LIMIT 20 OFFSET 4000</code>) is simple and degrades badly: the database still walks the skipped rows, so deep pages get slower, and if a row is inserted while a user pages through they will see an item twice or miss one. Cursor pagination passes an opaque marker for the last item seen and translates to <code>WHERE id &gt; ?</code>, which stays fast at any depth and is stable under concurrent inserts. Offset is fine for an admin table of a few hundred rows; cursors are the right default for a feed or any large list.</p>
+
+        <div class="answer">
+          <div class="answer-q">"How would you make a payment webhook safe?"</div>
+          <p>"Three things, and they are all about not trusting the request. First, verify the signature — the provider signs the raw body with a shared secret, so I have to compute the HMAC over the exact bytes received before any JSON parsing, since re-serializing changes them. Second, idempotency: delivery is at-least-once, so duplicates are expected rather than exceptional. I store the provider's event id and make processing conditional on inserting it, so a replay is a no-op instead of a second order. Third, respond fast and do the work asynchronously — acknowledge with a 2xx, push the job onto a queue, and let a worker handle it, because providers time out and retry, and a slow handler turns into a storm of duplicate deliveries."</p>
+        </div>
+      </section>
+
+      <section class="section" id="debugging">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Practical</div><h2>Real-World Debugging</h2><div class="subtitle">Tools for diagnosing network failures.</div></div></div>
+        <div class="answer"><div class="answer-q">"An API request is failing in production but works locally. How do you debug it?"</div><p>"First, I'd check the exact network request in the browser dev tools, looking at the HTTP status code and response body. If it's a CORS error, I check the preflight <code>OPTIONS</code> request. If it's a 502/504, I check the ALB/Nginx proxy logs to see if the backend is down or timing out. I would use <code>curl -v</code> to inspect headers and the TLS handshake, and <code>dig</code> to confirm DNS is resolving to the correct load balancer IP."</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

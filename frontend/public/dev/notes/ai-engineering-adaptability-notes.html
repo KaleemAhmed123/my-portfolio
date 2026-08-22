@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering and Adaptability Notes</title>
+<meta name="description" content="LLM pipelines, OCR extraction, RAG, agents, MCP safety, evaluation, and AI-assisted development philosophy.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/ai-engineering-adaptability-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">AI Engineering and Adaptability</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#positioning"><span class="nav-num">01</span>Positioning</a>
+    <a class="nav-item" href="#llm"><span class="nav-num">02</span>LLM Pipelines</a>
+    <a class="nav-item" href="#rag"><span class="nav-num">03</span>RAG</a>
+    <a class="nav-item" href="#agents"><span class="nav-num">04</span>Agents/MCP</a>
+    <a class="nav-item" href="#evaluation"><span class="nav-num">05</span>Evaluation</a>
+    <a class="nav-item" href="#adaptability"><span class="nav-num">06</span>Adaptability</a>
+    <a class="nav-item" href="#deep-ai"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">LLM Integration - RAG - MCP - Agentic Workflows</div>
+      <h1>AI Engineering <span>Interview Notes</span></h1>
+      <p>This page turns the resume's AI engineering and adaptability section into defendable interview knowledge: what you built, how you control risk, how you evaluate outputs, and how you use AI without giving up engineering ownership.</p>
+      <div class="tags"><span class="tag">Prompt engineering</span><span class="tag">RAG</span><span class="tag">MCP</span><span class="tag">OCR</span><span class="tag">Human-in-loop</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="positioning">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Positioning</div><h2>Your AI narrative</h2><div class="subtitle">AI-assisted, not AI-led.</div></div></div>
+        <p>The best framing is: <strong>I use AI to accelerate engineering, but I remain accountable for architecture, correctness, security, product taste, and final decisions.</strong> This avoids sounding like a tool user and positions you as an engineer who can work well in an AI-first environment.</p>
+        <div class="grid">
+          <div class="card"><h3>Engineering Ownership</h3><p>AI can draft, summarize, generate tests, or explore options. You still review, run, measure, and decide.</p></div>
+          <div class="card"><h3>Product Taste</h3><p>Judge whether output fits user workflow, domain constraints, edge cases, and maintainability.</p></div>
+          <div class="card"><h3>Safety</h3><p>Never paste secrets. Review generated code for auth, injection, performance, dependencies, and licensing issues.</p></div>
+          <div class="card"><h3>Adaptability</h3><p>Learning speed matters, but so does discipline: small experiments, evidence, feedback loops, and sustainable health.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="llm">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">LLM Pipelines</div><h2>LLM integration and prompt engineering</h2><div class="subtitle">LLMs are probabilistic components; wrap them with deterministic systems.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer</th><th>What to design</th><th>Acordly example</th></tr></thead>
+            <tbody>
+              <tr><td>Input normalization</td><td>Convert uploads/OCR into clean text blocks with metadata</td><td>Textract/Google Vision extracts document text and layout hints</td></tr>
+              <tr><td>Prompt contract</td><td>Clear role, task, allowed fields, schema, examples, refusal rules</td><td>Map document facts into ACORD form fields only when evidence exists</td></tr>
+              <tr><td>Structured output</td><td>JSON schema, validation, retries on malformed output</td><td>Return field_name, value, confidence, source span</td></tr>
+              <tr><td>Post-processing</td><td>Validate types, required fields, enums, cross-field consistency</td><td>Dates, policy numbers, addresses, insured names</td></tr>
+              <tr><td>Human review</td><td>Expose low-confidence fields for manual correction</td><td>Broker reviews extracted fields before final form submission</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"How do you reduce hallucinations in an LLM extraction system?"</div><p>Strong answer: "I constrain the task to extraction, provide schema-based output, ask for source evidence, validate the JSON, reject unsupported fields, and route low-confidence fields to human review. The system should prefer blank/unknown over invented values."</p></div>
+      </section>
+
+      <section class="section" id="rag">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">RAG</div><h2>Retrieval-augmented generation</h2><div class="subtitle">RAG is search plus generation plus evaluation.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Indexing</h3><ul><li>Chunk documents by semantic boundaries</li><li>Store embeddings plus metadata</li><li>Keep source document IDs and versions</li></ul></div>
+          <div class="card"><h3>Retrieval</h3><ul><li>Use top-k vector search, filters, hybrid search</li><li>Re-rank when precision matters</li><li>Return citations/source spans</li></ul></div>
+          <div class="card"><h3>Generation</h3><ul><li>Answer only from retrieved context</li><li>Say "not enough information" when context is weak</li><li>Keep context under token budget</li></ul></div>
+          <div class="card"><h3>Evaluation</h3><ul><li>Retrieval precision/recall</li><li>Faithfulness to sources</li><li>Golden question set and regression tests</li></ul></div>
+        </div>
+        <div class="callout amber"><div class="callout-title">Interview distinction</div><p>Fine-tuning changes model behavior. RAG injects external knowledge at query time. For business documents that change often, RAG is usually the first choice because it is cheaper to update the index than retrain a model.</p></div>
+      </section>
+
+      <section class="section" id="agents">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Agents</div><h2>Agentic workflows and MCP servers</h2><div class="subtitle">Agents need permissions, tools, memory boundaries, and audit logs.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concept</th><th>What to know</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td>Tool calling</td><td>Model chooses structured calls to APIs/functions</td><td>Bad arguments, excessive permissions, unexpected side effects</td></tr>
+              <tr><td>MCP server</td><td>Standard way to expose tools/resources to AI clients</td><td>Authentication, input validation, auditability, sandboxing</td></tr>
+              <tr><td>Agent loop</td><td>Plan, act, observe, revise until done or budget exceeded</td><td>Loops, cost explosion, unsafe actions</td></tr>
+              <tr><td>Context window</td><td>Limited working memory; must summarize and select relevant context</td><td>Lost constraints, stale context, prompt injection</td></tr>
+              <tr><td>Human approval</td><td>Require review for destructive, financial, or customer-visible actions</td><td>Automation doing irreversible work without oversight</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="evaluation">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Evaluation</div><h2>How to prove AI output is good</h2><div class="subtitle">AI systems need tests, not vibes.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Golden set:</strong> representative inputs with expected outputs, including edge cases and adversarial examples.</div>
+          <div class="check"><strong>Schema validity:</strong> percentage of outputs that parse and pass business validation.</div>
+          <div class="check"><strong>Field accuracy:</strong> precision/recall for extracted fields, especially high-risk fields like names, dates, policy numbers, amounts.</div>
+          <div class="check"><strong>Faithfulness:</strong> answer must be supported by source spans. Unsupported claims are failures.</div>
+          <div class="check"><strong>Cost and latency:</strong> tokens, model latency, retry rate, timeout rate, and queue backlog.</div>
+          <div class="check"><strong>Human override rate:</strong> how often users correct AI output; use corrections to improve prompts/retrieval.</div>
+        </div>
+      </section>
+
+      <section class="section" id="adaptability">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Adaptability</div><h2>Behavioral answer bank</h2><div class="subtitle">Prepare crisp answers that sound mature, not buzzword-heavy.</div></div></div>
+        <div class="answer"><div class="answer-q">"How do you use AI in your engineering workflow?"</div><p>"I use AI as a force multiplier for exploration, boilerplate, test ideas, documentation, and alternative designs. I do not treat output as truth. I review assumptions, run tests, inspect security and performance risks, and keep final ownership. The fastest workflow is still disciplined: clarify the problem, generate options, verify with evidence, and ship only what I understand."</p></div>
+        <div class="answer"><div class="answer-q">"What does adaptability mean to you in an AI-first engineering world?"</div><p>"Adaptability is not chasing every tool. It is learning quickly while preserving judgment. I try small experiments, compare outputs against real requirements, keep health and focus stable, and build taste by reviewing what AI produces instead of blindly accepting it."</p></div>
+        <div class="callout red"><div class="callout-title">Avoid saying</div><p>Do not say "AI writes most of my code." Say AI accelerates parts of the workflow, but architecture, correctness, security, and final decisions remain yours.</p></div>
+      </section>
+
+      <section class="section" id="deep-ai">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Deep Reference</div><h2>AI engineering project-building reference</h2><div class="subtitle">For Acordly, RAG, agent workflows, MCP tools, and AI-assisted development interviews.</div></div></div>
+
+        <div class="study-box">
+          <h3>The correct mental model</h3>
+          <p>An AI feature is not just an API call to a model. It is a system made of input preparation, retrieval or context selection, prompting, model execution, structured output parsing, validation, human review, monitoring, cost control, and feedback loops. The model is one component inside a larger deterministic product workflow.</p>
+        </div>
+
+        <div class="section-head"><div class="section-num">OCR</div><div><div class="section-kicker">Acordly</div><h2>OCR + LLM extraction pipeline</h2><div class="subtitle">A practical architecture for insurance document automation.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">User uploads document. Backend validates file type, size, tenant, and permissions, then stores original file in object storage with metadata.</div>
+          <div class="flow-step">OCR service runs AWS Textract or Google Vision. Store extracted text blocks, coordinates, page number, confidence, and source document version.</div>
+          <div class="flow-step">Preprocessor cleans OCR noise, groups sections, normalizes whitespace, and detects candidate document type or ACORD form type.</div>
+          <div class="flow-step">LLM receives a constrained extraction prompt, allowed field schema, examples, and OCR context. It returns structured JSON only.</div>
+          <div class="flow-step">Validator checks JSON schema, field types, enum values, required fields, confidence, and source evidence. Unsupported fields become blank or review-needed.</div>
+          <div class="flow-step">Form mapper converts extracted facts into ACORD field IDs. User reviews low-confidence or high-risk fields before final form generation.</div>
+          <div class="flow-step">Audit log records input file, model version, prompt version, output, corrections, and final submitter for compliance and debugging.</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pipeline risk</th><th>Mitigation</th><th>Metric</th></tr></thead>
+            <tbody>
+              <tr><td>OCR misses text</td><td>Use OCR confidence, page preview, manual correction, fallback OCR provider for important documents</td><td>OCR confidence by page, manual correction rate</td></tr>
+              <tr><td>LLM invents value</td><td>Require source span and allow "unknown"; reject unsupported fields</td><td>Unsupported-claim rate, hallucination rate</td></tr>
+              <tr><td>Wrong form type</td><td>Classifier plus user confirmation for ambiguous documents</td><td>Form classification accuracy</td></tr>
+              <tr><td>Bad JSON</td><td>JSON schema, repair retry, strict output mode if available</td><td>Parse success rate</td></tr>
+              <tr><td>Tenant data leak</td><td>Tenant-scoped storage, access checks, no cross-tenant retrieval</td><td>Authz denial tests, audit anomalies</td></tr>
+              <tr><td>High cost/latency</td><td>Chunk context, cache OCR, choose model by task difficulty, async processing</td><td>Tokens/doc, p95 extraction latency</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">PR</div><div><div class="section-kicker">Prompting</div><h2>Prompt engineering that survives production</h2><div class="subtitle">Good prompts define contracts, not vibes.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Prompt components</h3>
+            <ul>
+              <li><strong>Role:</strong> what perspective the model should take, such as "insurance document extraction assistant".</li>
+              <li><strong>Task:</strong> exact operation, such as "extract only fields supported by the supplied document text".</li>
+              <li><strong>Schema:</strong> required JSON keys, allowed enum values, confidence format, evidence/source span format.</li>
+              <li><strong>Rules:</strong> do not infer missing data, do not use outside knowledge, prefer null/unknown over guessing.</li>
+              <li><strong>Examples:</strong> one or two representative inputs with expected outputs for tricky fields.</li>
+              <li><strong>Failure behavior:</strong> what to do when the document is unreadable, ambiguous, or unrelated.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Prompt versioning</h3>
+            <p>Treat prompts like code. Store prompt version, model name, temperature, schema version, and evaluation results. A changed prompt can break extraction just like a changed API.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Temperature</h3>
+            <p>Use low temperature for extraction, classification, and deterministic workflows. Higher temperature is useful for ideation, not for filling insurance forms or financial records.</p>
+          </div>
+        </div>
+
+        <div class="code-block"><div class="code-title">Extraction prompt contract</div><pre>System:
+You extract insurance form data from OCR text.
+Return JSON matching the schema. Do not invent values.
+If evidence is missing, set value to null and confidence to 0.
+
+User:
+Form type candidates: ACORD_25, ACORD_125
+Allowed fields:
+- insured_name: string
+- policy_number: string | null
+- effective_date: ISO date | null
+
+For each field return:
+{ "value": ..., "confidence": 0-1, "evidence": "short source quote", "page": number }</pre></div>
+
+        <div class="section-head"><div class="section-num">RAG</div><div><div class="section-kicker">Retrieval</div><h2>RAG design in detail</h2><div class="subtitle">Retrieval quality dominates answer quality.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Ingestion loads source documents, strips boilerplate, preserves document ID, tenant ID, version, permissions, and timestamps.</div>
+          <div class="flow-step">Chunking splits documents by heading/section/semantic boundary. Avoid chunks so small they lose meaning or so large they waste context.</div>
+          <div class="flow-step">Embedding converts chunks to vectors. Store vectors with metadata filters for tenant, document type, date, owner, and permission scope.</div>
+          <div class="flow-step">Query processing rewrites or expands the user query when needed, applies filters, retrieves top-k candidates, and optionally reranks.</div>
+          <div class="flow-step">Generation receives only selected context and must cite sources. If context is insufficient, the answer should say so.</div>
+          <div class="flow-step">Evaluation checks retrieval hit rate, answer faithfulness, citation correctness, latency, and cost.</div>
+        </div>
+        <div class="answer"><div class="answer-q">"Why is my RAG system hallucinating even though I added documents?"</div><p>Because adding documents is not enough. Retrieval may be missing the right chunks, chunks may lack context, metadata filters may be wrong, or the prompt may allow unsupported claims. I would inspect retrieved chunks for failed questions, add a golden evaluation set, improve chunking/reranking, require citations, and make the model answer "not enough information" when evidence is weak.</p></div>
+
+        <div class="section-head"><div class="section-num">AG</div><div><div class="section-kicker">Agents</div><h2>Agentic workflows and MCP tool safety</h2><div class="subtitle">Agents should be bounded operators, not unsupervised admins.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Design area</th><th>Production-grade approach</th><th>Bad approach</th></tr></thead>
+            <tbody>
+              <tr><td>Tool permissions</td><td>Expose narrow tools with scoped auth and explicit input schemas</td><td>Give agent broad shell/API access</td></tr>
+              <tr><td>Approval</td><td>Human confirmation for destructive, financial, customer-visible, or external sends</td><td>Let agent execute irreversible operations automatically</td></tr>
+              <tr><td>Memory</td><td>Store only needed state, with tenant/user separation and retention policy</td><td>Dump every conversation into long-term memory</td></tr>
+              <tr><td>Audit</td><td>Log tool call, arguments, actor, result, model, and trace ID</td><td>No trail for why an action happened</td></tr>
+              <tr><td>Prompt injection</td><td>Treat retrieved/user content as untrusted data, not instructions</td><td>Let document text override system instructions</td></tr>
+              <tr><td>Budgets</td><td>Limit steps, tokens, time, and external calls</td><td>Infinite loops and uncontrolled cost</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">EV</div><div><div class="section-kicker">Evaluation</div><h2>AI evaluation framework</h2><div class="subtitle">Know how to measure model behavior before and after changes.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item"><h3>Offline eval</h3><p>Run a fixed golden dataset before release. Track parse success, exact field match, semantic correctness, faithfulness, refusal correctness, and latency/cost.</p></div>
+          <div class="deep-item"><h3>Online eval</h3><p>Track user corrections, thumbs up/down, escalation rate, retry rate, low-confidence rate, abandonment, and time saved per workflow.</p></div>
+          <div class="deep-item"><h3>Regression testing</h3><p>Every prompt/model/retrieval change should be tested against previous failures. AI changes can regress silently if you only test happy paths.</p></div>
+          <div class="deep-item"><h3>Human-in-loop threshold</h3><p>Not all fields need the same confidence. High-risk fields such as policy number, dates, money, legal names, and coverage limits need stricter thresholds.</p></div>
+        </div>
+
+        <div class="section-head"><div class="section-num">DEV</div><div><div class="section-kicker">AI-Assisted Development</div><h2>How to talk about tools like Claude, Codex, N8N, Antigravity</h2><div class="subtitle">The mature answer emphasizes leverage plus judgment.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Use AI for:</strong> design alternatives, scaffolding, test cases, refactoring suggestions, documentation drafts, API client examples, debugging hypotheses.</div>
+          <div class="check"><strong>Do not outsource:</strong> security decisions, architecture ownership, production deploys, data migrations, auth logic, payment correctness, customer communication.</div>
+          <div class="check"><strong>Verification loop:</strong> read generated code, run tests, inspect diffs, check edge cases, compare to requirements, measure performance where relevant.</div>
+          <div class="check"><strong>Prompting workflow:</strong> provide context, constraints, acceptance criteria, examples, and ask for risks/tradeoffs before code.</div>
+          <div class="check"><strong>Tool choice:</strong> use N8N for low-risk workflow automation; use custom backend code for core business correctness and complex domain rules.</div>
+        </div>
+
+        <div class="answer"><div class="answer-q">"What is the biggest risk with AI-assisted development?"</div><p>The biggest risk is false confidence. AI can produce plausible code that is subtly wrong, insecure, inefficient, or inconsistent with the existing system. My mitigation is to keep human ownership: understand the change, run tests, review security and edge cases, and use AI as a reviewer or accelerator rather than an authority.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

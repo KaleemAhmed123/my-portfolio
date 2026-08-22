@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Observability Cloud Notes</title>
+<meta name="description" content="Docker, AWS, Nginx, SSL, CI/CD, monitoring, logs, metrics, traces, dashboards, and incident response.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/devops-observability-cloud-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">DevOps, AWS, Observability</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#docker"><span class="nav-num">01</span>Docker</a>
+    <a class="nav-item" href="#aws"><span class="nav-num">02</span>AWS</a>
+    <a class="nav-item" href="#proxy"><span class="nav-num">03</span>Nginx/SSL</a>
+    <a class="nav-item" href="#cicd"><span class="nav-num">04</span>CI/CD</a>
+    <a class="nav-item" href="#observability"><span class="nav-num">05</span>Observability</a>
+    <a class="nav-item" href="#runbook"><span class="nav-num">06</span>Runbooks</a>
+    <a class="nav-item" href="#deep-devops"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Docker - AWS - Nginx - Prometheus - Grafana - Sentry</div>
+      <h1>Operations and Cloud <span>Interview Notes</span></h1>
+      <p>Use this page to defend deployment and operations claims: Linux VPS, Docker, Nginx reverse proxy, SSL, GitHub Actions, AWS services, CloudWatch, Prometheus, Grafana, Winston, and Sentry.</p>
+      <div class="tags"><span class="tag">Docker</span><span class="tag">AWS ECS</span><span class="tag">Nginx</span><span class="tag">CloudWatch</span><span class="tag">Prometheus</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="docker">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Containers</div><h2>Docker fundamentals</h2><div class="subtitle">A container packages app, runtime, dependencies, and config expectations.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Dockerfile</h3><p>Use small base images, deterministic dependency install, non-root user, health checks, and multi-stage builds.</p></div>
+          <div class="card"><h3>Images</h3><p>Tag with commit SHA/version. Avoid <code>:latest</code> in production because rollback becomes ambiguous.</p></div>
+          <div class="card"><h3>Containers</h3><p>Ephemeral. Do not store uploads, sessions, or durable data inside the container filesystem.</p></div>
+          <div class="card"><h3>Compose</h3><p>Good for local multi-service development; production needs orchestration, restart policy, logs, secrets, and monitoring.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="aws">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">AWS</div><h2>AWS services from the resume</h2><div class="subtitle">Know what each service is responsible for.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Service</th><th>Purpose</th><th>Interview focus</th></tr></thead>
+            <tbody>
+              <tr><td>EC2</td><td>Virtual machines</td><td>Security groups, SSH, systemd/Docker, patching, logs, backups</td></tr>
+              <tr><td>ECS</td><td>Container orchestration</td><td>Task definitions, services, desired count, rolling deploys, IAM task roles</td></tr>
+              <tr><td>IAM</td><td>Identity and permissions</td><td>Least privilege, roles over long-lived keys, separate env permissions</td></tr>
+              <tr><td>S3</td><td>Object storage</td><td>Uploads, pre-signed URLs, lifecycle, encryption, bucket policy</td></tr>
+              <tr><td>ALB</td><td>Layer 7 load balancer</td><td>Target groups, health checks, SSL termination, path routing</td></tr>
+              <tr><td>Route 53</td><td>DNS</td><td>A/CNAME records, TTL, hosted zones, failover basics</td></tr>
+              <tr><td>CloudWatch</td><td>AWS metrics and logs</td><td>Log groups, alarms, dashboards, ECS/EC2 metrics</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="proxy">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Proxy</div><h2>Nginx reverse proxy and SSL</h2><div class="subtitle">The gatekeeper in front of Node services.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Reverse Proxy</h3><p>Receives public traffic and forwards to internal app ports. Hides backend topology from clients.</p></div>
+          <div class="card"><h3>SSL Termination</h3><p>Nginx handles HTTPS certificates and forwards to backend over internal HTTP or HTTPS depending on setup.</p></div>
+          <div class="card"><h3>Headers</h3><p>Set <code>X-Forwarded-For</code>, <code>X-Real-IP</code>, and <code>X-Forwarded-Proto</code> so app sees original client context.</p></div>
+          <div class="card"><h3>Timeouts</h3><p>Configure connect/read/send timeouts. Hanging backends should not consume proxy workers forever.</p></div>
+        </div>
+        <div class="answer"><div class="answer-q">"Why does my app think all users have the same IP?"</div><p>"Because it is behind a reverse proxy and the app is reading the proxy IP. Nginx must forward the original IP using X-Forwarded-For/X-Real-IP, and the app must trust the proxy correctly. This matters for logging, rate limiting, geo checks, and security monitoring."</p></div>
+      </section>
+
+      <section class="section" id="cicd">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Delivery</div><h2>GitHub Actions and deployment flow</h2><div class="subtitle">Every deploy should be repeatable and reversible.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>CI:</strong> install dependencies, lint, typecheck, test, build Docker image.</div>
+          <div class="check"><strong>Secrets:</strong> injected from GitHub/AWS secret manager, never committed or baked into image.</div>
+          <div class="check"><strong>Deploy:</strong> push image with commit tag, update ECS service or VPS container, wait for health checks.</div>
+          <div class="check"><strong>Rollback:</strong> redeploy previous image tag or ECS task definition revision.</div>
+          <div class="check"><strong>Migration:</strong> run DB migrations safely before/after app deploy depending on compatibility.</div>
+        </div>
+      </section>
+
+      <section class="section" id="observability">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Observability</div><h2>Metrics, logs, traces, and errors</h2><div class="subtitle">If you cannot see it, you cannot operate it.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tool</th><th>Role</th><th>What to monitor</th></tr></thead>
+            <tbody>
+              <tr><td>Winston</td><td>Structured app logging</td><td>request_id, user_id, route, status, latency, error code</td></tr>
+              <tr><td>Prometheus</td><td>Metrics collection</td><td>request rate, p95/p99 latency, error rate, queue depth, DB pool usage</td></tr>
+              <tr><td>Grafana</td><td>Dashboards</td><td>API health, worker health, RabbitMQ backlog, Redis hit rate, infra saturation</td></tr>
+              <tr><td>Sentry</td><td>Error tracking</td><td>exceptions, release regressions, stack traces, affected users</td></tr>
+              <tr><td>CloudWatch</td><td>AWS logs/metrics/alarms</td><td>CPU, memory, target health, ALB 5xx, ECS restarts</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"What dashboard would you build for the marketplace?"</div><p>"I would track API p95/p99 latency, 4xx/5xx rate, checkout conversion errors, payment webhook failures, RabbitMQ queue depth and oldest message age, worker retry/DLQ count, Redis hit rate, DB connection pool usage, and wallet payout failures. Technical metrics should connect to business health."</p></div>
+      </section>
+
+      <section class="section" id="runbook">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Runbooks</div><h2>Production incident thinking</h2><div class="subtitle">Interviewers look for calm, ordered debugging.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>High latency</h3><ul><li>Check recent deploys</li><li>Inspect p99 by route</li><li>Look at DB slow queries and pool wait</li><li>Check queue/backpressure</li></ul></div>
+          <div class="card"><h3>5xx spike</h3><ul><li>Check app logs and Sentry</li><li>Check dependency health</li><li>Inspect ALB target health</li><li>Rollback if tied to release</li></ul></div>
+          <div class="card"><h3>Queue backlog</h3><ul><li>Producer rate vs consumer rate</li><li>Worker crashes</li><li>Poison messages</li><li>Scale consumers only if dependency can handle it</li></ul></div>
+          <div class="card"><h3>Deployment failure</h3><ul><li>Health check failing</li><li>Missing env var</li><li>Migration mismatch</li><li>Bad image or port config</li></ul></div>
+        </div>
+      </section>
+
+      <section class="section" id="deep-devops">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Deep Reference</div><h2>Deployment, cloud, and operations reference</h2><div class="subtitle">Everything to revise before infrastructure and production-readiness interviews.</div></div></div>
+
+        <div class="study-box">
+          <h3>How to frame your DevOps experience</h3>
+          <p>Say: "I have handled containerized deployments, reverse proxy setup, SSL, CI/CD, monitoring, and cloud services for production-like systems. I understand enough operations to ship safely, debug incidents, and communicate with dedicated DevOps/SRE teams." This is stronger and more realistic than claiming to be a full-time platform engineer.</p>
+        </div>
+
+        <div class="section-head"><div class="section-num">DC</div><div><div class="section-kicker">Docker</div><h2>Docker in project and interview detail</h2><div class="subtitle">Know what actually goes inside an image and what should never go inside.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Good Dockerfile principles</h3>
+            <ul>
+              <li>Install dependencies deterministically with lockfile.</li>
+              <li>Use multi-stage builds so final image contains only runtime artifacts.</li>
+              <li>Run as non-root user where possible.</li>
+              <li>Expose only the app port and use environment variables for config.</li>
+              <li>Do not copy <code>.env</code>, secrets, local uploads, or dev artifacts into the image.</li>
+              <li>Add health endpoint in the app; orchestration uses it to decide readiness.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Container lifecycle</h3>
+            <p>Containers should be replaceable. Logs go to stdout/stderr, durable files go to object storage/volumes, config comes from env/secret manager, and multiple replicas should behave the same.</p>
+          </div>
+        </div>
+        <div class="code-block"><div class="code-title">Production Dockerfile shape</div><pre>FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+USER node
+EXPOSE 3000
+CMD ["node", "dist/server.js"]</pre></div>
+
+        <div class="section-head"><div class="section-num">AWS</div><div><div class="section-kicker">Cloud</div><h2>AWS interview depth by service</h2><div class="subtitle">Know service responsibilities and how requests flow through them.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Route 53 resolves <code>api.example.com</code> to an ALB DNS name. TTL controls DNS caching behavior.</div>
+          <div class="flow-step">ALB terminates HTTPS, applies listener rules, checks target health, and forwards requests to ECS tasks or EC2 instances.</div>
+          <div class="flow-step">ECS service keeps the desired number of tasks running and rolls out new task definitions during deploys.</div>
+          <div class="flow-step">Task role grants app permissions to AWS services like S3 or CloudWatch without hardcoded keys.</div>
+          <div class="flow-step">CloudWatch collects logs/metrics and triggers alarms. Prometheus/Grafana can provide app-level metrics and dashboards.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Common question</th><th>Strong answer</th></tr></thead>
+            <tbody>
+              <tr><td>Security group vs NACL</td><td>Security groups are stateful instance/resource firewalls. NACLs are stateless subnet-level rules. Most app-level access control uses security groups.</td></tr>
+              <tr><td>IAM user vs role</td><td>Users are identities, usually for humans. Roles are assumed by services/workloads and are preferred for EC2/ECS because they avoid long-lived keys.</td></tr>
+              <tr><td>ALB vs NLB</td><td>ALB is layer 7 HTTP routing with host/path rules and TLS termination. NLB is layer 4 TCP/UDP and is faster/lower-level.</td></tr>
+              <tr><td>S3 public access</td><td>Default should be private. Use pre-signed URLs, CloudFront, bucket policies, and least privilege.</td></tr>
+              <tr><td>ECS task vs service</td><td>A task is a running container set. A service maintains desired count, deployment, health, and replacement.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">NG</div><div><div class="section-kicker">Nginx</div><h2>Nginx, SSL, DNS, and reverse proxy details</h2><div class="subtitle">Useful for VPS deployments and debugging real production issues.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item"><h3>Reverse proxy responsibilities</h3><p>Terminate HTTPS, forward to local app ports, set original client headers, enforce upload limits, compress responses, serve static files, and route multiple domains/apps on one server.</p></div>
+          <div class="deep-item"><h3>SSL setup</h3><p>Use Let's Encrypt/Certbot or managed certificates. Redirect HTTP to HTTPS. After confirming stability, enable HSTS carefully because it tells browsers to refuse HTTP for future requests.</p></div>
+          <div class="deep-item"><h3>Common 502 causes</h3><p>Node process down, wrong upstream port, app bound to localhost/container mismatch, firewall/security group issue, proxy timeout, crashed deployment, or health check hitting wrong path.</p></div>
+        </div>
+        <div class="code-block"><div class="code-title">Nginx reverse proxy essentials</div><pre>server {
+  listen 443 ssl;
+  server_name api.example.com;
+
+  ssl_certificate /etc/letsencrypt/live/api.example.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/api.example.com/privkey.pem;
+
+  client_max_body_size 20m;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+  }
+}</pre></div>
+
+        <div class="section-head"><div class="section-num">CI</div><div><div class="section-kicker">CI/CD</div><h2>Safe deployment pipeline</h2><div class="subtitle">Automation is valuable only when it protects correctness.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Pull request runs lint, typecheck, unit tests, integration tests, and build. Broken checks block merge.</div>
+          <div class="flow-step">Main branch builds immutable Docker image tagged with commit SHA and pushes it to registry.</div>
+          <div class="flow-step">Deployment updates ECS service or VPS container using the new image and environment-specific secrets.</div>
+          <div class="flow-step">Health checks must pass before traffic shifts fully. If health checks fail, deployment stops or rolls back.</div>
+          <div class="flow-step">After deploy, monitor error rate, p95/p99 latency, CPU/memory, queue depth, and business metrics.</div>
+        </div>
+        <div class="callout amber"><div class="callout-title">Migration deploy rule</div><p>Database migrations must be compatible with both old and new application versions during rolling deploys. Use expand/contract: add new column/table first, deploy dual-read/write code, backfill, switch reads, then drop old schema later.</p></div>
+
+        <div class="section-head"><div class="section-num">OBS</div><div><div class="section-kicker">Observability</div><h2>What to monitor in your projects</h2><div class="subtitle">Dashboards should answer: is the system healthy, and where is it failing?</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Area</th><th>Metrics/logs</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td>API</td><td>request rate, p50/p95/p99 latency, 4xx/5xx rate by route</td><td>Find slow or failing endpoints quickly</td></tr>
+              <tr><td>DB</td><td>slow queries, connection pool usage, lock waits, CPU/IOPS</td><td>Most app bottlenecks become database bottlenecks</td></tr>
+              <tr><td>Redis</td><td>hit rate, memory, evictions, command latency</td><td>Detect cache failures and memory pressure</td></tr>
+              <tr><td>RabbitMQ</td><td>queue depth, oldest message age, consumer count, retry/DLQ count</td><td>Queue depth alone is not enough; age shows user-visible delay</td></tr>
+              <tr><td>Payments</td><td>webhook failure rate, reconciliation mismatch count, payout failure count</td><td>Business correctness and money movement</td></tr>
+              <tr><td>Infra</td><td>CPU, memory, restarts, target health, disk, network</td><td>Detect saturation before outage</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"What is the difference between logs, metrics, and traces?"</div><p>Logs are discrete event records useful for debugging details. Metrics are numeric time-series useful for dashboards and alerts. Traces show one request across services and dependencies, useful for finding where time was spent. A mature system uses all three with a shared trace/request ID.</p></div>
+
+        <div class="section-head"><div class="section-num">INC</div><div><div class="section-kicker">Incidents</div><h2>Incident response framework</h2><div class="subtitle">Use this when asked how you debug production.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Triage impact: which users, which routes, severity, start time, and whether data correctness is affected.</div>
+          <div class="flow-step">Stabilize first: rollback bad deploy, disable feature flag, scale workers, pause queue, or fail closed for risky actions.</div>
+          <div class="flow-step">Diagnose with evidence: logs, metrics, traces, recent changes, dependency status, database health.</div>
+          <div class="flow-step">Recover and verify: confirm metrics return to normal and affected workflows complete correctly.</div>
+          <div class="flow-step">Postmortem: root cause, detection gap, prevention, owner, deadline, and tests/alerts to prevent recurrence.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

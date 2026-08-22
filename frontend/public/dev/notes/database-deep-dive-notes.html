@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Deep Dive Notes</title>
+<meta name="description" content="PostgreSQL internals, advanced indexing, isolation levels, transactions, and MongoDB modeling.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/database-deep-dive-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Databases</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#postgres"><span class="nav-num">01</span>PostgreSQL Internals</a>
+    <a class="nav-item" href="#indexing"><span class="nav-num">02</span>Indexing Deep-Dive</a>
+    <a class="nav-item" href="#transactions"><span class="nav-num">03</span>Transactions & ACID</a>
+    <a class="nav-item" href="#modeling"><span class="nav-num">04</span>Data Modeling</a>
+    <a class="nav-item" href="#scaling"><span class="nav-num">05</span>Replication & Scaling</a>
+    <a class="nav-item" href="#mongodb"><span class="nav-num">06</span>MongoDB</a>
+    <a class="nav-item" href="#projects"><span class="nav-num">07</span>Project Applications</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">PostgreSQL - MongoDB - Indexes - Transactions</div>
+      <h1>Database Engineering <span>Deep Dive</span></h1>
+      <p>The definitive guide to database concepts for mid-to-senior backend interviews. Covers PostgreSQL internals, advanced indexing, isolation levels, scaling, and how Eudoro and Gaza40+ model their data.</p>
+      <div class="tags"><span class="tag">PostgreSQL</span><span class="tag">MongoDB</span><span class="tag">Indexing</span><span class="tag">ACID</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="postgres">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Internals</div><h2>PostgreSQL Internals</h2><div class="subtitle">How Postgres actually manages data.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>MVCC (Multi-Version Concurrency Control)</h3><p>Readers don't block writers, and writers don't block readers. Postgres creates a new version of a row on UPDATE rather than overwriting it in place.</p></div>
+          <div class="card"><h3>Vacuuming</h3><p>Because MVCC leaves old row versions (dead tuples) behind, <code>VACUUM</code> reclaims this space. Auto-vacuum runs in the background but heavy update workloads might require manual tuning.</p></div>
+          <div class="card"><h3>WAL (Write-Ahead Logging)</h3><p>Changes are written to a sequential log *before* being applied to data pages. Guarantees durability (the D in ACID) and is used for replication and point-in-time recovery.</p></div>
+          <div class="card"><h3>Connection Pooling</h3><p>Postgres creates a heavy OS process per connection. Connection poolers (like PgBouncer or Prisma Accelerate) multiplex many lightweight client connections onto fewer real database connections.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="indexing">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Performance</div><h2>Indexing Deep-Dive</h2><div class="subtitle">Finding data without scanning the whole disk.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>B-Tree</h3>
+            <p>The default index type. Good for equality (<code>=</code>) and range queries (<code>&lt;</code>, <code>&gt;</code>). O(log N) search complexity.</p>
+          </div>
+          <div class="deep-item">
+            <h3>GIN & GiST</h3>
+            <p>Generalized Inverted Index. Essential for full-text search and JSONB containment queries (finding a key inside a JSON blob).</p>
+          </div>
+          <div class="deep-item">
+            <h3>Partial Indexes</h3>
+            <p>Indexes only a subset of rows (e.g., <code>WHERE is_active = true</code>). Much smaller index size, faster to scan and update.</p>
+          </div>
+        </div>
+        <div class="answer"><div class="answer-q">"Why is my index not being used?"</div><p>"The query planner might decide a sequential scan is faster if the table is small or if the query returns a large percentage of the table. Also, using functions on the indexed column (like <code>LOWER(email)</code>) disables the index unless an Expression Index was created. Check with <code>EXPLAIN ANALYZE</code>."</p></div>
+      </section>
+
+      <section class="section" id="transactions">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Safety</div><h2>Transactions & ACID</h2><div class="subtitle">Keeping data correct when things fail concurrently.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Isolation Level</th><th>Prevents Dirty Read</th><th>Prevents Non-Repeatable Read</th><th>Prevents Phantom Read</th></tr></thead>
+            <tbody>
+              <tr><td>Read Uncommitted</td><td>No</td><td>No</td><td>No</td></tr>
+              <tr><td>Read Committed (PG Default)</td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>Repeatable Read</td><td>Yes</td><td>Yes</td><td>No (Yes in PG)</td></tr>
+              <tr><td>Serializable</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout amber"><div class="callout-title">Row Locking & Deadlocks</div><p>When updating a wallet balance (like in Eudoro), always use <code>SELECT ... FOR UPDATE</code> to lock the row and prevent race conditions (Lost Updates). If two transactions lock rows in different orders, a deadlock occurs. Always acquire locks in a consistent order.</p></div>
+      </section>
+
+      <section class="section" id="modeling">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Design</div><h2>Data Modeling</h2><div class="subtitle">Normalization is not a style preference. It is a defence against a specific class of bug.</div></div></div>
+
+        <p>Most explanations of normal forms start with the rules, which is why most people forget them. Start with the problem instead. Suppose orders are stored with the customer's address copied into each row. Nothing is wrong yet. Then the customer moves. Now you have to update every order row, and the moment one update fails or one row is missed, the database holds two different answers to the same question and neither is marked wrong. That is an <em>update anomaly</em>, and normalization exists to make it structurally impossible rather than merely unlikely.</p>
+
+        <p>Once you see it that way the forms are almost obvious. Each one removes a way for the same fact to be recorded twice:</p>
+
+        <table>
+          <thead><tr><th>Form</th><th>Rule</th><th>The anomaly it removes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1NF</strong></td><td>Each column holds one value, not a list.</td><td>You cannot query, index, or constrain the third item in a comma-separated string. Everything downstream gets harder.</td></tr>
+            <tr><td><strong>2NF</strong></td><td>Non-key columns depend on the <em>whole</em> key, not part of it.</td><td>On a composite key, a column that depends on only half of it gets duplicated across every row sharing that half.</td></tr>
+            <tr><td><strong>3NF</strong></td><td>Non-key columns depend on the key and nothing else.</td><td>Storing <code>city</code> and <code>city_population</code> together means the population is repeated per city, and updating it means finding every row.</td></tr>
+          </tbody>
+        </table>
+
+        <p>The practical summary interviewers are listening for: <em>every fact should live in exactly one place</em>. 3NF is the default for anything transactional. If you can say why in terms of anomalies rather than reciting the definitions, you are already ahead.</p>
+
+        <div class="callout">
+          <div class="callout-title">And then you denormalize on purpose</div>
+          <p>Normalization optimizes for write correctness; it costs you joins on read. Denormalizing — caching a <code>comment_count</code> on the post, copying the product name onto the order line — is a legitimate, deliberate trade: you accept the duplication and take on the job of keeping the copies honest. The distinction that matters is <em>intentional</em> denormalization with a plan for consistency versus an accident. Order lines are the classic case where duplication is not even a compromise: you genuinely want the price <em>as it was at purchase</em>, not the current price. That is not a stale copy, it is a historical fact.</p>
+        </div>
+
+        <h3>Relationships</h3>
+        <div class="grid">
+          <div class="card"><h3>One-to-many</h3><p>The foreign key lives on the <em>many</em> side. An order has many line items, so <code>order_id</code> sits on the line item. Put an index on that column — Postgres does not create one automatically for a foreign key, and its absence is a very common cause of slow joins and of <code>DELETE</code>s on the parent table that take forever.</p></div>
+          <div class="card"><h3>Many-to-many</h3><p>Needs a third table. Students and courses become <code>enrollments</code>, with a composite primary key on both ids to prevent duplicates. The useful realization is that the join table almost always grows attributes of its own — <code>enrolled_at</code>, <code>grade</code> — which means it was a real entity all along.</p></div>
+          <div class="card"><h3>One-to-one</h3><p>Usually a sign the columns belong in one table. It earns its keep when a group of columns is rarely read, or is large, or has a different security profile — splitting sensitive KYC fields into their own table lets you grant access to it separately.</p></div>
+          <div class="card"><h3>Self-referencing</h3><p>Hierarchies: an employee's <code>manager_id</code> pointing back at the same table, categories with parents. Reading the whole tree needs a recursive CTE (<code>WITH RECURSIVE</code>), which is worth practising once so it is not a surprise.</p></div>
+        </div>
+
+        <h3>Choices that are hard to reverse</h3>
+        <p>Some modeling decisions can be changed with a migration. These ones tend to leak into application code everywhere and become expensive to undo, so they are worth getting right early.</p>
+
+        <table>
+          <thead><tr><th>Decision</th><th>Default</th><th>Reasoning</th></tr></thead>
+          <tbody>
+            <tr><td>Primary key</td><td>Surrogate (generated), not natural</td><td>Natural keys — email, phone, ISBN — change, and when they do you are updating every referencing row. A meaningless id never changes because it never meant anything.</td></tr>
+            <tr><td>Sequential vs UUID</td><td>Depends on exposure</td><td>Sequential integers are compact and index well but leak volume and are enumerable in URLs. UUIDv4 is random, which hurts B-tree locality on insert; UUIDv7 is time-ordered and gets most of the locality back.</td></tr>
+            <tr><td>Money</td><td>Integer minor units, or <code>NUMERIC</code></td><td>Never floating point. <code>0.1 + 0.2</code> is not <code>0.3</code> in binary floating point, and that error compounds across a ledger. Store paise or cents as an integer, or use exact <code>NUMERIC</code>.</td></tr>
+            <tr><td>Timestamps</td><td><code>TIMESTAMPTZ</code>, always UTC</td><td><code>TIMESTAMP</code> without a zone stores a wall-clock reading with no way to know what it meant. Convert to local time at the edge, for display only.</td></tr>
+            <tr><td>Deletes</td><td>Soft delete when history matters</td><td>A <code>deleted_at</code> column preserves auditability, but it now has to appear in every query and every unique constraint. Do it deliberately, not reflexively.</td></tr>
+            <tr><td>Nullable</td><td><code>NOT NULL</code> unless null means something</td><td><code>NULL</code> means "unknown", and it propagates through comparisons in ways that surprise people. If the column always has a value, say so and let the database enforce it.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="analogy">
+          <div class="analogy-label">Analogy</div>
+          <p>A normalized schema is a library where every book has one shelf. Denormalizing is putting popular titles on a display stand by the door as well — genuinely faster for the reader, and now you own the problem of keeping the display in sync with the shelf. Worth doing knowingly. Painful when it happens by accident.</p>
+        </div>
+
+        <div class="answer">
+          <div class="answer-q">"How would you approach modeling a new feature's schema?"</div>
+          <p>"I start from the facts and the access patterns rather than from the tables. What are the real entities, what is genuinely true about each one, and which of those facts change independently — because anything that changes independently wants its own row, otherwise I get update anomalies where the same fact is stored twice and can disagree with itself. I normalize to 3NF as the default and only denormalize where a read path demands it, deliberately, with an answer for how the copies stay honest. Then I decide the things that are expensive to change later: surrogate keys, <code>TIMESTAMPTZ</code> in UTC, integer minor units for money, <code>NOT NULL</code> wherever null would not carry meaning. Those are the ones that leak into application code everywhere if I get them wrong."</p>
+        </div>
+      </section>
+
+      <section class="section" id="scaling">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Growth</div><h2>Replication &amp; Scaling</h2><div class="subtitle">In the order you should actually reach for them, which is not the order people describe them.</div></div></div>
+
+        <p>The useful framing is that scaling a database is a sequence of steps that each buy time and each cost something, and the discipline is not skipping ahead. Almost every "we need to shard" conversation is really a missing index or a connection pool that was never configured. Work the list in order, and be able to say why the earlier steps were exhausted.</p>
+
+        <div class="flow">
+          <div class="flow-step">Fix the queries</div>
+          <div class="flow-step">Pool connections</div>
+          <div class="flow-step">Scale up</div>
+          <div class="flow-step">Cache</div>
+          <div class="flow-step">Read replicas</div>
+          <div class="flow-step">Partition</div>
+          <div class="flow-step">Shard</div>
+        </div>
+
+        <h3>Why connection pooling comes so early</h3>
+        <p>This is the step most often skipped and it is specific to how Postgres is built. Postgres forks a full OS process per connection, and each one reserves several megabytes before it does any work. A few hundred connections is therefore not a large number to a Node process but is a serious number to the database. Serverless makes it sharper still: every concurrent function instance wants its own connection, so an autoscaling API can exhaust the connection limit while the CPU sits near idle.</p>
+
+        <p>A pooler — PgBouncer, or a managed equivalent — keeps a small set of real backend connections and multiplexes many client connections onto them. In transaction pooling mode a backend is handed out for the duration of a transaction and then returned, which is what lets a handful of real connections serve a large number of callers. The catch worth knowing: transaction mode breaks anything that assumes session state across statements — session-level <code>SET</code>, advisory locks held between transactions, some prepared-statement patterns.</p>
+
+        <h3>Read replicas and the lag you inherit</h3>
+        <p>A replica streams the primary's write-ahead log and applies it. Reads scale out; writes still all go to the primary, which is why replicas help read-heavy workloads and do nothing for write-heavy ones.</p>
+
+        <p>The part that actually shows up in production is replication lag. Default replication is asynchronous: the primary commits and acknowledges without waiting for replicas, so a replica is some milliseconds — occasionally seconds, under load — behind. That produces the <strong>read-your-writes</strong> problem, and it is worth being able to describe concretely: a user updates their profile, the write goes to the primary, the redirect issues a read that lands on a lagging replica, and the app shows them their old data. They retry, it works, and the bug is unreproducible for you.</p>
+
+        <div class="callout">
+          <div class="callout-title">Three ways out, in increasing cost</div>
+          <p><strong>Route reads after writes to the primary</strong> — pin a user to the primary for a few seconds after any write. Cheap and covers the common case. <strong>Wait for the replica to catch up</strong> — track the WAL position of your write and only read from a replica that has reached it. Precise, more plumbing. <strong>Synchronous replication</strong> — the primary waits for a replica to confirm before acknowledging. No lag, but every write now pays the round trip, and if the replica is unhealthy your writes stall. That last trade is the CAP theorem showing up in a config flag rather than a diagram.</p>
+        </div>
+
+        <h3>Partitioning versus sharding</h3>
+        <p>These get used interchangeably and they are not the same thing. <strong>Partitioning</strong> splits one big table into smaller physical pieces inside a single database — usually by range, most often by time. The database knows about the partitions, so <code>WHERE created_at &gt;= …</code> lets the planner skip whole partitions, and dropping last year's data becomes an instant <code>DROP</code> of a partition instead of a <code>DELETE</code> of millions of rows. It buys you a great deal and costs almost nothing architecturally.</p>
+
+        <p><strong>Sharding</strong> splits data across separate database servers that do not know about each other. It is the only step that removes a write ceiling, and it is qualitatively harder than everything before it, because the guarantees you have been relying on stop being free:</p>
+
+        <div class="grid">
+          <div class="card"><h3>Cross-shard joins</h3><p>Stop existing. If two tables live on different servers, joining them becomes application code fetching from both and merging — with no query planner helping and no transactional view.</p></div>
+          <div class="card"><h3>Transactions</h3><p>ACID holds within a shard. Across shards you are into two-phase commit or, more commonly, sagas and compensating actions — eventual consistency with explicit undo steps.</p></div>
+          <div class="card"><h3>The shard key is forever</h3><p>Choosing it is the whole decision. Shard by tenant and a single large tenant becomes a hot shard. Shard by hash and range queries fan out to every server. Changing the key later means moving all the data.</p></div>
+          <div class="card"><h3>Rebalancing</h3><p>Adding a server means redistributing data while serving traffic. Consistent hashing limits how much moves; it does not make the operation trivial.</p></div>
+        </div>
+
+        <div class="analogy">
+          <div class="analogy-label">Analogy</div>
+          <p>Read replicas are photocopies of the ledger — anyone can read one, but a copy made a moment ago may not show the last entry. Partitioning is filing the same ledger into one binder per month. Sharding is opening a second branch office with its own ledger: now nothing reconciles automatically, and "how much did we sell?" becomes a project.</p>
+        </div>
+
+        <div class="answer">
+          <div class="answer-q">"The database is struggling. What do you do?"</div>
+          <p>"I would want to know what 'struggling' means before touching topology, because the answer is usually much earlier in the list than people expect. First I look at whether it is a query problem — <code>EXPLAIN ANALYZE</code> on the slow paths, a check for sequential scans and for foreign keys with no index. Then connections, which is the step most often skipped: Postgres forks a process per connection, so an autoscaling API can exhaust the limit while CPU is idle, and a pooler in transaction mode fixes that without changing the schema. After that, caching and read replicas if reads dominate — and if I add replicas I have to handle read-your-writes, which I would usually do by pinning a user to the primary briefly after a write. Partitioning by time if one table has grown unbounded. Sharding last, because it is the point where cross-table joins and transactions stop being free, and I would want to be sure a write ceiling is genuinely the constraint before paying that."</p>
+        </div>
+      </section>
+
+      <section class="section" id="mongodb">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">NoSQL</div><h2>MongoDB</h2><div class="subtitle">Flexible schema and document modeling.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Embedding vs Referencing</h3><p><strong>Embed</strong> data that is queried together and doesn't grow infinitely (e.g., user preferences). <br><strong>Reference</strong> (like foreign keys) for large, unbounded lists (e.g., user posts).</p></div>
+          <div class="card"><h3>Aggregation Pipeline</h3><p>Powerful framework for data transformation. Stages like <code>$match</code>, <code>$group</code>, <code>$lookup</code> (joins), and <code>$project</code> are processed in sequence.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="projects">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Application</div><h2>Project Applications</h2><div class="subtitle">How you applied databases in your real work.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Eudoro (PostgreSQL + Prisma)</h3>
+            <p>Used Postgres for strong relational integrity between Sellers, Buyers, and Orders. The immutable wallet ledger requires ACID transactions to ensure sellers are paid correctly only after delivery.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Gaza40+ (MongoDB)</h3>
+            <p>MongoDB's flexible schema allowed handling varied document requirements for students without massive schema migrations. Used aggregation pipelines for complex case tracking.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Forever Yours / Shaza (MongoDB Atlas Vector Search)</h3>
+            <p>Utilized MongoDB Atlas for native vector search capabilities alongside standard application data, enabling the RAG pipeline to retrieve relevant chat memories instantly.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

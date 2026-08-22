@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git & Version Control Notes</title>
+<meta name="description" content="Internals (blobs/trees/commits), interactive rebasing, branching strategies, and monorepos.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/git-version-control-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Git & VCS</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#internals"><span class="nav-num">01</span>Git Internals</a>
+    <a class="nav-item" href="#branching"><span class="nav-num">02</span>Branching Strategies</a>
+    <a class="nav-item" href="#advanced"><span class="nav-num">03</span>Advanced Git</a>
+    <a class="nav-item" href="#interview"><span class="nav-num">06</span>Interview Qs</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Internals - Rebasing - Monorepos</div>
+      <h1>Git & Version Control <span>Notes</span></h1>
+      <p>Git for professional engineers. Move beyond basic commits and understand the DAG, interactive rebasing, trunk-based development, and Nx monorepos (used in Eudoro).</p>
+      <div class="tags"><span class="tag">Git</span><span class="tag">Rebase</span><span class="tag">Monorepos</span><span class="tag">CI/CD</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="internals">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Core</div><h2>Git Internals</h2><div class="subtitle">Git is just a key-value data store.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>The Object Model</h3>
+            <p><strong>Blob:</strong> The contents of a file.<br><strong>Tree:</strong> A directory (contains pointers to blobs and other trees).<br><strong>Commit:</strong> A snapshot containing a pointer to the top-level tree, author info, and a pointer to the parent commit(s).<br><strong>Tag:</strong> A named pointer to a specific commit.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Refs and HEAD</h3>
+            <p>A branch (like <code>main</code>) is just a named reference (<code>ref</code>) pointing to the latest commit. <code>HEAD</code> is a special pointer that tells Git what branch you are currently on. A "detached HEAD" means <code>HEAD</code> points directly to a commit hash instead of a branch name.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="branching">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Workflows</div><h2>Branching Strategies</h2><div class="subtitle">How teams collaborate without destroying each other's work.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Trunk-Based Development</h3><p>Everyone merges to <code>main</code> (trunk) frequently (at least daily). Feature branches are short-lived. Requires robust automated testing and Feature Flags to hide unfinished work in production. Standard for modern CI/CD.</p></div>
+          <div class="card"><h3>Gitflow</h3><p>Heavyweight process. Distinct branches for <code>develop</code>, <code>feature/*</code>, <code>release/*</code>, and <code>hotfix/*</code>. Good for strictly scheduled, versioned software releases, but slows down web deployment cadence.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="advanced">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Advanced</div><h2>Advanced Operations</h2><div class="subtitle">When things go wrong.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Command</th><th>When to use it</th></tr></thead>
+            <tbody>
+              <tr><td><code>git rebase -i</code></td><td>Interactive rebase. Used to squash multiple messy commits into one clean commit before merging. Keeps history linear.</td></tr>
+              <tr><td><code>git cherry-pick</code></td><td>Copy a specific commit from one branch and apply it to another (e.g., pulling a hotfix into an older release branch).</td></tr>
+              <tr><td><code>git bisect</code></td><td>Binary search through history to find exactly which commit introduced a bug.</td></tr>
+              <tr><td><code>git reflog</code></td><td>The safety net. Keeps a log of every time HEAD moved. Can recover "lost" commits after a bad rebase.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="interview">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Q&A</div><h2>Interview Questions</h2><div class="subtitle">Prove you can fix a mess.</div></div></div>
+        <div class="answer"><div class="answer-q">"What is the difference between Rebase and Merge?"</div><p>"<code>git merge</code> creates a new 'merge commit' that ties two histories together, preserving the exact timeline but resulting in a messy, branching history graph. <code>git rebase</code> rewrites history by moving the base of your feature branch to the tip of the target branch, creating a clean, linear history. Rule of thumb: Rebase local, unpushed changes; Merge shared branches."</p></div>
+        
+        <div class="answer"><div class="answer-q">"How do you undo the last commit?"</div><p>"If I just want to change the message or add a file I forgot, I use <code>git commit --amend</code>. If I want to undo the commit entirely but keep the code changes, I use <code>git reset --soft HEAD~1</code>. If I want to nuke the commit and the code changes, I use <code>git reset --hard HEAD~1</code>. If the commit is already pushed and shared, I use <code>git revert &lt;commit-hash&gt;</code> to create a new commit that undoes the changes."</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

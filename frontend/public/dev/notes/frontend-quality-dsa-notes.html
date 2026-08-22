@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontend Quality DSA Notes</title>
+<meta name="description" content="Next.js, React, forms, uploads, dashboards, testing, API quality, DSA patterns, and behavioral storytelling.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/frontend-quality-dsa-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Frontend, Quality, DSA</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#next"><span class="nav-num">01</span>Next/React</a>
+    <a class="nav-item" href="#forms"><span class="nav-num">02</span>Forms</a>
+    <a class="nav-item" href="#quality"><span class="nav-num">03</span>Quality</a>
+    <a class="nav-item" href="#testing"><span class="nav-num">04</span>Testing</a>
+    <a class="nav-item" href="#dsa"><span class="nav-num">05</span>DSA</a>
+    <a class="nav-item" href="#behavioral"><span class="nav-num">06</span>Behavioral</a>
+    <a class="nav-item" href="#deep-frontend"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Next.js - React - Tailwind - Jest - Postman - DSA</div>
+      <h1>Frontend, Quality, and DSA <span>Interview Notes</span></h1>
+      <p>This page covers the non-backend resume surface: Next.js/React, dashboards, forms, file uploads, testing, API quality, error boundaries, DSA achievements, and behavioral project communication.</p>
+      <div class="tags"><span class="tag">Next.js</span><span class="tag">React</span><span class="tag">Zod</span><span class="tag">Jest</span><span class="tag">Postman</span><span class="tag">DSA</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="next">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Frontend</div><h2>Next.js and React fundamentals</h2><div class="subtitle">Be ready to explain rendering and state tradeoffs.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Topic</th><th>What to know</th><th>Use in projects</th></tr></thead>
+            <tbody>
+              <tr><td>SSR</td><td>Render on server for SEO/first load, fetch secure data server-side</td><td>Public marketplace pages or landing content</td></tr>
+              <tr><td>CSR</td><td>Interactive client-side dashboard behavior</td><td>Admin dashboards, filters, forms, student portal workflows</td></tr>
+              <tr><td>Server components</td><td>Reduce client JS, fetch data on server where possible</td><td>Dashboard shells, read-heavy pages</td></tr>
+              <tr><td>Custom hooks</td><td>Extract reusable state/effect logic</td><td>Auth, pagination, uploads, API mutations</td></tr>
+              <tr><td>Tailwind</td><td>Utility-first styling with consistent spacing/responsive classes</td><td>Fast dashboard and form UI development</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="forms">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">UX</div><h2>Forms, file uploads, and dashboards</h2><div class="subtitle">Resume projects depend on reliable operational interfaces.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Validation</h3><p>Use client validation for UX and server validation for security. Zod schemas can align frontend and backend rules.</p></div>
+          <div class="card"><h3>File Uploads</h3><p>Validate size/type, use pre-signed URLs for large files, show progress, scan risky documents, store metadata in DB.</p></div>
+          <div class="card"><h3>Dashboards</h3><p>Design for filtering, sorting, status visibility, empty states, permission boundaries, and fast scanning.</p></div>
+          <div class="card"><h3>Error Boundaries</h3><p>Contain UI crashes, report to Sentry, and show recovery actions instead of blank screens.</p></div>
+        </div>
+        <div class="answer"><div class="answer-q">"How would you design the Gaza40+ admin dashboard?"</div><p>"I would optimize for case triage: filters by region/status/urgency, profile completeness, document verification, funding gap, assigned mentor, and latest activity. Permissions must scope regional admins to their region, while master admins see global dashboards. Every status transition should be auditable."</p></div>
+      </section>
+
+      <section class="section" id="quality">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Quality</div><h2>API testing and frontend resilience</h2><div class="subtitle">Quality is observable behavior, not only unit tests.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Postman:</strong> test auth flows, CRUD, validation errors, pagination, RBAC denial, webhooks, and payment callbacks.</div>
+          <div class="check"><strong>Jest:</strong> test pure functions, services, validators, hooks, and edge cases.</div>
+          <div class="check"><strong>Contract tests:</strong> protect frontend/backend agreement for response shape and error codes.</div>
+          <div class="check"><strong>Error boundaries:</strong> catch rendering failures and report useful context.</div>
+          <div class="check"><strong>Logging:</strong> include request IDs and user/session context without leaking secrets.</div>
+        </div>
+      </section>
+
+      <section class="section" id="testing">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Testing</div><h2>Testing strategy for resume systems</h2><div class="subtitle">Know what you would test for each major project.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Project</th><th>Tests to mention</th><th>High-risk cases</th></tr></thead>
+            <tbody>
+              <tr><td>Personalized Wallah</td><td>Order flow integration, wallet ledger unit tests, webhook tests, queue consumer idempotency</td><td>Duplicate payment, double wallet credit, failed shipment creation</td></tr>
+              <tr><td>Acordly</td><td>OCR fixtures, LLM output schema validation, field accuracy golden set, multi-tenant auth tests</td><td>Hallucinated field, wrong form mapping, cross-tenant data leak</td></tr>
+              <tr><td>ETL Platform</td><td>Batch ingestion tests, duplicate file replay, partial success, API failure retries</td><td>Duplicate record, wrong source priority, failed ack generation</td></tr>
+              <tr><td>Gaza40+</td><td>RBAC tests, document upload tests, dashboard filters, status transition tests</td><td>Regional admin seeing wrong region, invalid funding calculations</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="dsa">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">DSA</div><h2>DSA revision map</h2><div class="subtitle">1500+ solved problems is a strong signal only if explanations are crisp.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Arrays and Strings</h3><ul><li>Two pointers</li><li>Sliding window</li><li>Prefix sums</li><li>Hash maps</li></ul></div>
+          <div class="card"><h3>Trees and Graphs</h3><ul><li>DFS/BFS</li><li>Topological sort</li><li>Shortest path</li><li>Union find</li></ul></div>
+          <div class="card"><h3>Dynamic Programming</h3><ul><li>State definition</li><li>Transition</li><li>Base cases</li><li>Space optimization</li></ul></div>
+          <div class="card"><h3>System Design Bridge</h3><ul><li>Heaps for schedulers</li><li>Hashing for sharding</li><li>Graphs for dependencies</li><li>Queues for BFS/workers</li></ul></div>
+        </div>
+        <div class="callout amber"><div class="callout-title">Coding round answer pattern</div><p>Clarify constraints, propose brute force, improve with the right data structure, explain complexity, code cleanly, test edge cases, then mention tradeoffs.</p></div>
+      </section>
+
+      <section class="section" id="behavioral">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Behavioral</div><h2>Behavioral stories to prepare</h2><div class="subtitle">Use STAR, but keep technical depth.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Ownership</h3><p>Managed deployment workflow across VPS, Docker, Nginx, SSL, CI/CD, monitoring. Explain a production issue and fix.</p></div>
+          <div class="card"><h3>Complexity</h3><p>Designed source-aware ETL with SAP/Salesforce/Ecommerce consistency. Explain tradeoffs and failure isolation.</p></div>
+          <div class="card"><h3>Product Impact</h3><p>Acordly reduced manual data entry by automating ACORD forms. Explain user pain, validation, and human review.</p></div>
+          <div class="card"><h3>Learning</h3><p>Adopted AI tools while keeping judgment. Explain how you challenge outputs and protect correctness.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="deep-frontend">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Deep Reference</div><h2>Frontend, testing, and DSA reference</h2><div class="subtitle">Enough depth to discuss full-stack decisions, not just UI libraries.</div></div></div>
+
+        <div class="study-box">
+          <h3>How to position frontend experience</h3>
+          <p>You are not trying to sound like a pure UI specialist. The strong narrative is: "I can build operational interfaces that expose backend workflows safely: dashboards, forms, uploads, role-based views, and API-integrated flows. I understand rendering tradeoffs and how frontend choices affect backend load and user correctness."</p>
+        </div>
+
+        <div class="section-head"><div class="section-num">NX</div><div><div class="section-kicker">Next.js</div><h2>Rendering and data fetching decisions</h2><div class="subtitle">Choose rendering mode based on product need.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Mode</th><th>Use when</th><th>Example from projects</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td>SSR</td><td>Need fresh server-rendered content and SEO</td><td>Marketplace product/category pages</td><td>Slower server response if data fetching is heavy</td></tr>
+              <tr><td>SSG</td><td>Mostly static content that can be generated ahead</td><td>Marketing/docs/landing pages</td><td>Stale content unless revalidated</td></tr>
+              <tr><td>ISR</td><td>Static speed with periodic regeneration</td><td>Catalog pages with moderate update frequency</td><td>Users may see slightly stale data</td></tr>
+              <tr><td>CSR</td><td>Highly interactive authenticated pages</td><td>Admin dashboards, student portal workflows</td><td>Loading states and API waterfall issues</td></tr>
+              <tr><td>Server components</td><td>Reduce client JS and fetch data securely on server</td><td>Read-heavy dashboard shells</td><td>Must understand client/server boundary</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"How do you choose between SSR and CSR?"</div><p>SSR is useful when first content, SEO, or secure server-side data fetching matters. CSR is fine for authenticated dashboards where interactivity dominates and SEO is irrelevant. I also consider API load, caching, loading states, and whether the data is user-specific or public.</p></div>
+
+        <div class="section-head"><div class="section-num">RC</div><div><div class="section-kicker">React</div><h2>React architecture patterns</h2><div class="subtitle">Good React code separates data, state, and presentation.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Component boundaries</h3>
+            <p>Split by responsibility: page/container fetches data and owns workflow; presentational components render; form components manage validation; hooks isolate reusable behavior.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Custom hooks</h3>
+            <p>Good for repeated client-side logic such as pagination, debounced search, file upload progress, auth state, websocket subscription, and mutation handling.</p>
+            <div class="code-block"><div class="code-title">Hook responsibilities</div><pre>usePaginatedOrders()
+- owns cursor/page state
+- calls API
+- exposes data, loading, error, fetchNext
+- does not render UI directly</pre></div>
+          </div>
+          <div class="deep-item">
+            <h3>State placement</h3>
+            <p>Keep state as local as possible. Use URL state for filters/search that should be shareable. Use server state libraries or explicit fetching for API data. Avoid global state for everything.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Performance</h3>
+            <p>Memoization is not the first tool. First avoid unnecessary data fetching, large client bundles, huge lists without virtualization, and expensive renders in frequently updated components.</p>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">FOR</div><div><div class="section-kicker">Forms</div><h2>Forms, validation, uploads, and workflow UX</h2><div class="subtitle">Most business apps are form and status workflows.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Client renders form with clear required fields, defaults, loading state, optimistic or pessimistic submission behavior, and field-level errors.</div>
+          <div class="flow-step">Client validates for usability, but server validates again for security and correctness.</div>
+          <div class="flow-step">Server returns machine-readable error codes and field-level messages. Frontend maps them predictably.</div>
+          <div class="flow-step">For file uploads, large files should go through pre-signed object storage upload when possible, with metadata saved through backend API.</div>
+          <div class="flow-step">Every admin workflow should have status visibility: draft, submitted, under_review, approved, rejected, needs_info.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Workflow</th><th>UI states to handle</th><th>Backend dependency</th></tr></thead>
+            <tbody>
+              <tr><td>Document upload</td><td>idle, uploading, processing, failed, complete, needs review</td><td>Object storage, virus scan/OCR, metadata table</td></tr>
+              <tr><td>Admin approval</td><td>pending, approving, rejected, approved, conflict</td><td>RBAC, audit log, state machine</td></tr>
+              <tr><td>Payment checkout</td><td>creating order, provider redirect/modal, verifying, success, failed</td><td>Payment intent/order, webhook, verification endpoint</td></tr>
+              <tr><td>Dashboard filters</td><td>loading, empty, filtered empty, stale, error</td><td>Pagination, query params, indexes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">TST</div><div><div class="section-kicker">Testing</div><h2>Testing pyramid for your resume projects</h2><div class="subtitle">Know what to test and at which layer.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Unit tests</h3>
+            <p>Best for pure logic: commission calculation, funding gap calculation, validators, mappers, status transition guards, date formatting, permission checks.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Integration tests</h3>
+            <p>Use for real database constraints, transactions, file metadata, auth middleware, queue consumer behavior, and API endpoints with test DB.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Contract/API tests</h3>
+            <p>Postman collections or automated contract tests should verify request/response shape, error codes, auth, pagination, and role restrictions.</p>
+          </div>
+          <div class="deep-item">
+            <h3>E2E tests</h3>
+            <p>Keep few and valuable: login, upload document, admin review, checkout/payment simulation, webhook handling, and dashboard visibility.</p>
+          </div>
+        </div>
+        <div class="answer"><div class="answer-q">"What would you test in Gaza40+?"</div><p>I would test role-based access, regional scoping, document upload validation, profile completeness, offer verification transitions, funding gap calculations, mentor assignment, dashboard filters, and audit logs. The highest-risk bug is a regional admin seeing or modifying a student outside their region.</p></div>
+
+        <div class="section-head"><div class="section-num">DSA</div><div><div class="section-kicker">Coding Rounds</div><h2>DSA patterns and revision depth</h2><div class="subtitle">Use patterns so 1500+ problems become explainable skill.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pattern</th><th>Recognize by</th><th>Examples</th><th>Common mistakes</th></tr></thead>
+            <tbody>
+              <tr><td>Two pointers</td><td>Sorted array/string, pair/triplet, reverse, partition</td><td>two sum sorted, 3sum, remove duplicates</td><td>Forgetting duplicates or pointer movement rules</td></tr>
+              <tr><td>Sliding window</td><td>Contiguous subarray/substring with constraint</td><td>longest substring, max sum k, min window</td><td>Not shrinking while invalid, wrong frequency map updates</td></tr>
+              <tr><td>Binary search</td><td>Sorted answer space or monotonic predicate</td><td>search rotated, capacity to ship, kth element</td><td>Infinite loop, wrong high/low invariant</td></tr>
+              <tr><td>DFS/BFS</td><td>Tree/graph traversal, connected components, shortest unweighted path</td><td>islands, level order, word ladder</td><td>Visited marking too late, recursion depth</td></tr>
+              <tr><td>Topological sort</td><td>Dependencies or ordering constraints</td><td>course schedule, build order</td><td>Missing cycle detection</td></tr>
+              <tr><td>Union find</td><td>Dynamic connectivity, grouping, Kruskal</td><td>number of provinces, redundant connection</td><td>No path compression/rank</td></tr>
+              <tr><td>Heap</td><td>Top k, streaming min/max, scheduling</td><td>k closest, merge k lists, meeting rooms</td><td>Wrong heap size or comparator</td></tr>
+              <tr><td>DP</td><td>Overlapping subproblems and choices</td><td>knapsack, LIS, grid paths, edit distance</td><td>Bad state definition; writing recurrence before base cases</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>DP answer framework</h3>
+            <ul>
+              <li>Define state clearly: <code>dp[i]</code> or <code>dp[i][j]</code> means what exactly?</li>
+              <li>Define transition: how current state depends on previous states.</li>
+              <li>Define base cases.</li>
+              <li>Pick iteration order so dependencies are computed first.</li>
+              <li>Analyze time and space; optimize space only after correct solution.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>How DSA connects to backend</h3>
+            <p>Hashing relates to sharding and idempotency maps. Queues relate to BFS and workers. Heaps relate to scheduling/retries. Graphs relate to service dependencies. DP trains state modeling, useful for workflow state machines.</p>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">BEH</div><div><div class="section-kicker">Behavioral</div><h2>Project storytelling framework</h2><div class="subtitle">Make answers concrete and measurable.</div></div></div>
+        <div class="flow">
+          <div class="flow-step"><strong>Context:</strong> what was the product/business problem and who were the users?</div>
+          <div class="flow-step"><strong>Constraints:</strong> scale, time, external APIs, correctness, security, team size, infrastructure.</div>
+          <div class="flow-step"><strong>Decision:</strong> architecture chosen and why alternatives were rejected.</div>
+          <div class="flow-step"><strong>Implementation:</strong> specific components, data models, failure handling, tests, observability.</div>
+          <div class="flow-step"><strong>Result:</strong> measurable impact, reliability, reduced manual work, faster workflow, fewer errors.</div>
+          <div class="flow-step"><strong>Learning:</strong> what you would improve now.</div>
+        </div>
+        <div class="answer"><div class="answer-q">"Tell me about a challenging project."</div><p>Choose the ETL platform or Personalized Wallah. Start with the business problem, then explain why simple CRUD was not enough: cross-system consistency, duplicate prevention, partial failures, external API retries, and operational visibility. End with measurable impact and a specific improvement you would make next, such as outbox pattern, stronger contract tests, or better dashboards.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

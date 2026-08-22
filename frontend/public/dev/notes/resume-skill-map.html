@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaleem Resume Skill Map</title>
+<meta name="description" content="The master index built from the resume, grouping every skill into interview surfaces and revision priorities.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/resume-skill-map">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Resume Interview Notes</div>
+      <div class="sidebar-title">Skill Map and Revision Plan</div>
+    </div>
+    <div class="nav-label">Artifacts</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/backend-architecture-interview-notes"><span class="nav-num">BE</span>Backend</a>
+    <a class="nav-item" href="/dev/notes/ai-engineering-adaptability-notes"><span class="nav-num">AI</span>AI Engineering</a>
+    <a class="nav-item" href="/dev/notes/devops-observability-cloud-notes"><span class="nav-num">DO</span>DevOps</a>
+    <a class="nav-item" href="/dev/notes/integrations-commerce-payments-notes"><span class="nav-num">IP</span>Integrations</a>
+    <a class="nav-item" href="/dev/notes/frontend-quality-dsa-notes"><span class="nav-num">FQ</span>Frontend/DSA</a>
+    <div class="nav-label">On This Page</div>
+    <a class="nav-item" href="#profile"><span class="nav-num">01</span>Profile Signal</a>
+    <a class="nav-item" href="#groups"><span class="nav-num">02</span>Skill Groups</a>
+    <a class="nav-item" href="#priority"><span class="nav-num">03</span>Priority</a>
+    <a class="nav-item" href="#plan"><span class="nav-num">04</span>Revision Plan</a>
+    <a class="nav-item" href="#stories"><span class="nav-num">05</span>Interview Stories</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Extracted from Kaleem_RESUME_FULL_STACK_may_updated.pdf</div>
+      <h1>Resume-Based <span>Interview Skill Map</span></h1>
+      <p>This artifact groups every resume skill into practical interview study areas. The goal is to revise like a backend/full-stack engineer with production ownership: correctness, scale, reliability, integrations, AI engineering, and adaptability.</p>
+      <div class="tags">
+        <a class="tag" href="/dev/notes/backend-engineering-handbook">Handbook Part 1</a>
+        <a class="tag" href="/dev/notes/handbook_part2">Handbook Part 2</a>
+        <span class="tag">Node.js</span>
+        <span class="tag">AWS</span>
+        <span class="tag">Microservices</span>
+        <span class="tag">AI workflows</span>
+      </div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="profile">
+        <div class="section-head">
+          <div class="section-num">01</div>
+          <div>
+            <div class="section-kicker">Profile Signal</div>
+            <h2>How the resume positions you</h2>
+            <div class="subtitle">Full-stack infrastructure engineer with backend, cloud, integrations, and AI workflow ownership.</div>
+          </div>
+        </div>
+        <p>The strongest interview narrative is not "I know many tools." It is: <strong>I build production backend systems, integrate messy external systems, operate deployments, and use AI as an engineering multiplier while keeping human ownership.</strong></p>
+        <div class="grid">
+          <div class="card"><h3>Primary Identity</h3><p>Backend/full-stack engineer with microservices, event-driven commerce, ETL, SaaS, and cloud deployments.</p></div>
+          <div class="card"><h3>Secondary Edge</h3><p>AI engineering: LLM integration, prompt engineering, RAG, agentic workflows, MCP servers, context management.</p></div>
+          <div class="card"><h3>Proof Projects</h3><p>JS ETL platform, Acordly AI form automation, Personalized Wallah marketplace, Gaza40+ student portal.</p></div>
+          <div class="card"><h3>Interview Risk</h3><p>The resume is broad. Interviewers may probe depth in system design, AWS, queues, payments, and AI reliability.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="groups">
+        <div class="section-head">
+          <div class="section-num">02</div>
+          <div>
+            <div class="section-kicker">Groups</div>
+            <h2>Skill groups to revise</h2>
+            <div class="subtitle">Grouped by how interviewers will probe them, not by resume section.</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Group</th><th>Resume skills</th><th>Interview topics</th><th>Artifact</th></tr></thead>
+            <tbody>
+              <tr><td>Backend architecture</td><td>Node.js, Express, TypeScript, microservices, API Gateway, Prisma, MongoDB, SQL/PostgreSQL</td><td>REST, service boundaries, transactions, indexing, idempotency, RBAC, rate limiting, data modeling</td><td><a href="/dev/notes/backend-architecture-interview-notes">Backend notes</a></td></tr>
+              <tr><td>Async and real-time</td><td>RabbitMQ, event-driven architecture, message queues, Socket.IO</td><td>DLQ, retries, ordering, idempotent consumers, websockets, push notifications, queue health</td><td><a href="/dev/notes/backend-architecture-interview-notes#async">Backend notes</a></td></tr>
+              <tr><td>AI engineering</td><td>LLM integration, prompt engineering, RAG, MCP, agentic workflows, OCR, Textract, Google Vision</td><td>prompt design, retrieval, evaluation, hallucination control, context windows, human-in-loop</td><td><a href="/dev/notes/ai-engineering-adaptability-notes">AI notes</a></td></tr>
+              <tr><td>Cloud and operations</td><td>Docker, AWS EC2/ECS/IAM/S3/ALB/Route 53/CloudWatch, Nginx, SSL, GitHub Actions</td><td>deployments, networking, IAM, containers, CI/CD, rollback, reverse proxy, DNS, TLS</td><td><a href="/dev/notes/devops-observability-cloud-notes">DevOps notes</a></td></tr>
+              <tr><td>Observability and quality</td><td>Prometheus, Grafana, Winston, Sentry, Jest, Postman</td><td>metrics/logs/traces, p95/p99, alerting, test pyramid, API tests, error boundaries</td><td><a href="/dev/notes/devops-observability-cloud-notes#observability">DevOps notes</a></td></tr>
+              <tr><td>Payments and integrations</td><td>Razorpay, Stripe, Shiprocket, Salesforce REST, SAP JSON ETL, third-party integrations</td><td>webhooks, reconciliation, idempotency, payouts, audit trails, partial failure, source-aware upserts</td><td><a href="/dev/notes/integrations-commerce-payments-notes">Integrations notes</a></td></tr>
+              <tr><td>Frontend and product</td><td>Next.js, React, Tailwind, custom hooks, file uploads, dashboards</td><td>SSR/CSR, forms, state, accessibility, error boundaries, dashboard UX, API integration</td><td><a href="/dev/notes/frontend-quality-dsa-notes">Frontend notes</a></td></tr>
+              <tr><td>DSA and problem solving</td><td>1500+ problems, trees, graphs, DP, contests</td><td>coding rounds, complexity, patterns, clean explanation, system design bridges</td><td><a href="/dev/notes/frontend-quality-dsa-notes#dsa">DSA notes</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="priority">
+        <div class="section-head">
+          <div class="section-num">03</div>
+          <div>
+            <div class="section-kicker">Priority</div>
+            <h2>Revision priority for interviews</h2>
+            <div class="subtitle">Use this order when time is limited.</div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card"><h3>P0 - Must Be Sharp</h3><ul><li>Node.js request lifecycle and async model</li><li>SQL transactions, indexes, locks</li><li>Redis caching and rate limiting</li><li>RabbitMQ retries, DLQs, idempotency</li><li>JWT, OAuth, RBAC, authz checks</li></ul></div>
+          <div class="card"><h3>P1 - Resume Claims</h3><ul><li>12-service microservices design</li><li>Seller wallet and payout correctness</li><li>SAP/Salesforce/Ecommerce ETL upserts</li><li>Docker/Nginx/SSL/GitHub Actions deployment</li><li>Prometheus/Grafana/Sentry/Winston observability</li></ul></div>
+          <div class="card"><h3>P2 - Differentiators</h3><ul><li>LLM pipelines and RAG evaluation</li><li>MCP server development</li><li>Agentic workflow guardrails</li><li>OCR extraction confidence and validation</li><li>AI-assisted development philosophy</li></ul></div>
+        </div>
+      </section>
+
+      <section class="section" id="plan">
+        <div class="section-head">
+          <div class="section-num">04</div>
+          <div>
+            <div class="section-kicker">Plan</div>
+            <h2>14-day focused revision plan</h2>
+            <div class="subtitle">Designed for backend/full-stack interviews where projects are discussed deeply.</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Days</th><th>Focus</th><th>Output</th></tr></thead>
+            <tbody>
+              <tr><td>1-2</td><td>Backend fundamentals: Node, Express, API design, auth, transactions, indexes</td><td>Explain every Personalized Wallah API boundary and data model.</td></tr>
+              <tr><td>3-4</td><td>Redis, RabbitMQ, event-driven systems, idempotency, DLQ, real-time Socket.IO</td><td>Draw order lifecycle from checkout to shipment and wallet credit.</td></tr>
+              <tr><td>5-6</td><td>Payments, payouts, reconciliation, webhooks, third-party integrations</td><td>Explain duplicate webhook, provider timeout, and partial-success recovery.</td></tr>
+              <tr><td>7-8</td><td>AWS, Docker, Nginx, SSL, CI/CD, DNS, monitoring</td><td>Walk through deploying one service from commit to production.</td></tr>
+              <tr><td>9-10</td><td>AI engineering: RAG, OCR, prompt engineering, agentic workflows, evaluation</td><td>Explain Acordly pipeline and how you validate extracted form fields.</td></tr>
+              <tr><td>11-12</td><td>Frontend, testing, dashboards, file uploads, error boundaries</td><td>Explain full-stack tradeoffs in Gaza40+ workflows and admin visibility.</td></tr>
+              <tr><td>13-14</td><td>Mock interviews, DSA refresh, project storytelling, behavioral adaptability</td><td>Prepare 6 STAR stories and 5 system design diagrams.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="stories">
+        <div class="section-head">
+          <div class="section-num">05</div>
+          <div>
+            <div class="section-kicker">Stories</div>
+            <h2>Project stories to prepare</h2>
+            <div class="subtitle">Each story should include problem, constraints, design, tradeoffs, failure handling, and metrics.</div>
+          </div>
+        </div>
+        <div class="checklist">
+          <div class="check"><strong>JS ETL Platform:</strong> source-aware idempotent UPSERTs across SAP, Salesforce, Ecommerce; partial success; parallel file ingestion; ack files.</div>
+          <div class="check"><strong>Acordly:</strong> OCR + LLM extraction, ACORD form mapping, multi-tenancy, OAuth/JWT, plans, payments, Docker deployment.</div>
+          <div class="check"><strong>Personalized Wallah:</strong> 12 services, API gateway, RabbitMQ workflows, Redis, seller wallet, payout engine, observability.</div>
+          <div class="check"><strong>Gaza40+:</strong> role-based student case management, document uploads, dashboards, offer verification, funding-gap tracking.</div>
+          <div class="check"><strong>Adaptability:</strong> AI-assisted but human-owned development, reviewing AI output, challenging suggestions, protecting product taste and correctness.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

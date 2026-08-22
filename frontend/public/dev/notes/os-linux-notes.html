@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS & Linux Notes</title>
+<meta name="description" content="Processes, threads, virtual memory, file descriptors, signals, and essential Linux commands.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/os-linux-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">OS & Linux</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#process"><span class="nav-num">01</span>Process Model</a>
+    <a class="nav-item" href="#memory"><span class="nav-num">02</span>Memory</a>
+    <a class="nav-item" href="#filesystem"><span class="nav-num">03</span>File System</a>
+    <a class="nav-item" href="#commands"><span class="nav-num">04</span>Linux Commands</a>
+    <a class="nav-item" href="#systemd"><span class="nav-num">05</span>Systemd</a>
+    <a class="nav-item" href="#interview"><span class="nav-num">07</span>Interview Qs</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Processes - Memory - Commands - Systemd</div>
+      <h1>Operating Systems & Linux <span>Notes</span></h1>
+      <p>The foundation of backend engineering. Master processes, threads, virtual memory, file descriptors, and the essential Linux commands needed to debug real servers.</p>
+      <div class="tags"><span class="tag">Linux</span><span class="tag">Processes</span><span class="tag">Systemd</span><span class="tag">Memory</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="process">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Execution</div><h2>The Process Model</h2><div class="subtitle">How code actually runs.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Process vs Thread</h3><p>A **process** is an isolated instance of a running program with its own memory space (heap). A **thread** is a unit of execution within a process; threads share the process's memory space but have their own stack.</p></div>
+          <div class="card"><h3>Fork & Exec</h3><p><code>fork()</code> creates an exact duplicate of the current process (child). <code>exec()</code> replaces the current process image with a new program. This is how shells run commands.</p></div>
+          <div class="card"><h3>Signals</h3><p>Software interrupts sent to a process. <br><code>SIGTERM</code> (15): Graceful shutdown request.<br><code>SIGKILL</code> (9): Immediate forced termination (cannot be caught).<br><code>SIGHUP</code> (1): Hangup, often used to tell daemons to reload config.</p></div>
+          <div class="card"><h3>Zombies & Orphans</h3><p><strong>Zombie:</strong> A process that has finished executing but its parent hasn't read its exit status yet. <br><strong>Orphan:</strong> A process whose parent has died; adopted by <code>init</code> (PID 1).</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="memory">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Resources</div><h2>Memory Management</h2><div class="subtitle">Where the data lives.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Virtual Memory & Paging</h3>
+            <p>The OS gives each process the illusion of a large, contiguous memory space. Virtual addresses are mapped to physical RAM via page tables. If physical RAM is full, pages are swapped to disk (Swap space), causing massive performance drops.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Stack vs Heap</h3>
+            <p><strong>Stack:</strong> Fast, LIFO memory for local variables and function calls. Managed automatically. Size is fixed.<br><strong>Heap:</strong> Dynamic memory for objects and closures. Managed by Garbage Collection (in JS/Java) or manually (C/C++). Memory leaks happen here.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="filesystem">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Storage</div><h2>File System</h2><div class="subtitle">Why "everything is a file" is a design decision and not a slogan.</div></div></div>
+
+        <p>The claim people repeat is that on Unix everything is a file. The useful version is more precise: <em>everything is reachable through the same small set of operations</em> — <code>open</code>, <code>read</code>, <code>write</code>, <code>close</code>. A regular file, a pipe, a terminal, a socket, and a kernel counter in <code>/proc</code> are wildly different things underneath, and they all answer to the same four calls. That is why shell pipelines compose so well, and why a program that reads a file needs no changes to read from a socket instead.</p>
+
+        <h3>Inodes: names are not files</h3>
+        <p>This is the idea that makes the rest of the section fall into place. A file's <em>data and metadata</em> — size, permissions, owner, timestamps, and the pointers to its data blocks — live in a structure called an inode, identified by a number. The filename is not part of it. A directory is just a table mapping names to inode numbers.</p>
+
+        <p>So a filename is a reference to an inode, and an inode counts how many references point at it. Several consequences that look surprising until you know this:</p>
+
+        <div class="grid">
+          <div class="card"><h3>Hard links</h3><p>A second name pointing at the same inode. Not a copy and not a shortcut — genuinely the same file with two names, and neither is the "real" one. Delete either name and the data survives, because the link count is still above zero.</p></div>
+          <div class="card"><h3>Symbolic links</h3><p>A small file whose contents are a <em>path</em>. Resolved at access time, so it can point across filesystems and can dangle if the target is removed. A hard link cannot dangle; a symlink is the one that can break.</p></div>
+          <div class="card"><h3>Deleting is unlinking</h3><p><code>rm</code> removes a name and decrements the count. Space is reclaimed when the count reaches zero <em>and</em> no process still holds the file open — which is why deleting a log file does not free the disk until you restart the process writing to it.</p></div>
+          <div class="card"><h3>Renames are cheap</h3><p><code>mv</code> within a filesystem rewrites a directory entry and touches no data, however large the file. Across filesystems it becomes a real copy plus a delete, which is why one is instant and the other is not.</p></div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">"No space left on device" with free space showing</div>
+          <p>A filesystem has a finite number of inodes, allocated when it is created, separate from its data capacity. Millions of tiny files — cache entries, session files — can exhaust the inode table while <code>df -h</code> still reports free gigabytes. <code>df -i</code> shows the inode usage, and it is the check that explains an otherwise baffling outage.</p>
+        </div>
+
+        <h3>File descriptors</h3>
+        <p>When a process opens something, the kernel returns a small integer: an index into that process's table of open files. 0, 1, and 2 are standard input, output, and error, which is what makes redirection work — <code>2&gt;&amp;1</code> simply points descriptor 2 at whatever descriptor 1 currently refers to.</p>
+
+        <p>Descriptors are a per-process limited resource (<code>ulimit -n</code>), and because sockets are also descriptors, a server that leaks connections eventually fails with <code>EMFILE: too many open files</code>. That error usually means a leak — connections or file handles opened in a loop and never closed — rather than a limit that is genuinely too low. Raise the limit only after you have checked which it is.</p>
+
+        <h3>Permissions</h3>
+        <p>Three classes — owner, group, other — each with read, write, execute. The octal notation is just those three bits per class: <code>r=4, w=2, x=1</code>, so <code>644</code> is owner read-write, everyone else read-only, and <code>755</code> adds execute.</p>
+
+        <p>The part worth knowing beyond the arithmetic is that on a <em>directory</em> the bits mean something different: <code>r</code> lets you list the names, <code>w</code> lets you create and delete entries in it, and <code>x</code> lets you traverse into it and access things by full path. This is why you can sometimes read a file whose directory you cannot list, and why removing a file needs write permission on the directory rather than on the file.</p>
+
+        <h3>The page cache</h3>
+        <p>Reads and writes do not usually go straight to disk. The kernel keeps recently used file pages in memory, serves repeat reads from there, and buffers writes to flush later. This is why the second run of a command is dramatically faster, and why <code>free -h</code> showing very little "free" memory is normal and healthy — cache is memory doing useful work, and it is released the moment a process needs it. The tradeoff is durability: a write that has returned successfully may still only be in the cache, which is what <code>fsync</code> is for and why databases call it explicitly at commit.</p>
+
+        <div class="analogy">
+          <div class="analogy-label">Analogy</div>
+          <p>The inode is the storage unit; the filename is a label on a keyring. Hard links are two labels on the same unit — remove one and the unit stays. A symlink is a note saying "see unit 47", useful until unit 47 is gone. And the janitor only empties the unit when every label is gone <em>and</em> nobody is standing inside it.</p>
+        </div>
+
+        <div class="answer">
+          <div class="answer-q">"I deleted a large log file but the disk is still full. Why?"</div>
+          <p>"Because deleting removes a name, not the data. The inode holds the data and a count of how many references point at it — directory entries and open file handles both count. If a process still has that log open, the link count has not reached zero, so the kernel keeps the blocks allocated even though the filename is gone. <code>lsof</code> will show the deleted file still held open. Restarting or signalling the process to reopen its log releases the space, which is also the reason log rotation tools send a signal after rotating rather than just moving the file."</p>
+        </div>
+      </section>
+
+      <section class="section" id="commands">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Tooling</div><h2>Essential Linux Commands</h2><div class="subtitle">For debugging production without a UI.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Command</th><th>What it does</th><th>Common use case</th></tr></thead>
+            <tbody>
+              <tr><td><code>top</code> / <code>htop</code></td><td>Process monitor</td><td>Finding what is consuming 100% CPU.</td></tr>
+              <tr><td><code>df -h</code></td><td>Disk free</td><td>Checking if the server ran out of disk space (causing 500 errors).</td></tr>
+              <tr><td><code>netstat -tulpn</code> / <code>ss</code></td><td>Network sockets</td><td>Checking if Node/Nginx is actually listening on port 80/443/3000.</td></tr>
+              <tr><td><code>lsof -i :3000</code></td><td>List open files</td><td>Finding which process is holding port 3000 (EADDRINUSE error).</td></tr>
+              <tr><td><code>tail -f log.txt | grep 'ERROR'</code></td><td>Follow file</td><td>Watching a live log file for errors.</td></tr>
+              <tr><td><code>chmod</code> / <code>chown</code></td><td>Permissions</td><td>Fixing "Permission denied" errors for a web server trying to read a file.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="systemd">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Daemons</div><h2>Systemd</h2><div class="subtitle">The modern Linux init system.</div></div></div>
+        <div class="code-block"><div class="code-title">Typical Node.js systemd service file (/etc/systemd/system/api.service)</div><pre>[Unit]
+Description=Backend API Service
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/var/www/api
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</pre></div>
+      </section>
+
+      <section class="section" id="interview">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Q&A</div><h2>Interview Questions</h2><div class="subtitle">The classic OS probes.</div></div></div>
+        <div class="answer"><div class="answer-q">"What happens when you run <code>node app.js</code>?"</div><p>"The shell uses <code>fork()</code> to create a child process, then <code>exec()</code> to replace that child with the <code>node</code> binary, passing <code>app.js</code> as an argument. The OS allocates a virtual memory space (stack, heap, code segments), opens standard file descriptors (stdin, stdout, stderr), and hands control to the Node.js V8 engine, which initializes the event loop and begins parsing <code>app.js</code>."</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

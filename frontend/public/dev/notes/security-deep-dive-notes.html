@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Deep Dive Notes</title>
+<meta name="description" content="AppSec for engineers: Injection, XSS, CSRF, CORS preflights, JWTs, and RBAC design.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/security-deep-dive-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Security</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#owasp"><span class="nav-num">01</span>OWASP Top 10</a>
+    <a class="nav-item" href="#injection"><span class="nav-num">02</span>Injection & SSRF</a>
+    <a class="nav-item" href="#xss-csrf"><span class="nav-num">03</span>XSS & CSRF</a>
+    <a class="nav-item" href="#auth"><span class="nav-num">04</span>Auth Security</a>
+    <a class="nav-item" href="#cors"><span class="nav-num">05</span>CORS</a>
+    <a class="nav-item" href="#infra"><span class="nav-num">06</span>Infra Security</a>
+    <a class="nav-item" href="#projects"><span class="nav-num">07</span>In Your Projects</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">OWASP - Auth - CORS - Injection</div>
+      <h1>Security Deep Dive <span>Interview Notes</span></h1>
+      <p>AppSec for backend engineers. Be ready to explain how you prevent injection, XSS, CSRF, how you manage secrets, and how you design secure authentication and RBAC systems (like in Gaza40+).</p>
+      <div class="tags"><span class="tag">OWASP</span><span class="tag">JWT Security</span><span class="tag">CORS</span><span class="tag">RBAC</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="owasp">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Foundation</div><h2>OWASP Top 10</h2><div class="subtitle">Not a checklist. A ranked list of the root causes that keep showing up.</div></div></div>
+
+        <p>Start with what the list actually is, because interviewers ask that before they ask you to recite it. OWASP is a nonprofit that periodically analyses breach and vulnerability data across thousands of real applications, groups what it finds by <em>root cause</em>, and ranks the categories by how often they appear and how badly they hurt. The Top 10 is the output of that exercise. It is a description of where software keeps failing, not a specification you can be compliant with.</p>
+
+        <p>Two consequences follow, and both are worth saying out loud in an interview. First, the categories are broad on purpose — "Broken Access Control" covers a missing <code>if</code> statement and a mis-scoped S3 bucket alike, because the underlying mistake is the same. Second, the list is revised every few years as the data shifts. The edition below is the widely-cited 2021 revision; the ordering moves between editions, so quote the reasoning rather than the rank number.</p>
+
+        <div class="callout">
+          <div class="callout-title">The single idea underneath the whole list</div>
+          <p>Almost every entry is a trust boundary that someone forgot was a boundary. Data crosses from a place you do not control into a place you do — a request body, a URL, a header, a dependency, a container image — and somewhere on that path it stops being treated as hostile. Injection, SSRF, deserialization, and supply-chain attacks are all that one mistake wearing different clothes. If you can only remember one thing, remember to ask "where does untrusted input stop being treated as untrusted?"</p>
+        </div>
+
+        <h3>The 2021 list, mechanism first</h3>
+        <table>
+          <thead><tr><th>#</th><th>Category</th><th>What actually goes wrong</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A01</strong></td><td>Broken Access Control</td><td>The server authenticates the user, then trusts the client about <em>what that user may do</em>. Changing an id in a URL returns someone else's record. This is number one because authorization is per-endpoint work and there is no framework that does it for you.</td></tr>
+            <tr><td><strong>A02</strong></td><td>Cryptographic Failures</td><td>Sensitive data is stored or moved without adequate protection — plaintext at rest, a homemade cipher, an unsalted or fast hash, TLS terminated somewhere and then carried onward in the clear.</td></tr>
+            <tr><td><strong>A03</strong></td><td>Injection</td><td>Input is concatenated into something an interpreter parses — SQL, a shell, an LDAP filter, a template. The interpreter cannot tell your intent from the attacker's because by the time it sees the string, both look identical. Covered in section 02.</td></tr>
+            <tr><td><strong>A04</strong></td><td>Insecure Design</td><td>The code correctly implements a design that was never safe: no rate limit on a password reset, a business flow that can be replayed, a trust assumption that does not hold. No amount of careful implementation fixes it.</td></tr>
+            <tr><td><strong>A05</strong></td><td>Security Misconfiguration</td><td>Defaults left in place. Debug endpoints in production, verbose stack traces, a permissive CORS policy, an admin account with the shipped password, cloud storage that is public because public was easier.</td></tr>
+            <tr><td><strong>A06</strong></td><td>Vulnerable &amp; Outdated Components</td><td>You did not write the vulnerability, you installed it. A modern service is mostly other people's code, and that code has a CVE feed.</td></tr>
+            <tr><td><strong>A07</strong></td><td>Identification &amp; Authentication Failures</td><td>Credential stuffing that works because there is no throttling, sessions that never expire, tokens that survive a logout, password reset flows that leak whether an account exists.</td></tr>
+            <tr><td><strong>A08</strong></td><td>Software &amp; Data Integrity Failures</td><td>Trusting code or data whose provenance you never checked — an unsigned update, a CI pipeline anyone can write to, deserializing an object graph an attacker supplied.</td></tr>
+            <tr><td><strong>A09</strong></td><td>Logging &amp; Monitoring Failures</td><td>Not an attack, an amplifier. It is why the average breach is discovered months after it starts, usually by someone outside the company.</td></tr>
+            <tr><td><strong>A10</strong></td><td>Server-Side Request Forgery</td><td>Your server fetches a URL the user chose. The server sits inside the network perimeter, so it can reach things the attacker cannot. Covered in section 02.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Why A01 sits at the top</h3>
+        <p>It is worth understanding this one properly, because it is the category most likely to appear in your own code. Authentication answers "who is this?" and is solved once, centrally, usually by a library. Authorization answers "may this person do this specific thing to this specific record?" — and that question has a different answer at every endpoint. There is no central place to solve it, so it gets solved N times, and the N+1th endpoint is the one that ships without the check.</p>
+
+        <p>The classic shape is the insecure direct object reference: <code>GET /api/invoices/1043</code>. The handler looks up invoice 1043 and returns it. It verified that you are <em>a</em> logged-in user; it never verified that invoice 1043 is <em>yours</em>. The fix is not to obfuscate the id — UUIDs make guessing harder but change nothing about the missing check. The fix is to scope every query by the authenticated principal, so that ownership is a property of the lookup rather than a separate <code>if</code> someone can forget:</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-title">the shape of the fix</span><span class="code-lang">pseudo</span></div>
+          <pre><code><span class="cmt">// Fragile: two statements, and the second one can be forgotten.</span>
+<span class="kw">const</span> invoice = <span class="kw">await</span> db.invoice.findUnique({ <span class="func">where</span>: { id } });
+<span class="kw">if</span> (invoice.ownerId !== user.id) <span class="kw">throw</span> forbidden();
+
+<span class="cmt">// Durable: ownership is part of the query. A miss is a 404, not a leak.</span>
+<span class="kw">const</span> invoice = <span class="kw">await</span> db.invoice.findFirst({
+  <span class="func">where</span>: { id, ownerId: user.id }
+});</code></pre>
+        </div>
+
+        <div class="analogy">
+          <div class="analogy-label">Analogy</div>
+          <p>Authentication is the guard checking your ID at the building entrance. Authorization is whether your badge opens <em>this</em> door. Broken access control is a building where the front desk is immaculate and every internal door is unlocked, because the doors were installed by different teams and only some of them remembered.</p>
+        </div>
+
+        <div class="answer">
+          <div class="answer-q">"Walk me through the OWASP Top 10."</div>
+          <p>"I would not recite it as ten items, because it is not ten problems — it is mostly one problem seen from ten angles. Untrusted data crosses a boundary and stops being treated as untrusted. Injection is that at an interpreter, SSRF is that at an outbound request, deserialization is that at an object graph, supply chain is that at build time. The two entries that do not fit that pattern are broken access control, which is authorization being per-endpoint work with no central place to enforce it, and logging failures, which is not an attack at all but the reason attacks run undetected for months. If you want me to go deeper on any one of them I would pick access control, since it is the one I have had to design for directly."</p>
+        </div>
+      </section>
+
+      <section class="section" id="injection">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Attacks</div><h2>Injection & SSRF</h2><div class="subtitle">When user input breaks out of its context.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>SQL Injection</h3><p>Attacker sends input that modifies the SQL query logic. <br><strong>Fix:</strong> Always use Parameterized Queries (Prepared Statements) or an ORM like Prisma. Never concatenate strings for SQL.</p></div>
+          <div class="card"><h3>NoSQL Injection</h3><p>Passing an object instead of a string to a MongoDB query (e.g., <code>{"$ne": null}</code>). <br><strong>Fix:</strong> Sanitize inputs, enforce types (TypeScript + Zod validation before DB queries).</p></div>
+          <div class="card"><h3>Command Injection</h3><p>Unsanitized input passed to <code>child_process.exec</code>. <br><strong>Fix:</strong> Use <code>execFile</code> or <code>spawn</code> instead of <code>exec</code>, passing arguments as an array so they aren't parsed by the shell.</p></div>
+          <div class="card"><h3>SSRF (Server-Side Request Forgery)</h3><p>Tricking your server into making an HTTP request to an internal IP (like AWS Metadata API <code>169.254.169.254</code>). <br><strong>Fix:</strong> Restrict outbound URLs, validate domains, run isolated workers.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="xss-csrf">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Browser</div><h2>XSS & CSRF</h2><div class="subtitle">Protecting the client from malicious payloads.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>XSS (Cross-Site Scripting)</h3>
+            <p>Attacker injects malicious JS into the page (Stored, Reflected, or DOM-based). That JS can then steal <code>localStorage</code> tokens or make actions on behalf of the user.<br><strong>Mitigation:</strong> Escape output (React does this automatically). Never use <code>dangerouslySetInnerHTML</code> without a sanitizer like DOMPurify. Use <code>HttpOnly</code> cookies for tokens so JS can't read them. Set CSP (Content Security Policy) headers.</p>
+          </div>
+          <div class="deep-item">
+            <h3>CSRF (Cross-Site Request Forgery)</h3>
+            <p>Attacker tricks a victim's browser into making an authenticated request to a vulnerable site (using the browser's automatic cookie inclusion).<br><strong>Mitigation:</strong> Use <code>SameSite=Lax</code> or <code>Strict</code> on cookies. If supporting older browsers, use Anti-CSRF tokens (Synchronizer Token Pattern). Or require a custom header (e.g., <code>X-Requested-With</code>) which triggers a CORS preflight that blocks the attack from third-party domains.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="auth">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Identity</div><h2>Auth Security</h2><div class="subtitle">Passwords and Tokens.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concept</th><th>Best Practice</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td>Password Hashing</td><td>Argon2 or bcrypt with a salt.</td><td>Salts defeat rainbow tables. Slow hashing defeats brute-force. Never use MD5/SHA.</td></tr>
+              <tr><td>JWT Storage</td><td><code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> cookies.</td><td>Prevents XSS theft. <code>localStorage</code> is vulnerable to XSS.</td></tr>
+              <tr><td>Token Lifespan</td><td>Short-lived Access Token (15m), Long-lived Refresh Token.</td><td>Limits the window if an access token is leaked.</td></tr>
+              <tr><td>OAuth 2.0 PKCE</td><td>Use PKCE for SPAs and Mobile.</td><td>Prevents Authorization Code interception attacks.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="cors">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Policy</div><h2>CORS (Cross-Origin Resource Sharing)</h2><div class="subtitle">The most misunderstood security feature.</div></div></div>
+        <div class="answer"><div class="answer-q">"Why does CORS exist, and how does a Preflight work?"</div><p>"The Same-Origin Policy prevents a malicious site from reading data from another site. CORS allows a server to explicitly whitelist origins. For complex requests (like <code>POST</code> with <code>application/json</code>), the browser first sends an <code>OPTIONS</code> (Preflight) request. The server replies with <code>Access-Control-Allow-Origin</code> and <code>Access-Control-Allow-Headers</code>. Only if that passes does the browser send the actual request. CORS protects the *client*, not the server—Postman bypasses CORS entirely."</p></div>
+      </section>
+
+      <section class="section" id="infra">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Platform</div><h2>Infra Security</h2><div class="subtitle">The attack surface that exists whether or not your application code is perfect.</div></div></div>
+
+        <p>Everything so far has been about code you wrote. This section is about the parts an attacker reaches without touching your handlers at all: the secrets, the transport, the host, the pipeline, and the dependencies. These fail differently from application bugs. An injection flaw needs someone to find and exploit it; a public S3 bucket or a leaked key needs someone to simply notice, and automated scanners notice within minutes.</p>
+
+        <h3>Secrets</h3>
+        <p>The mental model that matters: a secret is not a value, it is a value <em>plus a blast radius plus a rotation story</em>. When you ask "where should this live?", you are really asking "who can read it, and what happens the day it leaks?"</p>
+
+        <div class="grid">
+          <div class="card"><h3>Never in the repo</h3><p>Git is append-only. Deleting a committed key in a later commit does not remove it — it stays in history, in every clone, and in every fork. A key that has been pushed is burned; the only real remediation is rotation, not deletion.</p></div>
+          <div class="card"><h3>Environment, not code</h3><p>Config comes from the environment so the same artifact can run in staging and production. Watch the client boundary though: any bundler that inlines variables into a browser bundle — <code>VITE_*</code>, <code>NEXT_PUBLIC_*</code> — is publishing them, whatever the file is named.</p></div>
+          <div class="card"><h3>Managed stores for anything real</h3><p>AWS Secrets Manager, SSM Parameter Store, Vault. What you buy is not encryption, it is <em>rotation and an audit trail</em>: you can answer who read the value and when, and you can change it without a redeploy.</p></div>
+          <div class="card"><h3>Least privilege on the credential</h3><p>The database user your API connects as should not be able to <code>DROP TABLE</code>. Scope the IAM role to the specific bucket and the specific actions. Most breach severity comes from over-permissioned credentials, not from the initial foothold.</p></div>
+        </div>
+
+        <h3>Transport</h3>
+        <p>TLS gives you three properties, and it is worth separating them because interviewers probe the difference: <strong>confidentiality</strong> (an observer cannot read the traffic), <strong>integrity</strong> (an observer cannot alter it undetected), and <strong>authenticity</strong> (you are talking to the host you think you are, because a CA vouched for the certificate). Encryption alone gives you the first two; the certificate chain is what gives you the third, and it is the one that stops an active man-in-the-middle rather than a passive listener.</p>
+
+        <p>Two practical failure modes. The first is terminating TLS at a load balancer and then speaking plain HTTP to the service behind it — fine if that hop is a trusted network you control, a real exposure if it crosses a shared one. The second is redirecting HTTP to HTTPS without <code>Strict-Transport-Security</code>: the very first request still goes out in the clear, which is the window an attacker on the same network needs. HSTS tells the browser never to try plaintext for this host again.</p>
+
+        <h3>Headers the browser enforces for you</h3>
+        <table>
+          <thead><tr><th>Header</th><th>What it stops</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td><code>Strict-Transport-Security</code></td><td>Downgrade to plaintext on the first request</td><td>Cached by the browser for <code>max-age</code>. Test before setting a long one — it is hard to undo.</td></tr>
+            <tr><td><code>Content-Security-Policy</code></td><td>XSS payload execution</td><td>The strongest control here and the most work. It defines which origins may supply scripts, so an injected <code>&lt;script&gt;</code> has nowhere to load from.</td></tr>
+            <tr><td><code>X-Content-Type-Options: nosniff</code></td><td>Browser guessing that an upload is JavaScript</td><td>One line, no downside. Always set it.</td></tr>
+            <tr><td><code>X-Frame-Options</code> / <code>frame-ancestors</code></td><td>Clickjacking — your page framed invisibly over an attacker's</td><td>The CSP directive supersedes the older header.</td></tr>
+            <tr><td><code>Referrer-Policy</code></td><td>Leaking full URLs (with tokens in them) to third parties</td><td>Matters more than it sounds if you ever put an id in a path.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <div class="callout-title">Why CSP is worth the effort</div>
+          <p>Every other XSS defence is a promise that you escaped output correctly everywhere, forever, including in the code someone adds next quarter. CSP is a different kind of control: it assumes you will eventually fail and removes the attacker's payoff anyway, because injected script has no permitted origin to execute from. Defence in depth means pairing a control that prevents the bug with one that survives the bug.</p>
+        </div>
+
+        <h3>Host and container</h3>
+        <p>Run as a non-root user — container escape is rarer than people fear, but a process running as root inside a container that has a mounted host path is a much shorter path to the host than one running as uid 1000. Keep base images small: <code>alpine</code> or a distroless base has fewer packages, which means a smaller CVE surface and less for an attacker to pivot with once inside. Do not bake secrets into image layers; anyone who can pull the image can read them, deleted in a later layer or not — the same append-only trap as Git.</p>
+
+        <h3>Supply chain</h3>
+        <p>Most of what runs in production is code you did not write. <code>npm audit</code> and Dependabot are table stakes. The subtler control is the lockfile: it pins the exact resolved versions so that a fresh install cannot silently pull a newly-published malicious patch release. In CI, <code>npm ci</code> installs strictly from the lockfile, which is why it belongs in a pipeline while <code>npm install</code> does not.</p>
+
+        <h3>Detection</h3>
+        <p>A09 from section 01 lands here. Log authentication outcomes, authorization denials, and privilege changes as structured events with a correlation id — and log the <em>denials</em>, since a spike in 403s is what an enumeration attack looks like from the inside. Never log the secret itself: not passwords, not tokens, not full card numbers, not the raw request body of an auth endpoint. Logs get shipped to third parties, read by support staff, and retained far longer than anyone intends.</p>
+
+        <div class="answer">
+          <div class="answer-q">"How do you keep secrets out of a deployed application?"</div>
+          <p>"Three layers. They never enter the repository, because Git history is append-only — once a key is pushed, rotation is the only real remediation, and I would treat deleting it in a later commit as a false fix. At runtime they come from the environment, with care about the client boundary: anything a bundler inlines into browser code is published no matter what the variable is called. And for anything with real blast radius I want a managed store, less for the encryption than for rotation and the audit trail — being able to answer who read a value and when, and to change it without a redeploy. Underneath all of it, the credential itself should be scoped down, because how bad a leak is depends mostly on what that credential was allowed to do."</p>
+        </div>
+      </section>
+
+      <section class="section" id="projects">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Application</div><h2>Security in Your Projects</h2><div class="subtitle">How to frame your experience.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Gaza40+:</strong> Implemented strict RBAC (Role-Based Access Control) across 5 roles. Permissions are validated on the server on every request, *never* trusted from the client payload. Enforced regional isolation at the database query level.</div>
+          <div class="check"><strong>Eudoro:</strong> Handled payment webhook security using Razorpay signature verification to prevent spoofed successful payment events. Used immutable ledger patterns for seller payouts to prevent race condition double-spends.</div>
+          <div class="check"><strong>Shaza:</strong> Enforced privacy between partners so the AI mediator cannot leak private conversation history from one partner to the other.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

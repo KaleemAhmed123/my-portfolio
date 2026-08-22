@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Engineering Handbook</title>
+<meta name="description" content="The original complete handbook covering core backend concepts from concurrency to API design.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/backend-engineering-handbook">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Backend Handbook</div>
+    <div class="sidebar-title">Senior Engineer's Field Guide</div>
+  </div>
+  <div class="tier-label">Tier 1 — Must Know</div>
+  <a class="nav-item" href="#ch1"><span class="nav-num">01</span>Concurrency</a>
+  <a class="nav-item" href="#ch2"><span class="nav-num">02</span>Transactions</a>
+  <a class="nav-item" href="#ch3"><span class="nav-num">03</span>DB Indexing</a>
+  <a class="nav-item" href="#ch4"><span class="nav-num">04</span>Caching</a>
+  <a class="nav-item" href="#ch5"><span class="nav-num">05</span>Rate Limiting</a>
+  <a class="nav-item" href="#ch6"><span class="nav-num">06</span>Message Queues</a>
+  <a class="nav-item" href="#ch7"><span class="nav-num">07</span>Background Workers</a>
+  <a class="nav-item" href="#ch8"><span class="nav-num">08</span>Webhooks</a>
+  <a class="nav-item" href="#ch9"><span class="nav-num">09</span>Authn vs Authz</a>
+  <a class="nav-item" href="#ch10"><span class="nav-num">10</span>CSRF vs XSS</a>
+  <div class="tier-label">Tier 2 — Senior Level</div>
+  <a class="nav-item" href="#ch11"><span class="nav-num">11</span>Distributed Systems</a>
+  <a class="nav-item" href="#ch12"><span class="nav-num">12</span>Load Balancing</a>
+  <a class="nav-item" href="#ch13"><span class="nav-num">13</span>Scaling</a>
+  <a class="nav-item" href="#ch14"><span class="nav-num">14</span>DB Replication</a>
+  <a class="nav-item" href="#ch15"><span class="nav-num">15</span>Sharding</a>
+  <a class="nav-item" href="#ch16"><span class="nav-num">16</span>Optimistic Locking</a>
+  <a class="nav-item" href="#ch17"><span class="nav-num">17</span>Event-Driven Arch</a>
+  <a class="nav-item" href="#ch18"><span class="nav-num">18</span>Circuit Breakers</a>
+  <a class="nav-item" href="#ch19"><span class="nav-num">19</span>Retry Strategies</a>
+  <a class="nav-item" href="#ch20"><span class="nav-num">20</span>Observability</a>
+  <div class="tier-label">Tier 3 — DevOps + Infra</div>
+  <a class="nav-item" href="#ch21"><span class="nav-num">21</span>Docker</a>
+  <a class="nav-item" href="#ch22"><span class="nav-num">22</span>Kubernetes</a>
+  <a class="nav-item" href="#ch23"><span class="nav-num">23</span>CI/CD</a>
+  <a class="nav-item" href="#ch24"><span class="nav-num">24</span>Reverse Proxy</a>
+  <a class="nav-item" href="#ch25"><span class="nav-num">25</span>API Design</a>
+  <div class="tier-label">Expanded Notes</div>
+  <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+  <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">RS</span>Resume Skill Map</a>
+  <a class="nav-item" href="/dev/notes/handbook_part2"><span class="nav-num">P2</span>Part 2 Deep Dive</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Senior Engineer's Reference</div>
+    <h1>Backend Engineering<br><span>Handbook</span></h1>
+    <p class="hero-desc">Everything you need to build production-grade systems — from core concepts to real-world tradeoffs, with interview prep baked in. Your textbook, war story collection, and interview coach in one document.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">25 topics</span>
+      <span class="hero-tag">Tier 1–3</span>
+      <span class="hero-tag">Code Examples</span>
+      <span class="hero-tag">Interview Prep</span>
+      <span class="hero-tag">Production Tips</span>
+      <span class="hero-tag">Cheatsheets</span>
+      <a class="hero-tag" href="/dev/notes/resume-skill-map" style="text-decoration:none;">Resume Skill Map</a>
+      <a class="hero-tag" href="/dev/notes/handbook_part2" style="text-decoration:none;">Expanded Part 2</a>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- TIER 1 DIVIDER -->
+    <div class="tier-divider">
+      <div class="tier-divider-line"></div>
+      <div class="tier-divider-badge t1">⚡ Tier 1 — Must Know (Almost Mandatory)</div>
+      <div class="tier-divider-line"></div>
+    </div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 1: CONCURRENCY -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-num">01</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Concurrency</h2>
+      <div class="chapter-subtitle">Race conditions, locks, and the art of not shooting yourself in the foot</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>Concurrency means <strong>multiple operations happening at the same time</strong>, or appearing to. In development you test with one user. In production, a thousand requests hit your server simultaneously. Things that work perfectly in isolation break spectacularly together.</p>
+    <p>The classic problem: two users try to buy the last item in your inventory at the exact same millisecond. Both read <code style="color:var(--teal);font-family:var(--mono)">stock = 1</code>, both decide they can proceed, both decrement — now stock is <code style="color:var(--red);font-family:var(--mono)">-1</code>. You've oversold. Welcome to a <strong>race condition</strong>.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Two people editing the same Google Doc offline, then both saving. Whoever saves last wins — the other person's changes vanish. Concurrency bugs are that "last save wins" problem, except in your database with money or inventory on the line.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Key Concepts</h3></div>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🔒</div><h4>Mutex / Lock</h4><p>Only one thread can hold the lock at a time. Others wait. Use for short critical sections.</p></div>
+      <div class="card"><div class="card-icon">⚛️</div><h4>Atomic Operations</h4><p>CPU-level operations that can't be interrupted. <code style="font-family:var(--mono);font-size:11px">INCR</code> in Redis is atomic — guaranteed.</p></div>
+      <div class="card"><div class="card-icon">😊</div><h4>Optimistic Locking</h4><p>Assume no conflict. Check version on write. Retry on conflict. Good for low-contention.</p></div>
+      <div class="card"><div class="card-icon">😠</div><h4>Pessimistic Locking</h4><p>Assume conflict. Lock immediately. Others block. Good for high-contention writes.</p></div>
+      <div class="card"><div class="card-icon">🔄</div><h4>Event Loop</h4><p>Node.js runs one JS thread. I/O is async. Concurrency via callbacks, not threads.</p></div>
+      <div class="card"><div class="card-icon">🏦</div><h4>Isolation Levels</h4><p>READ COMMITTED, REPEATABLE READ, SERIALIZABLE — trade consistency for performance.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL + Node.js</span><span class="code-title">Preventing oversell with pessimistic locking</span></div>
+      <pre><span class="cmt">-- Pessimistic: lock the row immediately, block concurrent reads</span>
+<span class="kw">BEGIN</span>;
+<span class="kw">SELECT</span> stock <span class="kw">FROM</span> products <span class="kw">WHERE</span> id = <span class="num">42</span> <span class="kw">FOR UPDATE</span>;  <span class="cmt">-- row is now locked</span>
+<span class="cmt">-- application checks: if stock > 0, proceed</span>
+<span class="kw">UPDATE</span> products <span class="kw">SET</span> stock = stock - <span class="num">1</span> <span class="kw">WHERE</span> id = <span class="num">42</span>;
+<span class="kw">INSERT INTO</span> orders (product_id, user_id) <span class="kw">VALUES</span> (<span class="num">42</span>, <span class="num">99</span>);
+<span class="kw">COMMIT</span>;
+<span class="cmt">-- Lock is released. Next waiter proceeds.</span></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL</span><span class="code-title">Optimistic locking with version column</span></div>
+      <pre><span class="cmt">-- Optimistic: no lock on read. Check version on write.</span>
+<span class="kw">SELECT</span> stock, version <span class="kw">FROM</span> products <span class="kw">WHERE</span> id = <span class="num">42</span>;
+<span class="cmt">-- Got: stock=1, version=5</span>
+
+<span class="kw">UPDATE</span> products
+  <span class="kw">SET</span> stock = stock - <span class="num">1</span>, version = version + <span class="num">1</span>
+  <span class="kw">WHERE</span> id = <span class="num">42</span> <span class="kw">AND</span> version = <span class="num">5</span>;  <span class="cmt">-- version guard</span>
+
+<span class="cmt">-- If 0 rows updated → someone else changed it → RETRY</span>
+<span class="cmt">-- If 1 row updated → success!</span></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Redis</span><span class="code-title">Atomic decrement — race-condition-free inventory</span></div>
+      <pre><span class="cmt">-- Redis DECRBY is atomic. No two clients can interleave.</span>
+<span class="fn">DECRBY</span> inventory:<span class="num">42</span> <span class="num">1</span>
+<span class="cmt">-- Returns new value. If < 0, rollback: INCRBY inventory:42 1</span>
+
+<span class="cmt">-- Or use Lua script for check-and-decrement atomically:</span>
+<span class="kw">local</span> stock = redis.call(<span class="str">'GET'</span>, KEYS[<span class="num">1</span>])
+<span class="kw">if</span> tonumber(stock) &gt; <span class="num">0</span> <span class="kw">then</span>
+  <span class="kw">return</span> redis.call(<span class="str">'DECRBY'</span>, KEYS[<span class="num">1</span>], <span class="num">1</span>)
+<span class="kw">end</span>
+<span class="kw">return</span> -<span class="num">1</span>  <span class="cmt">-- out of stock signal</span></pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Prefer atomic DB operations (UPDATE with WHERE) over read-then-write patterns whenever possible.</li>
+      <li>Use Redis <code style="font-family:var(--mono);font-size:11px">INCR/DECR</code> for counters — it's single-threaded and race-free by design.</li>
+      <li>Keep pessimistic locks as short as possible — long locks = long queues = timeouts.</li>
+      <li>Set lock timeouts. A crashed process should not hold a lock forever.</li>
+      <li>In Node.js, the event loop handles concurrency without threads — but CPU-bound tasks block it. Use <code style="font-family:var(--mono);font-size:11px">worker_threads</code> for heavy computation.</li>
+      <li>Test concurrency with tools like <code style="font-family:var(--mono);font-size:11px">k6</code> or <code style="font-family:var(--mono);font-size:11px">Apache JMeter</code> — run 100 simultaneous requests and verify correctness.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Two users try to buy the last item simultaneously. How do you prevent overselling?"</div>
+    <div class="interview-weak"><span class="badge-weak">✗ Weak</span><p>"I'd use a transaction."</p></div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"I'd use a <code style="font-family:var(--mono)">SELECT FOR UPDATE</code> (pessimistic lock) inside a transaction. Both users hit the endpoint simultaneously — the first one acquires the row lock and checks stock, the second blocks. When the first commits, the second proceeds but now sees stock = 0 and gets an 'out of stock' error. For high-traffic flash sales, I'd move inventory to Redis and use Lua scripting for an atomic check-and-decrement — much faster than a DB row lock and no connection pool exhaustion."</p></div>
+    <div class="interview-q">"What's the difference between optimistic and pessimistic locking?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Pessimistic locking says 'I expect conflict — lock immediately.' It's safe but creates contention. Optimistic says 'conflict is rare — proceed without a lock, but verify on write via a version column.' If the version changed, retry. I use optimistic for low-contention scenarios like user profile edits, and pessimistic for high-contention scenarios like inventory or wallet balances."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Race condition</span><span class="cheat-val">Two ops read stale state, both proceed based on it — result is wrong</span></div>
+      <div class="cheat-row"><span class="cheat-key">Mutex</span><span class="cheat-val">One-at-a-time access gate. Others wait in line.</span></div>
+      <div class="cheat-row"><span class="cheat-key">SELECT FOR UPDATE</span><span class="cheat-val">Pessimistic DB row lock. Hold until COMMIT/ROLLBACK.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Optimistic lock</span><span class="cheat-val">WHERE version = :old_version on UPDATE. 0 rows = conflict, retry.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Atomic op</span><span class="cheat-val">Redis INCR/DECR, DB UPDATE col = col + 1. No read-then-write.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Node.js concurrency</span><span class="cheat-val">Single JS thread + async I/O. No race on JS state, but DB still needs locking.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 2: TRANSACTIONS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-num">02</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Transactions</h2>
+      <div class="chapter-subtitle">All or nothing — the backbone of payment systems</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>A transaction is a group of operations that <strong>succeed together or fail together</strong>. When you deduct money from one account and add it to another, both must happen — you can't have money disappear or materialize from thin air.</p>
+    <p>Databases guarantee this through <strong>ACID</strong> properties. Miss any one of them and you're building on sand.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A transaction is like a bank wire transfer. The bank doesn't take money from your account and say "okay we'll add it to the recipient's account later." Both sides happen atomically, or neither does. If the system crashes mid-transfer, the whole thing rolls back.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>ACID Properties</h3></div>
+    <div class="cards">
+      <div class="card"><h4>A — Atomicity</h4><p>All operations succeed, or none of them do. No partial states.</p></div>
+      <div class="card"><h4>C — Consistency</h4><p>The DB goes from one valid state to another. Constraints never violated.</p></div>
+      <div class="card"><h4>I — Isolation</h4><p>Concurrent transactions don't see each other's uncommitted changes.</p></div>
+      <div class="card"><h4>D — Durability</h4><p>Committed data survives crashes. Written to disk, not just memory.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js + PostgreSQL</span><span class="code-title">Payment transfer — atomic debit + credit</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">transfer</span>(fromId, toId, amount) {
+  <span class="kw">const</span> client = <span class="kw">await</span> pool.<span class="fn">connect</span>();
+  <span class="kw">try</span> {
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'BEGIN'</span>);
+
+    <span class="kw">const</span> { rows } = <span class="kw">await</span> client.<span class="fn">query</span>(
+      <span class="str">`SELECT balance FROM accounts WHERE id = $1 FOR UPDATE`</span>,
+      [fromId]
+    );
+
+    <span class="kw">if</span> (rows[<span class="num">0</span>].balance &lt; amount) {
+      <span class="kw">throw new</span> <span class="type">Error</span>(<span class="str">'Insufficient funds'</span>);
+    }
+
+    <span class="kw">await</span> client.<span class="fn">query</span>(
+      <span class="str">`UPDATE accounts SET balance = balance - $1 WHERE id = $2`</span>,
+      [amount, fromId]
+    );
+    <span class="kw">await</span> client.<span class="fn">query</span>(
+      <span class="str">`UPDATE accounts SET balance = balance + $1 WHERE id = $2`</span>,
+      [amount, toId]
+    );
+    <span class="kw">await</span> client.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO transactions (from_id, to_id, amount) VALUES ($1, $2, $3)`</span>,
+      [fromId, toId, amount]
+    );
+
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'COMMIT'</span>);
+    <span class="kw">return</span> { success: <span class="kw">true</span> };
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">'ROLLBACK'</span>); <span class="cmt">// entire transaction undone</span>
+    <span class="kw">throw</span> err;
+  } <span class="kw">finally</span> {
+    client.<span class="fn">release</span>();
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>Isolation Levels</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Level</th><th>Dirty Read</th><th>Non-Repeatable Read</th><th>Phantom Read</th><th>Use When</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag blue">READ UNCOMMITTED</span></td><td><span class="tag red">Possible</span></td><td><span class="tag red">Possible</span></td><td><span class="tag red">Possible</span></td><td>Analytics where stale is OK</td></tr>
+          <tr><td><span class="tag blue">READ COMMITTED</span></td><td><span class="tag green">Safe</span></td><td><span class="tag red">Possible</span></td><td><span class="tag red">Possible</span></td><td>Default in Postgres, most apps</td></tr>
+          <tr><td><span class="tag blue">REPEATABLE READ</span></td><td><span class="tag green">Safe</span></td><td><span class="tag green">Safe</span></td><td><span class="tag red">Possible</span></td><td>Reports needing stable snapshot</td></tr>
+          <tr><td><span class="tag blue">SERIALIZABLE</span></td><td><span class="tag green">Safe</span></td><td><span class="tag green">Safe</span></td><td><span class="tag green">Safe</span></td><td>Financial critical paths</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Keep transactions short — a long open transaction holds locks, blocks other queries, and can cause connection pool exhaustion.</li>
+      <li>Never do network calls (HTTP, email) inside a DB transaction. The external call may hang for 10s while your lock is held.</li>
+      <li>Use <strong>Savepoints</strong> for nested transaction-like behavior within a single transaction.</li>
+      <li>Deadlock detection: Postgres auto-detects and kills the younger transaction. Retry on deadlock errors (<code style="font-family:var(--mono);font-size:11px">SQLSTATE 40P01</code>).</li>
+      <li>Distributed transactions (across multiple DBs/services) are notoriously hard. Prefer the Saga pattern — a sequence of local transactions with compensating actions.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What does ACID stand for and why does it matter?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"ACID ensures database correctness. Atomicity means all-or-nothing — a payment can't debit without crediting. Consistency means constraints are always satisfied. Isolation means concurrent transactions don't step on each other's toes — critical for correctness under load. Durability means a committed transaction survives a crash — we don't lose data when a server reboots. In practice, I've seen teams skip proper transaction scoping and end up with ghost orders where money was deducted but the order wasn't created. ACID is what prevents that."</p></div>
+    <div class="interview-q">"What are the risks of long-running transactions?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Long transactions hold locks on rows and pages, blocking other writers. They can also bloat the transaction log and in Postgres, prevent VACUUM from cleaning dead rows — table bloat. In high-traffic apps I always aim for sub-50ms transactions. If something expensive must happen, I'll complete the DB work first, commit, then do the external operation."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">BEGIN / COMMIT / ROLLBACK</span><span class="cheat-val">Start, save, undo transaction</span></div>
+      <div class="cheat-row"><span class="cheat-key">ACID</span><span class="cheat-val">Atomicity, Consistency, Isolation, Durability</span></div>
+      <div class="cheat-row"><span class="cheat-key">Dirty read</span><span class="cheat-val">Reading uncommitted data from another transaction</span></div>
+      <div class="cheat-row"><span class="cheat-key">Deadlock</span><span class="cheat-val">A ↔ B waiting on each other's locks. DB detects and kills one.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Saga pattern</span><span class="cheat-val">Distributed txn via local txns + compensating actions on failure</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 3: DATABASE INDEXING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-num">03</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Database Indexing</h2>
+      <div class="chapter-subtitle">The difference between O(log n) and a full table scan at 10M rows</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>An index is a <strong>separate data structure</strong> that stores a sorted copy of one or more columns, with pointers back to the original rows. When you query by an indexed column, the DB uses the index instead of scanning every row.</p>
+    <p>Without an index on a 10-million-row table, <code style="font-family:var(--mono);color:var(--red)">WHERE email = 'user@example.com'</code> reads all 10 million rows. With a B-tree index, it's ~25 comparisons. That's the difference between a 5-second query and a 1ms query.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A database index is exactly like the index at the back of a textbook. Without it, to find all mentions of "TCP/IP" you'd read every single page. With the index, you jump directly to page 247, 312, and 401. The B-tree structure is how that index is organized — sorted alphabetically for fast binary search.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL</span><span class="code-title">Index types and when to use them</span></div>
+      <pre><span class="cmt">-- Single column index: fast WHERE email = ?</span>
+<span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users(email);
+
+<span class="cmt">-- Composite index: fast for (user_id + status) or just user_id</span>
+<span class="cmt">-- Leftmost prefix rule: this helps WHERE user_id = ? AND status = ?</span>
+<span class="cmt">-- Also helps WHERE user_id = ? (alone)</span>
+<span class="cmt">-- Does NOT help WHERE status = ? (alone)</span>
+<span class="kw">CREATE INDEX</span> idx_orders_user_status <span class="kw">ON</span> orders(user_id, status);
+
+<span class="cmt">-- Covering index: all needed cols in the index → no table lookup</span>
+<span class="cmt">-- Query: SELECT email, name FROM users WHERE email = ?</span>
+<span class="cmt">-- If index covers email + name → result served from index alone</span>
+<span class="kw">CREATE INDEX</span> idx_covering <span class="kw">ON</span> users(email) <span class="kw">INCLUDE</span> (name);
+
+<span class="cmt">-- Partial index: only index rows matching condition</span>
+<span class="cmt">-- Great for "pending orders" queries on a table with mostly completed</span>
+<span class="kw">CREATE INDEX</span> idx_pending <span class="kw">ON</span> orders(created_at)
+  <span class="kw">WHERE</span> status = <span class="str">'pending'</span>;
+
+<span class="cmt">-- EXPLAIN ANALYZE: see if your index is being used</span>
+<span class="kw">EXPLAIN ANALYZE SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'test@example.com'</span>;
+<span class="cmt">-- Look for: "Index Scan" (good) vs "Seq Scan" (bad on large tables)</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>B-tree Index Structure</h3></div>
+    <p>A <strong>B-tree</strong> (Balanced Tree) is the default index type. Data is stored in sorted order across multiple pages. Each node has multiple keys and pointers. The tree stays balanced — all leaves are at the same depth. This guarantees O(log n) lookups regardless of data size.</p>
+    <p><strong>Key insight:</strong> B-trees support equality (<code style="font-family:var(--mono);color:var(--teal)">=</code>), range (<code style="font-family:var(--mono);color:var(--teal)">&gt; &lt; BETWEEN</code>), and prefix (<code style="font-family:var(--mono);color:var(--teal)">LIKE 'abc%'</code>) queries. They do NOT support suffix patterns (<code style="font-family:var(--mono);color:var(--red)">LIKE '%abc'</code>) — that requires a full scan or a special index like GIN.</p>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Indexes slow down writes (INSERT/UPDATE/DELETE must update the index too). Don't over-index — be selective.</li>
+      <li>High cardinality columns (email, user_id) benefit most from indexes. Low cardinality (boolean, status with 3 values) often doesn't help.</li>
+      <li>Run <code style="font-family:var(--mono);font-size:11px">EXPLAIN ANALYZE</code> on slow queries — look for "Seq Scan" on large tables as the smoking gun.</li>
+      <li>In Postgres, use <code style="font-family:var(--mono);font-size:11px">pg_stat_user_indexes</code> to find unused indexes — they're write overhead with no read benefit.</li>
+      <li>Create indexes <code style="font-family:var(--mono);font-size:11px">CONCURRENTLY</code> in production to avoid table locks during creation.</li>
+      <li>The composite index column order matters: put the most selective column first, equality conditions before range conditions.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"A query that was fast is now slow after reaching 10 million rows. What do you check?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"First, I'd run <code style="font-family:var(--mono)">EXPLAIN ANALYZE</code> to see the query plan. I'm looking for a Seq Scan on a large table — that's usually the culprit. Then I'd check if there's an index on the WHERE columns. If there is but it's not being used, the query planner might have decided a seq scan is faster — common when you're fetching a large percentage of rows, or the index statistics are stale (run ANALYZE). I'd also check for function calls on indexed columns like <code style="font-family:var(--mono)">WHERE LOWER(email) = ?</code> — that disables index usage. The fix would be a functional index or changing the query."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">B-tree</span><span class="cheat-val">Default index. Sorted, O(log n) lookup. Supports =, &lt;, &gt;, BETWEEN, LIKE 'x%'</span></div>
+      <div class="cheat-row"><span class="cheat-key">Composite index</span><span class="cheat-val">Multiple columns. Leftmost prefix rule applies.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Covering index</span><span class="cheat-val">Includes all cols needed — no heap (table) fetch needed</span></div>
+      <div class="cheat-row"><span class="cheat-key">Seq scan</span><span class="cheat-val">Reads every row. Fine for tiny tables, disaster for millions.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Index selectivity</span><span class="cheat-val">High cardinality = good candidate. Boolean flag = bad candidate.</span></div>
+      <div class="cheat-row"><span class="cheat-key">EXPLAIN ANALYZE</span><span class="cheat-val">Shows actual execution plan + timing. Always use for slow queries.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 4: CACHING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-num">04</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Caching</h2>
+      <div class="chapter-subtitle">The fastest database query is the one you never make</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>Caching stores frequently-accessed data in fast memory (Redis, Memcached) so you don't hit the database on every request. A Redis GET takes ~0.1ms. A Postgres query might take 5–50ms. At 10,000 req/sec, that difference is what separates a working system from a melted one.</p>
+    <p>The challenge isn't storing data in cache — it's <strong>cache invalidation</strong>: knowing when cached data is stale and needs to be refreshed. Phil Karlton famously said: "There are only two hard things in computer science: cache invalidation and naming things."</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A cache is like your brain's short-term memory vs. looking something up in a book. You remember your friend's phone number (cache hit — instant). For a rarely-called number, you look it up in your contacts (cache miss — go to the source). If your friend changes their number but you still have the old one memorized, that's a stale cache.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Caching Patterns</h3></div>
+    <div class="cards">
+      <div class="card"><h4>Cache-Aside (Lazy)</h4><p>App checks cache first. Miss → fetch DB → populate cache. Most common pattern.</p></div>
+      <div class="card"><h4>Write-Through</h4><p>Write to cache AND DB simultaneously. Cache always fresh. Slower writes.</p></div>
+      <div class="card"><h4>Write-Behind</h4><p>Write to cache immediately, DB async. Fast writes but risk of data loss.</p></div>
+      <div class="card"><h4>Read-Through</h4><p>Cache sits in front of DB. Cache handles misses automatically.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js + Redis</span><span class="code-title">Cache-aside pattern with TTL</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">getUserById</span>(userId) {
+  <span class="kw">const</span> cacheKey = <span class="str">`user:<span class="kw">${userId}</span>`</span>;
+
+  <span class="cmt">// 1. Check cache first</span>
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(cacheKey);
+  <span class="kw">if</span> (cached) {
+    <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);  <span class="cmt">// cache hit ✓</span>
+  }
+
+  <span class="cmt">// 2. Cache miss → fetch from DB</span>
+  <span class="kw">const</span> user = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`SELECT * FROM users WHERE id = $1`</span>, [userId]);
+
+  <span class="cmt">// 3. Populate cache with TTL (5 minutes)</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(cacheKey, <span class="num">300</span>, JSON.<span class="fn">stringify</span>(user));
+
+  <span class="kw">return</span> user;
+}
+
+<span class="cmt">// Invalidation on update — critical!</span>
+<span class="kw">async function</span> <span class="fn">updateUser</span>(userId, data) {
+  <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`UPDATE users SET ... WHERE id = $1`</span>, [userId]);
+  <span class="kw">await</span> redis.<span class="fn">del</span>(<span class="str">`user:<span class="kw">${userId}</span>`</span>); <span class="cmt">// evict stale cache</span>
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Redis</span><span class="code-title">Cache stampede protection (mutex)</span></div>
+      <pre><span class="cmt">// Cache stampede: cache expires, 1000 concurrent requests all hit DB</span>
+<span class="cmt">// Fix: only one request rebuilds the cache, others wait</span>
+
+<span class="kw">async function</span> <span class="fn">getWithStampedeProtection</span>(key, fetchFn, ttl = <span class="num">300</span>) {
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(key);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);
+
+  <span class="cmt">// Try to acquire rebuild lock</span>
+  <span class="kw">const</span> lockKey = <span class="str">`lock:<span class="kw">${key}</span>`</span>;
+  <span class="kw">const</span> acquired = <span class="kw">await</span> redis.<span class="fn">set</span>(lockKey, <span class="num">1</span>, <span class="str">'NX'</span>, <span class="str">'EX'</span>, <span class="num">10</span>);
+
+  <span class="kw">if</span> (acquired) {
+    <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchFn</span>();           <span class="cmt">// only ONE request hits DB</span>
+    <span class="kw">await</span> redis.<span class="fn">setex</span>(key, ttl, JSON.<span class="fn">stringify</span>(data));
+    <span class="kw">await</span> redis.<span class="fn">del</span>(lockKey);
+    <span class="kw">return</span> data;
+  } <span class="kw">else</span> {
+    <span class="cmt">// Another request is rebuilding. Wait and retry.</span>
+    <span class="kw">await</span> <span class="fn">sleep</span>(<span class="num">100</span>);
+    <span class="kw">return</span> <span class="fn">getWithStampedeProtection</span>(key, fetchFn, ttl);
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Set meaningful TTLs. Too short = high cache miss rate. Too long = stale data. Profile your data's change frequency.</li>
+      <li>Use cache tags or key prefixes for bulk invalidation: <code style="font-family:var(--mono);font-size:11px">user:*</code> to clear all user caches.</li>
+      <li>Cache stampede is real in high-traffic systems. Use mutex locks or probabilistic early expiration (PER algorithm).</li>
+      <li>Monitor cache hit rate. A good cache hit rate is &gt;90%. Below 80% means your TTL is too short or your access patterns are too random.</li>
+      <li>Redis eviction policy: set <code style="font-family:var(--mono);font-size:11px">maxmemory-policy allkeys-lru</code> so Redis evicts least-recently-used keys when full, rather than crashing.</li>
+      <li>Don't cache user-specific data at the application level if using a shared cache — namespace by user ID.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Your database is overloaded during peak traffic. How do you reduce the load?"</div>
+    <div class="interview-weak"><span class="badge-weak">✗ Weak</span><p>"I'd add Redis."</p></div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"I'd implement cache-aside pattern with Redis. For each hot query (like product listings or user profiles), check cache first. On a miss, query the DB and cache the result with an appropriate TTL — maybe 5 minutes for products, 1 hour for configs. I'd also set up cache warming to pre-populate on deployment so the cold start after deploy doesn't spike the DB. I'd add stampede protection for critical high-traffic endpoints. The goal is a 90%+ cache hit rate, which should reduce DB load by 10x."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Cache-aside</span><span class="cheat-val">Check cache → miss → fetch DB → populate. App controls it.</span></div>
+      <div class="cheat-row"><span class="cheat-key">TTL</span><span class="cheat-val">Time To Live. Auto-expires stale data. Set per-use-case.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Cache invalidation</span><span class="cheat-val">DEL key on update/delete. The hard part.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Cache stampede</span><span class="cheat-val">Expiry → many concurrent misses → DB overload. Fix with mutex.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Cache hit rate</span><span class="cheat-val">Target &gt;90%. Below 80% = review TTLs or caching strategy.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Redis SETEX</span><span class="cheat-val">SET key with TTL in one atomic command: SETEX key seconds value</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 5: RATE LIMITING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-num">05</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Rate Limiting</h2>
+      <div class="chapter-subtitle">Protecting your API from bots, abuse, and well-meaning but destructive clients</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>Rate limiting restricts how many requests a client can make in a time window. Without it, a single bot can hammer your API with 10,000 requests/second and take down your service for everyone else.</p>
+    <p>Rate limiting protects against: DDoS attacks, credential stuffing, scraping bots, runaway clients with bugs making infinite retry loops, and free-tier abuse.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A token bucket is like a bus ticket machine. You start with 10 tokens in your bucket. Each request spends one token. Tokens refill at 2 per second. If you burst and empty the bucket, you wait for it to refill. This is how Stripe, GitHub, and most production APIs work.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Algorithms Compared</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Algorithm</th><th>How It Works</th><th>Burst Allowed</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag purple">Token Bucket</span></td><td>Tokens added at rate r. Each request consumes 1. Excess rejected.</td><td>Yes (up to bucket size)</td><td>APIs allowing some burst</td></tr>
+          <tr><td><span class="tag blue">Leaky Bucket</span></td><td>Requests queue up, processed at fixed rate. Overflow dropped.</td><td>No (smoothed output)</td><td>Smooth traffic shaping</td></tr>
+          <tr><td><span class="tag amber">Fixed Window</span></td><td>Count requests per time window. Reset at boundary.</td><td>Double at boundary!</td><td>Simple use cases</td></tr>
+          <tr><td><span class="tag green">Sliding Window</span></td><td>Rolling window of last N seconds. More accurate than fixed.</td><td>No double burst</td><td>Production standard</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js + Redis</span><span class="code-title">Sliding window rate limiter</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">isRateLimited</span>(userId, limit = <span class="num">100</span>, windowSec = <span class="num">60</span>) {
+  <span class="kw">const</span> key = <span class="str">`rl:<span class="kw">${userId}</span>`</span>;
+  <span class="kw">const</span> now = Date.<span class="fn">now</span>();
+  <span class="kw">const</span> windowStart = now - (windowSec * <span class="num">1000</span>);
+
+  <span class="kw">const</span> pipeline = redis.<span class="fn">pipeline</span>();
+  pipeline.<span class="fn">zremrangebyscore</span>(key, <span class="num">0</span>, windowStart);  <span class="cmt">// prune old</span>
+  pipeline.<span class="fn">zadd</span>(key, now, <span class="str">`<span class="kw">${now}</span>-<span class="kw">${Math.random()}</span>`</span>);  <span class="cmt">// add request</span>
+  pipeline.<span class="fn">zcard</span>(key);                               <span class="cmt">// count in window</span>
+  pipeline.<span class="fn">expire</span>(key, windowSec);                   <span class="cmt">// auto-clean keys</span>
+  <span class="kw">const</span> results = <span class="kw">await</span> pipeline.<span class="fn">exec</span>();
+
+  <span class="kw">const</span> requestCount = results[<span class="num">2</span>][<span class="num">1</span>];
+  <span class="kw">return</span> requestCount &gt; limit;  <span class="cmt">// true = rate limited</span>
+}
+
+<span class="cmt">// Express middleware usage</span>
+app.<span class="fn">use</span>(<span class="kw">async</span> (req, res, next) =&gt; {
+  <span class="kw">const</span> limited = <span class="kw">await</span> <span class="fn">isRateLimited</span>(req.user.id);
+  <span class="kw">if</span> (limited) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">json</span>({
+      error: <span class="str">'Too Many Requests'</span>,
+      retryAfter: <span class="num">60</span>  <span class="cmt">// always tell the client when to retry</span>
+    });
+  }
+  <span class="fn">next</span>();
+});</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Always return <code style="font-family:var(--mono);font-size:11px">Retry-After</code> and <code style="font-family:var(--mono);font-size:11px">X-RateLimit-Remaining</code> headers — clients can back off gracefully instead of hammering.</li>
+      <li>Rate limit by multiple dimensions: IP, user ID, API key. IP-only is bypassable via botnets.</li>
+      <li>Different limits for different endpoints: stricter on password reset/login (brute force prevention), looser on read endpoints.</li>
+      <li>Use API Gateway (AWS API Gateway, Kong, NGINX) for rate limiting at the infrastructure level — more reliable than application code.</li>
+      <li>Sliding window is worth the extra Redis cost vs. fixed window — fixed window has a 2x burst vulnerability at window boundaries.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you implement rate limiting for a public API?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"I'd use a sliding window counter in Redis, keyed by user ID or API key. For each request, I remove entries older than the window, add the current timestamp, and check the count. Redis sorted sets make this efficient. I'd expose rate limit headers so clients know their remaining quota. For unauthenticated endpoints, I'd rate limit by IP with a stricter limit. At scale, I'd push this to the API Gateway layer — application-level rate limiting doesn't protect against requests that consume resources before they hit your code."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">429 Too Many Requests</span><span class="cheat-val">HTTP status for rate limited responses. Always include Retry-After.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Token bucket</span><span class="cheat-val">Allows bursts up to bucket size. Tokens refill at constant rate.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Sliding window</span><span class="cheat-val">Count requests in last N seconds. More fair than fixed window.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Fixed window flaw</span><span class="cheat-val">100 req at 11:59 + 100 req at 12:01 = 200 req in 2 seconds.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Redis ZSET</span><span class="cheat-val">Sorted set by timestamp. ZREMRANGEBYSCORE prunes old entries.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 6: MESSAGE QUEUES -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter-header">
+    <div class="chapter-num">06</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Message Queues</h2>
+      <div class="chapter-subtitle">Decoupling services so a slow email server doesn't crash your checkout</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>A message queue is a <strong>buffer between producers and consumers</strong>. Instead of Service A calling Service B directly and waiting, A publishes a message to the queue and moves on. B picks it up when it's ready.</p>
+    <p>This <strong>decoupling</strong> is the key insight. It means B can be slow, down, or overwhelmed — A still works fine. Messages pile up in the queue and get processed when B recovers.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A restaurant's order slip system. The waiter takes your order (producer) and drops a slip in the kitchen window (queue). The chef (consumer) processes orders at their own pace. The waiter doesn't stand there waiting — they take more orders. If the kitchen is backed up, slips queue up. Nobody loses their order.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js + BullMQ (Redis-backed)</span><span class="code-title">Email job queue with retries</span></div>
+      <pre><span class="kw">import</span> { Queue, Worker } <span class="kw">from</span> <span class="str">'bullmq'</span>;
+
+<span class="cmt">// --- PRODUCER: enqueue in your API handler ---</span>
+<span class="kw">const</span> emailQueue = <span class="kw">new</span> <span class="type">Queue</span>(<span class="str">'emails'</span>, { connection: redisConfig });
+
+<span class="kw">async function</span> <span class="fn">signup</span>(user) {
+  <span class="kw">await</span> db.<span class="fn">createUser</span>(user);
+  <span class="cmt">// Don't send email inline — enqueue it</span>
+  <span class="kw">await</span> emailQueue.<span class="fn">add</span>(<span class="str">'welcome'</span>, { userId: user.id, email: user.email }, {
+    attempts: <span class="num">3</span>,           <span class="cmt">// retry up to 3 times</span>
+    backoff: { type: <span class="str">'exponential'</span>, delay: <span class="num">2000</span> }
+  });
+  <span class="kw">return</span> res.<span class="fn">json</span>({ success: <span class="kw">true</span> }); <span class="cmt">// instant response</span>
+}
+
+<span class="cmt">// --- CONSUMER: runs in a separate process ---</span>
+<span class="kw">const</span> worker = <span class="kw">new</span> <span class="type">Worker</span>(<span class="str">'emails'</span>, <span class="kw">async</span> (job) =&gt; {
+  <span class="kw">const</span> { userId, email } = job.data;
+  <span class="kw">await</span> sendWelcomeEmail(email);  <span class="cmt">// SMTP call here, not in API</span>
+  console.<span class="fn">log</span>(<span class="str">`Email sent to <span class="kw">${email}</span>`</span>);
+}, { connection: redisConfig });
+
+worker.<span class="fn">on</span>(<span class="str">'failed'</span>, (job, err) =&gt; {
+  console.<span class="fn">error</span>(<span class="str">`Job <span class="kw">${job.id}</span> failed: <span class="kw">${err.message}</span>`</span>);
+  <span class="cmt">// After 3 attempts, goes to Dead Letter Queue</span>
+});</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>Key Concepts</h3></div>
+    <div class="cards">
+      <div class="card"><h4>At-Least-Once Delivery</h4><p>Message delivered at least once but possibly multiple times. Make consumers idempotent.</p></div>
+      <div class="card"><h4>Dead Letter Queue</h4><p>Failed messages after max retries land here for manual inspection. Never lose them.</p></div>
+      <div class="card"><h4>Backpressure</h4><p>Consumer signals it's overwhelmed. Producer slows down. Prevents memory blowup.</p></div>
+      <div class="card"><h4>Ordering</h4><p>Kafka guarantees order per partition. RabbitMQ with single consumer guarantees order. Multiple consumers = no ordering guarantee.</p></div>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Make message handlers <strong>idempotent</strong> — at-least-once delivery means you will process duplicates. Processing the same message twice must be safe.</li>
+      <li>Always have a dead letter queue. Failed jobs need investigation, not silent disappearance.</li>
+      <li>Monitor queue depth. A growing queue is an early warning of a consumer falling behind.</li>
+      <li>BullMQ (Redis) for most apps. Kafka for high-throughput event streaming (millions/sec). RabbitMQ for complex routing (topics, fanout).</li>
+      <li>Include correlation IDs in messages for distributed tracing — trace a user action through all the async jobs it spawned.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Why not just send the welcome email synchronously in the signup handler?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Three reasons. First, reliability: SMTP can fail or time out. If it does, the user gets an error even though their account was created — terrible UX. Enqueuing separates the concerns. Second, performance: email sending might take 2–5 seconds. The user shouldn't wait for that. Third, resilience: if the email service is down, messages queue up and get delivered when it recovers. The user gets their email 5 minutes late instead of never. The tradeoff is eventual delivery, which is almost always fine for emails."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Producer</span><span class="cheat-val">Publishes messages. Doesn't wait for processing.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Consumer</span><span class="cheat-val">Pulls and processes messages at its own pace.</span></div>
+      <div class="cheat-row"><span class="cheat-key">At-least-once</span><span class="cheat-val">Guaranteed delivery but possible duplicates. Make handlers idempotent.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Dead letter queue</span><span class="cheat-val">Catches failed messages after max retries. Never silently drop.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Kafka vs RabbitMQ</span><span class="cheat-val">Kafka: high-throughput streams, replay. Rabbit: complex routing, RPC-style.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTERS 7–25: CONDENSED BUT COMPLETE -->
+
+<!-- ============================================================ -->
+<!-- CHAPTER 7: BACKGROUND WORKERS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter-header">
+    <div class="chapter-num">07</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Background Workers</h2>
+      <div class="chapter-subtitle">Don't make the user wait for things that can happen later</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>A background worker is a process that runs outside the request-response cycle. The API handler enqueues a job and returns immediately. The worker picks it up and does the heavy lifting asynchronously. This keeps your API fast and your users happy.</p>
+    <p>Use background workers for: PDF generation, video transcoding, sending emails/SMS, AI inference, image resizing, report generation, data exports, and anything that takes &gt;500ms.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>When you order a custom cake at a bakery, they don't make you stand there while they bake it. They take your order (API responds), give you a ticket (job ID), and call you when it's ready (webhook/notification). The baker works in the background.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">PDF generation as background job</span></div>
+    <pre><span class="cmt">// API Handler — returns instantly with job ID</span>
+app.<span class="fn">post</span>(<span class="str">'/reports/generate'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> job = <span class="kw">await</span> reportQueue.<span class="fn">add</span>(<span class="str">'generate-pdf'</span>, {
+    userId: req.user.id,
+    filters: req.body.filters
+  });
+  res.<span class="fn">json</span>({ jobId: job.id, status: <span class="str">'queued'</span> });
+  <span class="cmt">// Response: 202 Accepted — processing in background</span>
+});
+
+<span class="cmt">// Status polling endpoint</span>
+app.<span class="fn">get</span>(<span class="str">'/reports/:jobId/status'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> job = <span class="kw">await</span> reportQueue.<span class="fn">getJob</span>(req.params.jobId);
+  <span class="kw">const</span> state = <span class="kw">await</span> job.<span class="fn">getState</span>(); <span class="cmt">// waiting/active/completed/failed</span>
+  res.<span class="fn">json</span>({ status: state, result: job.returnvalue });
+});
+
+<span class="cmt">// Background worker process</span>
+<span class="kw">const</span> worker = <span class="kw">new</span> <span class="type">Worker</span>(<span class="str">'reports'</span>, <span class="kw">async</span> (job) =&gt; {
+  <span class="kw">const</span> pdfBuffer = <span class="kw">await</span> <span class="fn">generatePDF</span>(job.data);  <span class="cmt">// heavy operation</span>
+  <span class="kw">const</span> url = <span class="kw">await</span> s3.<span class="fn">upload</span>(pdfBuffer);
+  <span class="kw">await</span> <span class="fn">notifyUser</span>(job.data.userId, url);         <span class="cmt">// webhook or email</span>
+  <span class="kw">return</span> { downloadUrl: url };
+});</pre>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Use 202 Accepted (not 200) for endpoints that queue work — communicates async processing to clients.</li>
+      <li>Provide job status polling and/or webhooks so clients know when work completes.</li>
+      <li>Scale workers horizontally independently from your API servers — heavy batch processing doesn't slow down your API.</li>
+      <li>Set job timeouts — a stuck worker should be killed and retried, not held forever.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you handle generating a large PDF report for a user?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"I'd use a background job pattern. The API endpoint immediately returns a 202 with a job ID. A worker picks up the job, generates the PDF, uploads to S3, and sends the user a download link via email or webhook. I'd expose a status endpoint the client can poll. This keeps API response times fast regardless of report complexity."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">202 Accepted</span><span class="cheat-val">HTTP status for async job started. Return job ID.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Job states</span><span class="cheat-val">waiting → active → completed / failed</span></div>
+      <div class="cheat-row"><span class="cheat-key">Use case signals</span><span class="cheat-val">&gt;500ms processing, external service calls, batch ops, heavy I/O</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 8: WEBHOOKS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter-header">
+    <div class="chapter-num">08</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Webhooks</h2>
+      <div class="chapter-subtitle">Don't poll. Let the source tell you when something happens.</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>A webhook is an HTTP callback — you register a URL and an external service POSTs to it when an event occurs. Instead of you polling Stripe every second asking "did the payment succeed?", Stripe calls your endpoint the instant it does.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Polling is like repeatedly calling a restaurant: "Is my food ready? Is it ready now? Now?" Webhooks are like leaving your phone number and having them call you when it's ready.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Stripe webhook with signature verification</span></div>
+    <pre><span class="cmt">// 1. Verify the signature — CRITICAL. Anyone can POST to your URL.</span>
+app.<span class="fn">post</span>(<span class="str">'/webhooks/stripe'</span>,
+  express.<span class="fn">raw</span>({ type: <span class="str">'application/json'</span> }),  <span class="cmt">// raw body needed for sig check</span>
+  <span class="kw">async</span> (req, res) =&gt; {
+    <span class="kw">const</span> sig = req.headers[<span class="str">'stripe-signature'</span>];
+    <span class="kw">let</span> event;
+    <span class="kw">try</span> {
+      event = stripe.<span class="fn">constructEvent</span>(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">send</span>(<span class="str">'Invalid signature'</span>);
+    }
+
+    <span class="cmt">// 2. Respond 200 immediately — tell Stripe you got it</span>
+    res.<span class="fn">json</span>({ received: <span class="kw">true</span> });
+
+    <span class="cmt">// 3. Process async — don't do heavy work before responding</span>
+    <span class="kw">switch</span> (event.type) {
+      <span class="kw">case</span> <span class="str">'payment_intent.succeeded'</span>:
+        <span class="kw">await</span> orderQueue.<span class="fn">add</span>(<span class="str">'fulfill'</span>, event.data.object);
+        <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="str">'customer.subscription.deleted'</span>:
+        <span class="kw">await</span> <span class="fn">handleCancellation</span>(event.data.object);
+        <span class="kw">break</span>;
+    }
+  }
+);</pre>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li><strong>Always verify signatures.</strong> Without it, anyone can fake a "payment succeeded" event and get free access.</li>
+      <li>Respond with 200 <em>immediately</em> before doing any processing. If you respond slowly, the sender retries — causing duplicates.</li>
+      <li>Make handlers idempotent with a unique event ID check — store processed event IDs to prevent replay attacks.</li>
+      <li>Enqueue webhook processing as a background job — never do DB-heavy or slow work inline in the webhook handler.</li>
+      <li>Use a tool like ngrok in local development to expose your localhost to receive webhook events.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What's the difference between polling and webhooks? When would you use each?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Polling is your client repeatedly asking a server 'anything new?' — simple but wasteful and latency-bound. Webhooks are event-driven: the server calls you. I'd use webhooks for payment events, third-party integrations, and anything where low latency matters and you control a public endpoint. I'd use polling when I can't register a callback URL (e.g., calling a third-party API that doesn't support webhooks), or for batch jobs where slight delays are fine. The key security practice for webhooks is signature verification to prevent spoofed events."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Signature verification</span><span class="cheat-val">HMAC-SHA256 of request body. Compare to header. Reject mismatches.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Idempotency</span><span class="cheat-val">Store processed event IDs. Skip duplicates on retry.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Respond fast</span><span class="cheat-val">200 immediately, process async. Slow = retry storm.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Replay attack</span><span class="cheat-val">Attacker resends old signed request. Prevent with timestamp check + nonce.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 9: AUTHN vs AUTHZ -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter-header">
+    <div class="chapter-num">09</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>Authentication vs Authorization</h2>
+      <div class="chapter-subtitle">Who are you? vs What can you do?</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p><strong>Authentication (AuthN)</strong>: Verifying identity — "Who are you?" You prove who you are via password, token, biometric, etc.</p>
+    <p><strong>Authorization (AuthZ)</strong>: Verifying permission — "What are you allowed to do?" Once we know who you are, can you access this resource?</p>
+    <p>The confusion: both happen on every request, sequentially. First verify identity, then check permissions. Skipping either is a security hole.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A hotel key card. Authentication is at the front desk — you show ID and they verify you're a guest (who you are). Authorization is when you tap your keycard on the room door — the door checks if your card is allowed into room 412 (what you can access). The front desk is AuthN. The door reader is AuthZ.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Node.js + JWT</span><span class="code-title">AuthN middleware → AuthZ check</span></div>
+    <pre><span class="cmt">// 1. AUTHENTICATION middleware — verify the JWT</span>
+<span class="kw">const</span> <span class="fn">authenticate</span> = (req, res, next) =&gt; {
+  <span class="kw">const</span> token = req.headers.authorization?.split(<span class="str">' '</span>)[<span class="num">1</span>]; <span class="cmt">// "Bearer &lt;token&gt;"</span>
+  <span class="kw">if</span> (!token) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> });
+  <span class="kw">try</span> {
+    req.user = jwt.<span class="fn">verify</span>(token, process.env.JWT_SECRET);
+    <span class="fn">next</span>(); <span class="cmt">// identity confirmed: req.user.id, req.user.role</span>
+  } <span class="kw">catch</span> {
+    res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid token'</span> });
+  }
+};
+
+<span class="cmt">// 2. AUTHORIZATION middleware — check role/permission</span>
+<span class="kw">const</span> <span class="fn">authorize</span> = (...roles) =&gt; (req, res, next) =&gt; {
+  <span class="kw">if</span> (!roles.<span class="fn">includes</span>(req.user.role)) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">json</span>({ error: <span class="str">'Forbidden'</span> });
+  }
+  <span class="fn">next</span>();
+};
+
+<span class="cmt">// 3. Resource-level check (does this user own this order?)</span>
+app.<span class="fn">get</span>(<span class="str">'/orders/:id'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> order = <span class="kw">await</span> db.<span class="fn">getOrder</span>(req.params.id);
+  <span class="kw">if</span> (order.userId !== req.user.id && req.user.role !== <span class="str">'admin'</span>) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">json</span>({ error: <span class="str">'Forbidden'</span> });
+  }
+  res.<span class="fn">json</span>(order);
+});
+
+<span class="cmt">// Admin-only route</span>
+app.<span class="fn">delete</span>(<span class="str">'/users/:id'</span>, authenticate, <span class="fn">authorize</span>(<span class="str">'admin'</span>), <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">await</span> db.<span class="fn">deleteUser</span>(req.params.id);
+  res.<span class="fn">json</span>({ success: <span class="kw">true</span> });
+});</pre>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>JWT Deep Dive</h3></div>
+    <p>A JWT (JSON Web Token) is a <strong>self-contained token</strong> — it carries the user's identity and claims (id, role, email) encoded and signed with a secret. The server doesn't need to look up the session in a DB — it just verifies the signature.</p>
+    <div class="cards">
+      <div class="card"><h4>Header</h4><p>Algorithm type: <code style="font-family:var(--mono);font-size:11px">{"alg":"HS256","typ":"JWT"}</code></p></div>
+      <div class="card"><h4>Payload</h4><p>Claims: <code style="font-family:var(--mono);font-size:11px">{"sub":"123","role":"admin","exp":1234}</code></p></div>
+      <div class="card"><h4>Signature</h4><p>HMAC-SHA256 of header + payload + secret. Tamper-proof.</p></div>
+    </div>
+    <p>Refresh tokens: JWTs expire (typically 15 min–1 hour). A long-lived refresh token (stored in HttpOnly cookie) exchanges for a new access JWT without re-login.</p>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Store JWTs in memory or HttpOnly cookies, never localStorage — XSS attacks can steal localStorage tokens.</li>
+      <li>Short access token expiry (15 min). Long refresh token in HttpOnly cookie. Rotate refresh tokens on use.</li>
+      <li>Use RBAC (Role-Based Access Control) for role checks, but don't forget resource-level authorization — a user with "viewer" role can't view other users' private data.</li>
+      <li>For OAuth ("Sign in with Google"), you're the client — Google does authentication, you receive an identity assertion. You still handle authorization.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What's the difference between 401 and 403?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"401 Unauthorized means authentication failed — 'I don't know who you are.' The client should re-authenticate. 403 Forbidden means authentication succeeded but authorization failed — 'I know who you are, but you're not allowed here.' The naming is confusingly historical; 401 should've been called Unauthenticated."</p></div>
+    <div class="interview-q">"How do JWTs work and what are their limitations?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"A JWT encodes claims in a base64 payload and signs it with a secret. The server can verify it without a DB lookup — that's the scalability win. The limitation is revocation: you can't invalidate a JWT before it expires. If a user logs out or is banned, their token is still valid until expiry. The mitigations are short TTLs (15 min) plus a token blocklist in Redis for critical revocations."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">AuthN → AuthZ</span><span class="cheat-val">Always in order. Can't authorize without identifying first.</span></div>
+      <div class="cheat-row"><span class="cheat-key">401 Unauthorized</span><span class="cheat-val">Not authenticated. Send credentials.</span></div>
+      <div class="cheat-row"><span class="cheat-key">403 Forbidden</span><span class="cheat-val">Authenticated but not authorized. No credentials fix this.</span></div>
+      <div class="cheat-row"><span class="cheat-key">JWT</span><span class="cheat-val">Stateless. Self-contained. Can't revoke without blocklist.</span></div>
+      <div class="cheat-row"><span class="cheat-key">RBAC</span><span class="cheat-val">Role-Based Access Control. user/admin/superadmin roles.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Refresh token</span><span class="cheat-val">Long-lived. HttpOnly cookie. Exchanges for new access JWT.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 10: CSRF vs XSS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter-header">
+    <div class="chapter-num">10</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t1">Tier 1</div>
+      <h2>CSRF vs XSS</h2>
+      <div class="chapter-subtitle">The two most misunderstood web security attacks</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p><strong>CSRF (Cross-Site Request Forgery)</strong>: Attacker tricks your authenticated browser into making a request to your bank/app. Your browser sends cookies automatically — so the malicious request has your credentials.</p>
+    <p><strong>XSS (Cross-Site Scripting)</strong>: Attacker injects malicious JavaScript into your website. When another user loads the page, the script runs in their browser — can steal cookies, tokens, or control the page.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>CSRF is like someone sending a letter pretending to be you — to your bank, using your address, so the bank thinks it's legitimate. XSS is like someone poisoning a public notice board so every person who reads it gets infected. CSRF abuses trust in the user. XSS abuses trust in the content.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">CSRF protection + XSS prevention</span></div>
+    <pre><span class="cmt">// CSRF: SameSite cookie is the modern fix</span>
+res.<span class="fn">cookie</span>(<span class="str">'session'</span>, token, {
+  httpOnly: <span class="kw">true</span>,   <span class="cmt">// no JS access (also fights XSS token theft)</span>
+  secure: <span class="kw">true</span>,    <span class="cmt">// HTTPS only</span>
+  sameSite: <span class="str">'strict'</span> <span class="cmt">// never sent on cross-site requests ← CSRF protection</span>
+});
+
+<span class="cmt">// Or CSRF token approach (for older browsers / APIs)</span>
+<span class="kw">const</span> csrf = <span class="kw">require</span>(<span class="str">'csurf'</span>);
+app.<span class="fn">use</span>(<span class="fn">csrf</span>());
+app.<span class="fn">get</span>(<span class="str">'/form'</span>, (req, res) =&gt; {
+  res.<span class="fn">render</span>(<span class="str">'form'</span>, { csrfToken: req.<span class="fn">csrfToken</span>() }); <span class="cmt">// embed in form</span>
+});
+
+<span class="cmt">// XSS: never render raw user input — escape it</span>
+<span class="cmt">// BAD — executes any script in userName</span>
+document.getElementById(<span class="str">'name'</span>).innerHTML = userName;
+
+<span class="cmt">// GOOD — escapes HTML characters</span>
+document.getElementById(<span class="str">'name'</span>).textContent = userName;
+
+<span class="cmt">// Server-side: use helmet for CSP headers</span>
+<span class="kw">const</span> helmet = <span class="kw">require</span>(<span class="str">'helmet'</span>);
+app.<span class="fn">use</span>(helmet.<span class="fn">contentSecurityPolicy</span>({
+  directives: {
+    scriptSrc: [<span class="str">"'self'"</span>],  <span class="cmt">// only your scripts allowed</span>
+    defaultSrc: [<span class="str">"'self'"</span>]
+  }
+}));</pre>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--red)"></div><h3>Attack Comparison</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Aspect</th><th>CSRF</th><th>XSS</th></tr></thead>
+        <tbody>
+          <tr><td>Attack vector</td><td>Malicious site tricks browser into request</td><td>Malicious script injected into your site</td></tr>
+          <tr><td>Abuses</td><td>Browser auto-sending cookies</td><td>Trust in rendered content</td></tr>
+          <tr><td>Primary fix</td><td>SameSite cookies / CSRF tokens</td><td>Escape output, CSP headers</td></tr>
+          <tr><td>Stored vs Reflected</td><td>—</td><td>Stored XSS stays in DB; reflected in URL</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Use <code style="font-family:var(--mono);font-size:11px">SameSite=Strict</code> or <code style="font-family:var(--mono);font-size:11px">Lax</code> on all session cookies — this alone defeats most CSRF attacks.</li>
+      <li>Use <code style="font-family:var(--mono);font-size:11px">textContent</code> not <code style="font-family:var(--mono);font-size:11px">innerHTML</code> when rendering user data in the browser.</li>
+      <li>Set a strict Content Security Policy (CSP) header — it's your last line of defense if XSS exists.</li>
+      <li>Sanitize HTML on the server if you must accept rich text input (use DOMPurify or similar).</li>
+      <li>Use <code style="font-family:var(--mono);font-size:11px">HttpOnly</code> on session cookies — XSS can't steal what JS can't see.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Explain CSRF and how you'd prevent it."</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"CSRF exploits the browser's automatic cookie behavior. If I'm logged into bank.com and visit evil.com, evil.com can trigger a request to bank.com — my browser sends the session cookie automatically. Prevention: <code style="font-family:var(--mono)">SameSite=Strict</code> cookies tell the browser to never send the cookie on cross-site requests. Or a CSRF token — a random value embedded in forms, verified server-side — that evil.com can't read due to same-origin policy."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">CSRF</span><span class="cheat-val">Cross-site request using victim's cookies. Fix: SameSite cookie.</span></div>
+      <div class="cheat-row"><span class="cheat-key">XSS</span><span class="cheat-val">Injected JS runs in victim's browser. Fix: escape output + CSP.</span></div>
+      <div class="cheat-row"><span class="cheat-key">SameSite=Strict</span><span class="cheat-val">Cookie never sent on cross-site requests. Best CSRF protection.</span></div>
+      <div class="cheat-row"><span class="cheat-key">textContent vs innerHTML</span><span class="cheat-val">textContent escapes. innerHTML executes scripts.</span></div>
+      <div class="cheat-row"><span class="cheat-key">HttpOnly cookie</span><span class="cheat-val">JS cannot read it. Defeats XSS token theft.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 2 DIVIDER -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t2">🚀 Tier 2 — Senior-Level Concepts</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTERS 11–20: TIER 2 -->
+<!-- ============================================================ -->
+
+<section class="chapter" id="ch11">
+  <div class="chapter-header"><div class="chapter-num t2">11</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Distributed Systems Basics</h2><div class="chapter-subtitle">Multiple servers, partial failures, and why the network lies</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>When your system runs on multiple machines, failures become <strong>partial and probabilistic</strong>. A server might be slow, not dead. A packet might arrive twice. The network can partition. These are normal conditions in production, not edge cases.</p>
+  <p>The <strong>CAP Theorem</strong> states you can only guarantee two of three: Consistency (all nodes see same data), Availability (every request gets a response), Partition Tolerance (system works despite network splits). In practice, partitions happen — so you choose between C and A.</p>
+  </div>
+
+  <div class="analogy"><div class="analogy-label">🎭 Analogy</div><p>CAP is like running a bank with branches. If the phone line between branches goes down (partition), you either (A) refuse all transactions until reconnected (Consistency) or (B) let each branch keep operating with possibly stale balances (Availability). There's no free lunch.</p></div>
+
+  <div class="cards">
+    <div class="card"><h4>CP Systems</h4><p>Consistent + Partition Tolerant. May refuse requests when partitioned. HBase, ZooKeeper.</p></div>
+    <div class="card"><h4>AP Systems</h4><p>Available + Partition Tolerant. Eventually consistent. DynamoDB, Cassandra.</p></div>
+    <div class="card"><h4>Eventual Consistency</h4><p>Writes propagate "eventually." Reads may be stale. Good for carts, feeds; bad for balances.</p></div>
+    <div class="card"><h4>Idempotency</h4><p>Same request applied twice = same result. Critical for retries. Use idempotency keys.</p></div>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Design for partial failure. Any external call can fail. Use timeouts, retries, and circuit breakers.</li>
+    <li>Clocks drift across machines. Never compare timestamps from different servers for ordering — use logical clocks or UUIDs.</li>
+    <li>Include idempotency keys on all mutation operations (payments, orders). POST /payments with same key twice = one charge.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">CAP Theorem</span><span class="cheat-val">Pick 2: Consistency, Availability, Partition Tolerance. P always happens.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Eventual consistency</span><span class="cheat-val">Writes propagate in time. Reads may be stale briefly.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Idempotency key</span><span class="cheat-val">Client-generated unique ID. Server deduplicates on this.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch12">
+  <div class="chapter-header"><div class="chapter-num t2">12</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Load Balancing</h2><div class="chapter-subtitle">Distributing traffic so no single server drowns</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>A load balancer sits in front of your servers and distributes incoming requests. It's both a traffic router and a health checker — it removes failed servers from rotation automatically.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>Round Robin</h4><p>Server 1, 2, 3, 1, 2, 3... Equal distribution. Simple. Ignores server load.</p></div>
+    <div class="card"><h4>Least Connections</h4><p>Route to server with fewest active connections. Better for variable request durations.</p></div>
+    <div class="card"><h4>Sticky Sessions</h4><p>Same client always hits same server. Useful for in-memory session state. Breaks horizontal scaling.</p></div>
+    <div class="card"><h4>Health Checks</h4><p>LB pings /health on each server. Unhealthy = removed from pool. Healthy again = re-added.</p></div>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Avoid sticky sessions — they create uneven load and make horizontal scaling painful. Store session in Redis instead.</li>
+    <li>Health check endpoint should verify DB connectivity, not just HTTP 200. A server that can't reach the DB shouldn't receive traffic.</li>
+    <li>AWS ALB terminates SSL, handles health checks, and integrates with Auto Scaling — use it before rolling your own with NGINX.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Round robin</span><span class="cheat-val">Distribute equally. Simple. Default in most LBs.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Least connections</span><span class="cheat-val">Route to least busy. Better for uneven request durations.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Sticky session trap</span><span class="cheat-val">Breaks horizontal scaling. Use external session store instead.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch13">
+  <div class="chapter-header"><div class="chapter-num t2">13</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Horizontal vs Vertical Scaling</h2><div class="chapter-subtitle">Buy a bigger machine vs buy more machines</div></div></div>
+
+  <div class="analogy"><div class="analogy-label">🎭 Analogy</div><p>Vertical scaling is hiring a super-employee and paying them more. Horizontal scaling is hiring more regular employees. The super-employee has limits (there's a maximum salary); hiring more people scales infinitely (in theory). But more employees mean coordination overhead (distributed systems problems).</p></div>
+
+  <div class="cards">
+    <div class="card"><h4>Vertical (Scale Up)</h4><p>Bigger CPU, more RAM, faster disk. Simple. Has a ceiling. Single point of failure. No code changes needed.</p></div>
+    <div class="card"><h4>Horizontal (Scale Out)</h4><p>More servers. Theoretically unlimited. Requires stateless architecture. Needs load balancer.</p></div>
+    <div class="card"><h4>Stateless Apps</h4><p>Each request carries all needed context. No server-local state. Any server can handle any request.</p></div>
+    <div class="card"><h4>Auto-scaling</h4><p>Cloud adds/removes servers based on CPU/memory metrics. Pay only for what you need.</p></div>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Stateless services are the foundation of horizontal scaling. Move sessions, files, and caches to external stores (Redis, S3).</li>
+    <li>Scale vertically first if you need a quick fix. Scale horizontally for sustained growth.</li>
+    <li>Database is the hardest piece to scale horizontally — plan for it early (read replicas, then sharding).</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Vertical</span><span class="cheat-val">Bigger machine. Fast to do. Has hardware ceiling.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Horizontal</span><span class="cheat-val">More machines. Needs stateless app + load balancer.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Stateless = scalable</span><span class="cheat-val">Session in Redis, files in S3, cache in Redis. Any server, any request.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch14">
+  <div class="chapter-header"><div class="chapter-num t2">14</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Database Replication</h2><div class="chapter-subtitle">One writer, many readers — and what happens when the writer dies</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Replication copies data from a <strong>primary</strong> (read/write) to one or more <strong>replicas</strong> (read-only). This serves two purposes: scale read traffic across replicas, and provide a failover target if the primary dies.</p>
+  <p>The catch: <strong>replication lag</strong>. Writes go to primary; replicas catch up asynchronously. For a few milliseconds (or more under load), a replica may serve stale data. "Read your own writes" is a common bug — user updates their profile, reads it back from a lagging replica, sees the old value.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Route reads to replicas, writes to primary</span></div>
+  <pre><span class="cmt">// Route writes to primary, reads to replicas</span>
+<span class="kw">const</span> primaryPool = <span class="kw">new</span> <span class="type">Pool</span>({ host: <span class="str">'primary.db'</span>, ... });
+<span class="kw">const</span> replicaPool = <span class="kw">new</span> <span class="type">Pool</span>({ host: <span class="str">'replica.db'</span>, ... });
+
+<span class="kw">async function</span> <span class="fn">write</span>(sql, params) {
+  <span class="kw">return</span> primaryPool.<span class="fn">query</span>(sql, params);
+}
+<span class="kw">async function</span> <span class="fn">read</span>(sql, params, { consistent = <span class="kw">false</span> } = {}) {
+  <span class="cmt">// For "read your own writes", use primary; otherwise replica</span>
+  <span class="kw">const</span> pool = consistent ? primaryPool : replicaPool;
+  <span class="kw">return</span> pool.<span class="fn">query</span>(sql, params);
+}</pre>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Monitor replication lag. Set alert for lag &gt; 100ms. Lag spikes mean replicas are falling behind primary.</li>
+    <li>For "read your own writes" consistency, route reads to primary for a short window after a write, or use sticky routing to primary for that session.</li>
+    <li>Managed DBs (RDS, Cloud SQL) handle failover automatically — they promote a replica to primary and update the DNS endpoint.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Primary</span><span class="cheat-val">Accepts writes. Source of truth.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Replica</span><span class="cheat-val">Read-only copy. Can serve heavy read traffic.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Replication lag</span><span class="cheat-val">Replica may serve stale data. Async replication.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Failover</span><span class="cheat-val">Primary dies → replica promoted. Automated in managed DBs.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch15">
+  <div class="chapter-header"><div class="chapter-num t2">15</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Sharding / Partitioning</h2><div class="chapter-subtitle">When one database can't hold all your data</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Sharding splits your data across multiple database instances (shards). Each shard holds a subset of rows. A shard key determines which shard a given row lives on.</p>
+  </div>
+
+  <div class="analogy"><div class="analogy-label">🎭 Analogy</div><p>A library with too many books for one room. You split by category: Science (shard A), History (shard B), Fiction (shard C). To find a book, you first check what category it is (shard key lookup), then go to that room. Cross-category searches are expensive — you have to check multiple rooms.</p></div>
+
+  <div class="cards">
+    <div class="card"><h4>Range Sharding</h4><p>user_id 1–1M → shard A, 1M–2M → shard B. Simple but hotspots possible.</p></div>
+    <div class="card"><h4>Hash Sharding</h4><p>shard = hash(user_id) % N. Even distribution but range queries are expensive.</p></div>
+    <div class="card"><h4>Directory Sharding</h4><p>Lookup table maps key to shard. Flexible but lookup table is a bottleneck.</p></div>
+    <div class="card"><h4>Cross-Shard Queries</h4><p>The hard part. JOINs across shards require application-level aggregation.</p></div>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Sharding is complex — exhaust other options first: indexing, caching, read replicas, vertical scaling.</li>
+    <li>Choose shard key carefully. A bad key creates hotspots (all traffic on one shard). user_id is usually good.</li>
+    <li>Consider managed solutions: Amazon Aurora, Vitess (MySQL), or Citus (Postgres) that handle sharding for you.</li>
+    <li>Cross-shard transactions are extremely hard. Design to avoid them — shard entities together that are often queried together.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Shard key</span><span class="cheat-val">Determines which shard. Choose for even distribution.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Hash sharding</span><span class="cheat-val">Even distribution. Bad for range scans.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Cross-shard join</span><span class="cheat-val">Application must fetch from multiple shards and merge. Expensive.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch16">
+  <div class="chapter-header"><div class="chapter-num t2">16</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Optimistic Locking</h2><div class="chapter-subtitle">Trust, verify, retry</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Covered briefly in Chapter 1. Let's go deeper. Optimistic locking avoids holding DB locks by using a version number. You read a row (capturing the version), modify it in memory, then write back with a condition: only update if version hasn't changed. If it has — someone else edited it — your update affects 0 rows. Retry.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Optimistic lock with retry logic</span></div>
+  <pre><span class="kw">async function</span> <span class="fn">updateWithOptimisticLock</span>(productId, delta, maxRetries = <span class="num">3</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++) {
+    <span class="kw">const</span> { rows: [product] } = <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">'SELECT id, stock, version FROM products WHERE id = $1'</span>, [productId]
+    );
+    <span class="kw">if</span> (!product || product.stock + delta &lt; <span class="num">0</span>) <span class="kw">throw new</span> <span class="type">Error</span>(<span class="str">'Out of stock'</span>);
+
+    <span class="kw">const</span> result = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+      UPDATE products SET stock = stock + $1, version = version + 1
+      WHERE id = $2 AND version = $3
+    `</span>, [delta, productId, product.version]);
+
+    <span class="kw">if</span> (result.rowCount === <span class="num">1</span>) <span class="kw">return</span> <span class="kw">true</span>; <span class="cmt">// success</span>
+    <span class="cmt">// 0 rows updated: version mismatch, retry</span>
+    <span class="kw">await</span> <span class="fn">sleep</span>(<span class="num">10</span> * (<span class="num">2</span> ** attempt)); <span class="cmt">// exponential backoff</span>
+  }
+  <span class="kw">throw new</span> <span class="type">Error</span>(<span class="str">'Conflict after max retries'</span>);
+}</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Version column</span><span class="cheat-val">Increment on every write. Acts as conflict detector.</span></div>
+    <div class="cheat-row"><span class="cheat-key">0 rows updated</span><span class="cheat-val">Version mismatch = conflict. Retry with fresh read.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Best for</span><span class="cheat-val">Low-contention writes. High-contention → pessimistic is faster.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch17">
+  <div class="chapter-header"><div class="chapter-num t2">17</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Event-Driven Architecture</h2><div class="chapter-subtitle">Services that react to what happened, not what they were told</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Instead of Service A directly calling Service B, A emits an event: <code style="font-family:var(--mono);color:var(--teal)">order.created</code>. Any interested service subscribes to this event and reacts. A doesn't know (or care) who's listening. This is extreme decoupling.</p>
+  </div>
+
+  <div class="analogy"><div class="analogy-label">🎭 Analogy</div><p>A radio broadcast vs a phone call. A phone call (direct call) requires knowing the recipient's number and waiting for them to answer. A radio broadcast says "attention all listeners: traffic on highway 1" — anyone tuned in reacts. The broadcaster doesn't know who's listening and doesn't wait for a response.</p></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Event-driven order flow</span></div>
+  <pre><span class="cmt">// Order service emits event</span>
+<span class="kw">async function</span> <span class="fn">createOrder</span>(orderData) {
+  <span class="kw">const</span> order = <span class="kw">await</span> db.<span class="fn">insert</span>(orderData);
+  <span class="kw">await</span> eventBus.<span class="fn">publish</span>(<span class="str">'order.created'</span>, { orderId: order.id, ...orderData });
+  <span class="kw">return</span> order;
+  <span class="cmt">// Order service is DONE. It doesn't call inventory/email/analytics.</span>
+}
+
+<span class="cmt">// Inventory service subscribes</span>
+eventBus.<span class="fn">subscribe</span>(<span class="str">'order.created'</span>, <span class="kw">async</span> (event) =&gt; {
+  <span class="kw">await</span> <span class="fn">reserveInventory</span>(event.productId, event.quantity);
+  <span class="kw">await</span> eventBus.<span class="fn">publish</span>(<span class="str">'inventory.reserved'</span>, { orderId: event.orderId });
+});
+
+<span class="cmt">// Email service subscribes to a different event</span>
+eventBus.<span class="fn">subscribe</span>(<span class="str">'inventory.reserved'</span>, <span class="kw">async</span> (event) =&gt; {
+  <span class="kw">await</span> <span class="fn">sendConfirmationEmail</span>(event.orderId);
+});</pre>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Event sourcing: store all events as the source of truth. Current state = replay of events. Powerful for audit trails.</li>
+    <li>Events must be immutable and include enough context to be handled independently — don't emit "something happened" with no data.</li>
+    <li>Versioning events is critical. As event schemas change, consumers on old code must still work.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Event</span><span class="cheat-val">Immutable fact about what happened. Past tense: order.created.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Publisher</span><span class="cheat-val">Emits event. Doesn't know or care who's listening.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Subscriber</span><span class="cheat-val">Reacts to events asynchronously. Independently deployable.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch18">
+  <div class="chapter-header"><div class="chapter-num t2">18</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Circuit Breakers</h2><div class="chapter-subtitle">Stop trying to call a dead service</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>If Service B is failing, Service A shouldn't keep trying — it'll waste resources and slow down user requests with timeout waits. A circuit breaker monitors failures and "trips" — subsequent calls fail fast with an error instead of waiting for a timeout. After a cooldown, it tries again.</p>
+  <p>Three states: <strong>Closed</strong> (normal — calls pass through), <strong>Open</strong> (tripped — calls fail fast), <strong>Half-Open</strong> (testing — one call allowed to check if service recovered).</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Circuit breaker with opossum</span></div>
+  <pre><span class="kw">import</span> CircuitBreaker <span class="kw">from</span> <span class="str">'opossum'</span>;
+
+<span class="kw">const</span> breaker = <span class="kw">new</span> <span class="type">CircuitBreaker</span>(callPaymentService, {
+  timeout: <span class="num">3000</span>,          <span class="cmt">// fail if takes > 3s</span>
+  errorThresholdPercentage: <span class="num">50</span>, <span class="cmt">// trip if 50%+ requests fail</span>
+  resetTimeout: <span class="num">30000</span>,    <span class="cmt">// try again after 30s</span>
+  volumeThreshold: <span class="num">10</span>     <span class="cmt">// min 10 requests before tripping</span>
+});
+
+breaker.<span class="fn">fallback</span>(() =&gt; ({ error: <span class="str">'Payment service unavailable. Try later.'</span> }));
+
+breaker.<span class="fn">on</span>(<span class="str">'open'</span>, () =&gt; console.<span class="fn">warn</span>(<span class="str">'⚡ Circuit OPEN: payment service failing'</span>));
+breaker.<span class="fn">on</span>(<span class="str">'halfOpen'</span>, () =&gt; console.<span class="fn">log</span>(<span class="str">'🔍 Circuit HALF-OPEN: probing...'</span>));
+breaker.<span class="fn">on</span>(<span class="str">'close'</span>, () =&gt; console.<span class="fn">log</span>(<span class="str">'✅ Circuit CLOSED: service recovered'</span>));
+
+<span class="kw">const</span> result = <span class="kw">await</span> breaker.<span class="fn">fire</span>(paymentData);</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Closed</span><span class="cheat-val">Normal operation. Requests pass through.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Open</span><span class="cheat-val">Too many failures. Fail fast. No calls to downstream.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Half-Open</span><span class="cheat-val">Cooldown expired. One test call. If OK → Closed.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Fallback</span><span class="cheat-val">Graceful degradation response when circuit is Open.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch19">
+  <div class="chapter-header"><div class="chapter-num t2">19</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Retry Strategies</h2><div class="chapter-subtitle">Retry smarter, not harder</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Transient failures are normal. Networks blip. Services restart. The naive fix — retry immediately — makes things worse: if a service is overloaded, hammering it with retries is a DDOS. <strong>Exponential backoff with jitter</strong> is the right answer.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Exponential backoff with jitter</span></div>
+  <pre><span class="kw">async function</span> <span class="fn">retryWithBackoff</span>(fn, maxRetries = <span class="num">5</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++) {
+    <span class="kw">try</span> {
+      <span class="kw">return await</span> <span class="fn">fn</span>();
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">if</span> (attempt === maxRetries - <span class="num">1</span>) <span class="kw">throw</span> err; <span class="cmt">// last attempt</span>
+
+      <span class="cmt">// Only retry on transient errors, not 400 Bad Request etc.</span>
+      <span class="kw">if</span> (err.status && err.status &lt; <span class="num">500</span>) <span class="kw">throw</span> err;
+
+      <span class="kw">const</span> baseDelay = Math.<span class="fn">min</span>(<span class="num">1000</span> * <span class="num">2</span> ** attempt, <span class="num">30000</span>); <span class="cmt">// cap at 30s</span>
+      <span class="kw">const</span> jitter = Math.<span class="fn">random</span>() * baseDelay * <span class="num">0.3</span>; <span class="cmt">// ±30% jitter</span>
+      <span class="kw">await</span> <span class="fn">sleep</span>(baseDelay + jitter);
+    }
+  }
+}
+
+<span class="cmt">// Delays: ~1s, ~2s, ~4s, ~8s, ~16s (with jitter)</span>
+<span class="cmt">// Jitter prevents thundering herd: 1000 clients don't all retry at t=2s</span></pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Exponential backoff</span><span class="cheat-val">delay = base * 2^attempt. Doubles each retry. Cap at max.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Jitter</span><span class="cheat-val">Random variance on delay. Prevents thundering herd problem.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Don't retry 4xx</span><span class="cheat-val">400/401/403 won't succeed on retry. Only 5xx and network errors.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Idempotency required</span><span class="cheat-val">Retried mutations must be safe to apply twice.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch20">
+  <div class="chapter-header"><div class="chapter-num t2">20</div><div class="chapter-meta"><div class="chapter-tier t2-tag">Tier 2</div><h2>Observability</h2><div class="chapter-subtitle">If you can't see it, you can't fix it</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+  <p>Observability is your ability to understand the internal state of your system from its external outputs. The three pillars: <strong>Logs</strong> (what happened), <strong>Metrics</strong> (how it's performing), <strong>Traces</strong> (how a request flowed through services).</p>
+  <p>Without observability, debugging production is like performing surgery blindfolded. You're guessing.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>📜 Logs</h4><p>Structured JSON logs. Include request ID, user ID, severity. Aggregate in Datadog/Grafana.</p></div>
+    <div class="card"><h4>📊 Metrics</h4><p>Counters, gauges, histograms. Request rate, error rate, latency (p50/p95/p99). Alert on anomalies.</p></div>
+    <div class="card"><h4>🔍 Traces</h4><p>Follow a request across services. Shows which service is slow. OpenTelemetry standard.</p></div>
+    <div class="card"><h4>🚨 Alerting</h4><p>Error rate spikes, latency increases, queue depth growth. PagerDuty at 3am if it's urgent.</p></div>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Structured logging with request context</span></div>
+  <pre><span class="kw">import</span> pino <span class="kw">from</span> <span class="str">'pino'</span>;
+<span class="kw">const</span> logger = pino({ level: <span class="str">'info'</span> });
+
+<span class="cmt">// Middleware: attach request context to logger</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  req.log = logger.<span class="fn">child</span>({
+    requestId: req.headers[<span class="str">'x-request-id'</span>] || crypto.<span class="fn">randomUUID</span>(),
+    userId: req.user?.id,
+    path: req.path,
+    method: req.method
+  });
+  <span class="fn">next</span>();
+});
+
+<span class="cmt">// Usage</span>
+req.log.<span class="fn">info</span>({ orderId, amount }, <span class="str">'Order created'</span>);
+req.log.<span class="fn">error</span>({ err: error.message, stack: error.stack }, <span class="str">'Payment failed'</span>);
+
+<span class="cmt">// Golden signals to monitor:</span>
+<span class="cmt">// - Latency: p50, p95, p99 response times</span>
+<span class="cmt">// - Traffic: requests per second</span>
+<span class="cmt">// - Errors: 5xx error rate</span>
+<span class="cmt">// - Saturation: CPU, memory, queue depth</span></pre>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Log structured JSON (not strings) — machines can parse and query JSON. <code style="font-family:var(--mono);font-size:11px">{"level":"error","msg":"Payment failed","userId":123}</code> is infinitely more useful than <code style="font-family:var(--mono);font-size:11px">"ERROR: Payment failed for user 123"</code>.</li>
+    <li>Add correlation/trace IDs to every log. When debugging, you want all logs for a single request, not searching by time.</li>
+    <li>Monitor the four golden signals: Latency, Traffic, Errors, Saturation. Set alerts before you need them.</li>
+    <li>p99 latency matters more than average. Average hides the pain of 1% of users. If p99 = 10s, 1 in 100 users waits 10 seconds.</li>
+  </ul></div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Logs</span><span class="cheat-val">What happened. Structured JSON. Include request ID.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Metrics</span><span class="cheat-val">How it performs. req/s, error rate, p99 latency.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Traces</span><span class="cheat-val">How a request moved through services. Find the bottleneck.</span></div>
+    <div class="cheat-row"><span class="cheat-key">p99 latency</span><span class="cheat-val">99th percentile. 1 in 100 users waits this long. Watch it.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Golden signals</span><span class="cheat-val">Latency, Traffic, Errors, Saturation. Monitor all four.</span></div>
+  </div></div>
+</section>
+
+<!-- TIER 3 DIVIDER -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t3">🛠 Tier 3 — DevOps + Infrastructure</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTERS 21–25: TIER 3 -->
+<!-- ============================================================ -->
+
+<section class="chapter" id="ch21">
+  <div class="chapter-header"><div class="chapter-num t3">21</div><div class="chapter-meta"><div class="chapter-tier t3-tag">Tier 3</div><h2>Docker</h2><div class="chapter-subtitle">It works on my machine — and now it works everywhere</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+  <p>Docker packages your application with all its dependencies (runtime, libraries, configs) into a <strong>container</strong> — a portable, isolated unit. The same container runs identically on your laptop, CI, and production. "Works on my machine" dies with Docker.</p>
+  </div>
+
+  <div class="analogy"><div class="analogy-label">🎭 Analogy</div><p>A Docker container is like a shipping container. Before containers, loading cargo onto ships required custom packing for each ship. Containers standardized it — any container fits any ship (host). Docker standardized apps — any container runs on any Docker host.</p></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Dockerfile</span><span class="code-title">Production Node.js image with multi-stage build</span></div>
+  <pre><span class="cmt"># Stage 1: Builder — install ALL deps including dev</span>
+<span class="kw">FROM</span> node:<span class="num">20</span>-alpine <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package*.json .
+<span class="kw">RUN</span> npm ci
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> npm run build   <span class="cmt"># TypeScript compile, etc.</span>
+
+<span class="cmt"># Stage 2: Production — only what's needed to run</span>
+<span class="kw">FROM</span> node:<span class="num">20</span>-alpine
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package*.json .
+<span class="kw">RUN</span> npm ci --only=production   <span class="cmt"># no dev deps</span>
+<span class="kw">COPY</span> --from=builder /app/dist ./dist
+
+<span class="kw">ENV</span> NODE_ENV=production
+<span class="kw">EXPOSE</span> <span class="num">3000</span>
+<span class="kw">USER</span> node   <span class="cmt"># never run as root</span>
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"dist/server.js"</span>]</pre>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">docker-compose.yml</span><span class="code-title">Local dev environment</span></div>
+  <pre><span class="kw">services</span>:
+  <span class="fn">app</span>:
+    <span class="kw">build</span>: .
+    <span class="kw">ports</span>: [<span class="str">"3000:3000"</span>]
+    <span class="kw">environment</span>:
+      <span class="kw">DATABASE_URL</span>: postgresql://postgres:pass@db:5432/mydb
+      <span class="kw">REDIS_URL</span>: redis://redis:6379
+    <span class="kw">depends_on</span>: [db, redis]
+    <span class="kw">volumes</span>: [<span class="str">"./src:/app/src"</span>]  <span class="cmt"># hot reload in dev</span>
+
+  <span class="fn">db</span>:
+    <span class="kw">image</span>: postgres:<span class="num">16</span>-alpine
+    <span class="kw">environment</span>: { POSTGRES_PASSWORD: pass, POSTGRES_DB: mydb }
+    <span class="kw">volumes</span>: [<span class="str">"pg_data:/var/lib/postgresql/data"</span>]  <span class="cmt"># persist data</span>
+
+  <span class="fn">redis</span>:
+    <span class="kw">image</span>: redis:<span class="num">7</span>-alpine
+
+<span class="kw">volumes</span>:
+  <span class="kw">pg_data</span>:</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Image</span><span class="cheat-val">Blueprint. Built from Dockerfile. Immutable.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Container</span><span class="cheat-val">Running instance of an image. Ephemeral.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Multi-stage build</span><span class="cheat-val">Separate build and runtime stages. Smaller production images.</span></div>
+    <div class="cheat-row"><span class="cheat-key">docker-compose</span><span class="cheat-val">Define multi-service local environments. One command to start everything.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Volumes</span><span class="cheat-val">Persist data beyond container restarts. Mount for dev hot reload.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch22">
+  <div class="chapter-header"><div class="chapter-num t3">22</div><div class="chapter-meta"><div class="chapter-tier t3-tag">Tier 3</div><h2>Kubernetes Basics</h2><div class="chapter-subtitle">Container orchestration at scale</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+  <p>Kubernetes (K8s) manages containers at scale — scheduling them across a cluster of machines, restarting crashed ones, scaling based on load, and routing traffic. It's the operating system for your distributed application.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>Pod</h4><p>Smallest deployable unit. One or more containers that share network and storage. Ephemeral by design.</p></div>
+    <div class="card"><h4>Deployment</h4><p>Declares desired state: "run 3 replicas of image:v2." K8s ensures this is always true.</p></div>
+    <div class="card"><h4>Service</h4><p>Stable DNS name + IP for a set of pods. Load balances traffic to matching pods.</p></div>
+    <div class="card"><h4>Ingress</h4><p>HTTP routing rules. Maps myapp.com/api → api-service. Often with cert-manager for TLS.</p></div>
+    <div class="card"><h4>HPA</h4><p>Horizontal Pod Autoscaler. Scale from 2 to 10 pods when CPU &gt;70%. Automatic.</p></div>
+    <div class="card"><h4>ConfigMap / Secret</h4><p>Config and credentials injected as env vars or files. Never bake secrets into images.</p></div>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">YAML</span><span class="code-title">Deployment + Service + HPA</span></div>
+  <pre><span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">metadata</span>:
+  <span class="kw">name</span>: api
+<span class="kw">spec</span>:
+  <span class="kw">replicas</span>: <span class="num">3</span>
+  <span class="kw">selector</span>:
+    <span class="kw">matchLabels</span>: { app: api }
+  <span class="kw">template</span>:
+    <span class="kw">metadata</span>:
+      <span class="kw">labels</span>: { app: api }
+    <span class="kw">spec</span>:
+      <span class="kw">containers</span>:
+      - <span class="kw">name</span>: api
+        <span class="kw">image</span>: myrepo/api:<span class="str">v1.2.3</span>   <span class="cmt"># always pin version, never :latest</span>
+        <span class="kw">ports</span>: [{ <span class="kw">containerPort</span>: <span class="num">3000</span> }]
+        <span class="kw">readinessProbe</span>:            <span class="cmt"># traffic only sent to ready pods</span>
+          <span class="kw">httpGet</span>: { path: /health, port: <span class="num">3000</span> }
+        <span class="kw">resources</span>:
+          <span class="kw">requests</span>: { cpu: <span class="str">"100m"</span>, memory: <span class="str">"128Mi"</span> }
+          <span class="kw">limits</span>: { cpu: <span class="str">"500m"</span>, memory: <span class="str">"512Mi"</span> }
+---
+<span class="kw">apiVersion</span>: autoscaling/v2
+<span class="kw">kind</span>: HorizontalPodAutoscaler
+<span class="kw">spec</span>:
+  <span class="kw">scaleTargetRef</span>: { name: api }
+  <span class="kw">minReplicas</span>: <span class="num">2</span>
+  <span class="kw">maxReplicas</span>: <span class="num">20</span>
+  <span class="kw">metrics</span>:
+  - <span class="kw">type</span>: Resource
+    <span class="kw">resource</span>: { name: cpu, target: { averageUtilization: <span class="num">70</span> } }</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Pod</span><span class="cheat-val">Smallest unit. Ephemeral. Never reference pods directly — use Deployments.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Deployment</span><span class="cheat-val">Manages replica count and rollouts. kubectl rollout undo for rollback.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Service</span><span class="cheat-val">Stable endpoint for pods. Internal DNS: svc-name.namespace.svc.cluster.local</span></div>
+    <div class="cheat-row"><span class="cheat-key">Readiness probe</span><span class="cheat-val">No traffic until /health returns 200. Critical for rolling deploys.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Resource limits</span><span class="cheat-val">Set requests + limits. No limits = one OOM pod kills the node.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch23">
+  <div class="chapter-header"><div class="chapter-num t3">23</div><div class="chapter-meta"><div class="chapter-tier t3-tag">Tier 3</div><h2>CI/CD</h2><div class="chapter-subtitle">Every commit should be deployable</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+  <p><strong>CI (Continuous Integration)</strong>: Automatically build, lint, and test on every commit. Catch bugs before they merge. <strong>CD (Continuous Deployment)</strong>: Automatically deploy passing commits to production. The goal: deployments so routine and automated they're not events.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">GitHub Actions</span><span class="code-title">Full CI/CD pipeline</span></div>
+  <pre><span class="kw">name</span>: CI/CD
+<span class="kw">on</span>:
+  <span class="kw">push</span>: { branches: [main] }
+  <span class="kw">pull_request</span>: { branches: [main] }
+
+<span class="kw">jobs</span>:
+  <span class="fn">test</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">services</span>:
+      <span class="kw">postgres</span>: { image: postgres:<span class="num">16</span>, env: { POSTGRES_PASSWORD: test } }
+    <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: actions/checkout@v4
+    - <span class="kw">uses</span>: actions/setup-node@v4
+      <span class="kw">with</span>: { node-version: <span class="str">'20'</span>, cache: <span class="str">'npm'</span> }
+    - <span class="kw">run</span>: npm ci
+    - <span class="kw">run</span>: npm run lint
+    - <span class="kw">run</span>: npm run typecheck
+    - <span class="kw">run</span>: npm test
+
+  <span class="fn">deploy</span>:
+    <span class="kw">needs</span>: test
+    <span class="kw">if</span>: github.ref == <span class="str">'refs/heads/main'</span>   <span class="cmt"># only on main branch</span>
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: actions/checkout@v4
+    - <span class="kw">name</span>: Build and push Docker image
+      <span class="kw">run</span>: |
+        docker build -t myrepo/api:<span class="kw">${{ github.sha }}</span> .
+        docker push myrepo/api:<span class="kw">${{ github.sha }}</span>
+    - <span class="kw">name</span>: Rolling deploy to Kubernetes
+      <span class="kw">run</span>: |
+        kubectl set image deployment/api api=myrepo/api:<span class="kw">${{ github.sha }}</span>
+        kubectl rollout status deployment/api  <span class="cmt"># wait for rollout</span></pre>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>Blue-Green Deploy</h4><p>Two identical environments. Switch traffic from blue to green instantly. Instant rollback by switching back.</p></div>
+    <div class="card"><h4>Canary Deploy</h4><p>Route 5% of traffic to new version. Monitor. If good, increase to 100%. Safe for risky changes.</p></div>
+    <div class="card"><h4>Feature Flags</h4><p>Deploy code dark (off). Enable per user/cohort. Decouple deploy from release.</p></div>
+    <div class="card"><h4>Rollback</h4><p>kubectl rollout undo. Or keep previous image tagged :stable for one-command revert.</p></div>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">CI</span><span class="cheat-val">Lint + test on every PR. Breaks = PR blocked. No exceptions.</span></div>
+    <div class="cheat-row"><span class="cheat-key">CD</span><span class="cheat-val">Auto-deploy passing main branch. Trust your tests.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Blue-green</span><span class="cheat-val">Two live envs. Instant switch. Instant rollback. Needs 2x resources.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Canary</span><span class="cheat-val">Gradual traffic shift. Catch bugs affecting real users before full rollout.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch24">
+  <div class="chapter-header"><div class="chapter-num t3">24</div><div class="chapter-meta"><div class="chapter-tier t3-tag">Tier 3</div><h2>Reverse Proxy</h2><div class="chapter-subtitle">The gatekeeper in front of your servers</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+  <p>A reverse proxy sits between the internet and your servers. Clients talk to the proxy; the proxy forwards to the right backend. Your servers are never directly exposed. NGINX is the classic choice; Caddy is the modern, auto-SSL alternative.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">NGINX</span><span class="code-title">Reverse proxy with SSL termination and rate limiting</span></div>
+  <pre><span class="fn">upstream</span> api_servers {
+  server api1:<span class="num">3000</span>;
+  server api2:<span class="num">3000</span>;
+  server api3:<span class="num">3000</span>;
+  keepalive <span class="num">32</span>;   <span class="cmt"># connection pool to backends</span>
+}
+
+<span class="fn">server</span> {
+  listen <span class="num">443</span> ssl;
+  server_name api.myapp.com;
+
+  ssl_certificate /etc/ssl/cert.pem;
+  ssl_certificate_key /etc/ssl/key.pem;
+
+  <span class="cmt"># Rate limiting (reference to zone defined outside)</span>
+  limit_req zone=api_limit burst=<span class="num">20</span> nodelay;
+
+  <span class="cmt"># Compression</span>
+  gzip on;
+  gzip_types application/json text/html;
+
+  location /api/ {
+    proxy_pass http://api_servers;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_connect_timeout <span class="num">5</span>s;
+    proxy_read_timeout <span class="num">30</span>s;
+  }
+
+  location /static/ {
+    root /var/www;
+    expires <span class="num">1</span>y;        <span class="cmt"># cache static assets heavily</span>
+    add_header Cache-Control "public, immutable";
+  }
+}</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">SSL termination</span><span class="cheat-val">HTTPS to the proxy, HTTP to backend. Proxy handles certs.</span></div>
+    <div class="cheat-row"><span class="cheat-key">X-Real-IP header</span><span class="cheat-val">Pass original client IP to backend. Without this, all requests look like they come from the proxy.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Upstream</span><span class="cheat-val">Pool of backend servers. NGINX load balances across them.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Timeouts</span><span class="cheat-val">Set proxy_read_timeout. Don't let hanging backends hold NGINX workers.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch25">
+  <div class="chapter-header"><div class="chapter-num t3">25</div><div class="chapter-meta"><div class="chapter-tier t3-tag">Tier 3</div><h2>API Design</h2><div class="chapter-subtitle">APIs are forever — design them like they are</div></div></div>
+  <div class="section"><div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+  <p>Good API design is about <strong>predictability, consistency, and longevity</strong>. Once an API is public, you can't easily change it — clients depend on it. Design as if v1 will live forever.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">REST + Node.js</span><span class="code-title">Production API patterns</span></div>
+  <pre><span class="cmt">// Versioning in URL path</span>
+app.<span class="fn">use</span>(<span class="str">'/v1'</span>, v1Router);
+app.<span class="fn">use</span>(<span class="str">'/v2'</span>, v2Router);
+
+<span class="cmt">// Pagination — cursor-based is better than offset for large datasets</span>
+<span class="cmt">// Offset: page 3 can change as items are added. Cursor: stable.</span>
+app.<span class="fn">get</span>(<span class="str">'/v1/orders'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { cursor, limit = <span class="num">20</span> } = req.query;
+  <span class="kw">const</span> orders = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+    SELECT * FROM orders
+    WHERE id > $1
+    ORDER BY id ASC LIMIT $2
+  `</span>, [cursor || <span class="num">0</span>, parseInt(limit) + <span class="num">1</span>]);
+
+  <span class="kw">const</span> hasMore = orders.length > limit;
+  res.<span class="fn">json</span>({
+    data: orders.<span class="fn">slice</span>(<span class="num">0</span>, limit),
+    nextCursor: hasMore ? orders[limit - <span class="num">1</span>].id : <span class="kw">null</span>,
+    hasMore
+  });
+});
+
+<span class="cmt">// Idempotency key for POST mutations</span>
+app.<span class="fn">post</span>(<span class="str">'/v1/payments'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> idempotencyKey = req.headers[<span class="str">'idempotency-key'</span>];
+  <span class="kw">if</span> (!idempotencyKey) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: <span class="str">'Idempotency-Key required'</span> });
+
+  <span class="cmt">// Check if already processed</span>
+  <span class="kw">const</span> existing = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">`idem:<span class="kw">${idempotencyKey}</span>`</span>);
+  <span class="kw">if</span> (existing) <span class="kw">return</span> res.<span class="fn">json</span>(JSON.<span class="fn">parse</span>(existing));
+
+  <span class="kw">const</span> payment = <span class="kw">await</span> <span class="fn">processPayment</span>(req.body);
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">`idem:<span class="kw">${idempotencyKey}</span>`</span>, <span class="num">86400</span>, JSON.<span class="fn">stringify</span>(payment));
+  res.<span class="fn">json</span>(payment);
+});</pre>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>REST vs GraphQL</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Aspect</th><th>REST</th><th>GraphQL</th></tr></thead>
+        <tbody>
+          <tr><td>Data fetching</td><td>Fixed response shape per endpoint</td><td>Client specifies exactly what it needs</td></tr>
+          <tr><td>Over/under-fetching</td><td>Common. Multiple round trips for related data.</td><td>Get exactly what you ask for in one request.</td></tr>
+          <tr><td>Versioning</td><td>URL versioning (/v1, /v2)</td><td>Evolve schema with deprecations</td></tr>
+          <tr><td>Caching</td><td>HTTP caching works naturally</td><td>HTTP caching complex (POST queries)</td></tr>
+          <tr><td>Best for</td><td>Public APIs, simple CRUD, mobile</td><td>Complex queries, internal APIs, multiple clients</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">⚡ Production Tips</div><ul>
+    <li>Use cursor-based pagination over offset. Offset pagination on page 500 reads and discards 10,000 rows.</li>
+    <li>Return consistent error shapes: <code style="font-family:var(--mono);font-size:11px">{"error": "message", "code": "PAYMENT_FAILED", "details": {...}}</code></li>
+    <li>Document with OpenAPI/Swagger. Generate client SDKs from it.</li>
+    <li>Require idempotency keys on all non-safe (POST/PUT/DELETE) endpoints that cause side effects.</li>
+  </ul></div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you design a pagination API for a large dataset?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"I'd use cursor-based pagination over offset. Offset has two problems: it's slow on deep pages (SELECT * LIMIT 20 OFFSET 100000 still reads 100,020 rows) and it's unstable — if a new item is inserted, page 2 now has a different result. Cursor-based uses a stable ID: WHERE id &gt; :cursor ORDER BY id LIMIT 20. The client passes the last seen ID as the next cursor. O(log n) with an index, stable results, works fine at any depth."</p></div>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Resource naming</span><span class="cheat-val">Nouns not verbs: /orders not /getOrders. Plural.</span></div>
+    <div class="cheat-row"><span class="cheat-key">HTTP verbs</span><span class="cheat-val">GET=read, POST=create, PUT=replace, PATCH=partial update, DELETE=delete</span></div>
+    <div class="cheat-row"><span class="cheat-key">Cursor pagination</span><span class="cheat-val">WHERE id > cursor ORDER BY id LIMIT n. Stable, efficient.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Idempotency key</span><span class="cheat-val">Client header. Server deduplicates. Safe retries for payments.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Versioning</span><span class="cheat-val">/v1/ in URL. Keep old versions alive for client migration period.</span></div>
+  </div></div>
+</section>
+
+<!-- MASTER CHEATSHEET -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t1">📋 Master Cheatsheet</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<section class="chapter" id="master">
+  <h2 style="margin-bottom:1.5rem;font-size:1.5rem;">The Senior Engineer Mindset Shift</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Topic</th><th>Junior Says</th><th>Senior Says</th></tr></thead>
+      <tbody>
+        <tr><td>Caching</td><td>"I added Redis"</td><td>"Cache-aside pattern with 5min TTL, stampede protection, 92% hit rate → 8x DB load reduction"</td></tr>
+        <tr><td>Emails</td><td>"I send it in the request handler"</td><td>"I enqueue to BullMQ because SMTP may fail, and the user shouldn't wait 3 seconds for signup to complete"</td></tr>
+        <tr><td>Retries</td><td>"I retry the request"</td><td>"Exponential backoff with jitter, max 5 attempts, only on 5xx, idempotency key to prevent duplicate payments"</td></tr>
+        <tr><td>Slow query</td><td>"I'll add an index"</td><td>"EXPLAIN ANALYZE first. It's a seq scan. I'll add a covering composite index on (user_id, status) since we always filter by both. Watch out: this adds write overhead."</td></tr>
+        <tr><td>Payment</td><td>"I wrap it in a transaction"</td><td>"Transaction with SELECT FOR UPDATE on the account row, idempotency key on the endpoint, dead letter queue for failed charges"</td></tr>
+        <tr><td>Auth bug</td><td>"The user is not logged in"</td><td>"401 = no token/invalid token (authn failure). 403 = valid token but missing permission (authz failure). Different root causes."</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 style="margin:2rem 0 1rem;font-size:1.4rem;">Recommended Learning Order</h2>
+  <div class="cards">
+    <div class="card"><h4>Phase 1 — Foundation</h4><p>Concurrency → Transactions → Indexing. Everything else builds on these three.</p></div>
+    <div class="card"><h4>Phase 2 — Scale</h4><p>Caching → Queues → Background Workers → Rate Limiting. These are your tools for handling load.</p></div>
+    <div class="card"><h4>Phase 3 — Security</h4><p>AuthN/AuthZ → CSRF/XSS → Webhooks. These are your correctness guarantees.</p></div>
+    <div class="card"><h4>Phase 4 — Distribution</h4><p>Distributed Systems → Replication → Sharding → Circuit Breakers → Retries.</p></div>
+    <div class="card"><h4>Phase 5 — Operations</h4><p>Observability → Docker → K8s → CI/CD → Reverse Proxy → API Design.</p></div>
+  </div>
+
+  <div class="interview" style="margin-top:2rem;">
+    <div class="interview-label">🎯 The Universal Interview Framework</div>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:1rem;">For every system design question, structure your answer around:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+      <div style="padding:1rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;">1. Problem</div>
+        <div style="color:var(--text2);font-size:12px;">What failure mode are we solving? What happens at 1000x scale?</div>
+      </div>
+      <div style="padding:1rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;">2. Naive Solution</div>
+        <div style="color:var(--text2);font-size:12px;">Simple synchronous approach. Why does it break?</div>
+      </div>
+      <div style="padding:1rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;">3. Production Solution</div>
+        <div style="color:var(--text2);font-size:12px;">The real approach with specific tools and patterns named.</div>
+      </div>
+      <div style="padding:1rem;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;">4. Tradeoffs</div>
+        <div style="color:var(--text2);font-size:12px;">What does this cost? Complexity, latency, consistency. Show you think in tradeoffs.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+  </div><!-- /content-area -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.chapter');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</div>
+</body>
+</html>

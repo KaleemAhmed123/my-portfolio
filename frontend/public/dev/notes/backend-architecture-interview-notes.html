@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Architecture Interview Notes</title>
+<meta name="description" content="Implementation-level notes for Node, APIs, DB, Redis, RabbitMQ, auth, microservices, and system design.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/backend-architecture-interview-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Backend Architecture</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#runtime"><span class="nav-num">01</span>Node Runtime</a>
+    <a class="nav-item" href="#api"><span class="nav-num">02</span>API Design</a>
+    <a class="nav-item" href="#data"><span class="nav-num">03</span>Data Layer</a>
+    <a class="nav-item" href="#async"><span class="nav-num">04</span>Async Systems</a>
+    <a class="nav-item" href="#security"><span class="nav-num">05</span>Auth/RBAC</a>
+    <a class="nav-item" href="#system"><span class="nav-num">06</span>Project Design</a>
+    <a class="nav-item" href="#deep-backend"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Node.js - Express - TypeScript - Microservices</div>
+      <h1>Backend Architecture <span>Interview Notes</span></h1>
+      <p>Use this to revise the backend claims in the resume: microservices, API gateways, Redis, RabbitMQ, Prisma, SQL/MongoDB, idempotency, rate limiting, RBAC, and production correctness.</p>
+      <div class="tags"><span class="tag">Node.js</span><span class="tag">Express</span><span class="tag">RabbitMQ</span><span class="tag">Redis</span><span class="tag">Prisma</span><span class="tag">Microservices</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="runtime">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Runtime</div><h2>Node.js and Express fundamentals</h2><div class="subtitle">You should explain why Node works well for I/O-heavy APIs.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Event Loop</h3><p>Single JS thread coordinates async I/O. CPU-heavy work blocks the loop unless moved to worker threads or external services.</p></div>
+          <div class="card"><h3>Middleware Chain</h3><p>Express middleware handles parsing, auth, validation, request IDs, logging, error mapping, and rate limits.</p></div>
+          <div class="card"><h3>Error Handling</h3><p>Use centralized error middleware, typed errors, consistent response shape, and no stack traces in production responses.</p></div>
+          <div class="card"><h3>TypeScript</h3><p>Use DTOs, service interfaces, typed request context, and validation at runtime with Zod/Joi because TS disappears at runtime.</p></div>
+        </div>
+        <div class="answer"><div class="answer-q">"Why use Node.js for backend services?"</div><p>Strong answer: "Node is efficient for I/O-heavy workloads like API gateways, commerce flows, queue producers, and integrations because async I/O lets one process handle many concurrent sockets. I would avoid CPU-heavy OCR or PDF processing inside the request path; that belongs in a worker or external service."</p></div>
+      </section>
+
+      <section class="section" id="api">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">API</div><h2>REST, gateways, and service boundaries</h2><div class="subtitle">The resume mentions a 12-service microservices backend with API Gateway.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concept</th><th>What to know</th><th>Interview phrase</th></tr></thead>
+            <tbody>
+              <tr><td>API Gateway</td><td>JWT auth, RBAC, rate limiting, request routing, correlation IDs, aggregation only when necessary</td><td>"The gateway enforces cross-cutting concerns but business rules stay in domain services."</td></tr>
+              <tr><td>Service boundary</td><td>Split by business capability: catalog, seller, order, wallet, shipment, notification</td><td>"A service owns its data and exposes contracts; no direct DB sharing."</td></tr>
+              <tr><td>Versioning</td><td>/v1, backward-compatible additive changes, deprecation windows</td><td>"Breaking changes go to a new version; old clients get a sunset period."</td></tr>
+              <tr><td>Idempotency</td><td>Required for payments, orders, webhooks, and retries</td><td>"A retry should not create a second order or second charge."</td></tr>
+              <tr><td>Rate limiting</td><td>Per IP/user/API key, Redis atomic counters or token bucket</td><td>"429 protects the system and prevents abuse."</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="data">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Data</div><h2>SQL, MongoDB, Prisma, Redis</h2><div class="subtitle">Revise correctness before optimization.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Transactions</h3><ul><li>Use for wallet credits, payouts, order state transitions</li><li>Know isolation levels and row locks</li><li>Never call external APIs while holding DB locks</li></ul></div>
+          <div class="card"><h3>Indexes</h3><ul><li>Composite indexes for common filters</li><li>Use EXPLAIN ANALYZE before guessing</li><li>Indexes speed reads but slow writes</li></ul></div>
+          <div class="card"><h3>Prisma</h3><ul><li>Great for typed queries and migrations</li><li>Watch for N+1 queries</li><li>Use raw SQL for locks/reporting/hot paths</li></ul></div>
+          <div class="card"><h3>Redis</h3><ul><li>Sessions, OTPs, token revocation</li><li>Distributed rate limiting</li><li>Cache-aside with TTL and stampede protection</li></ul></div>
+        </div>
+        <div class="callout amber"><div class="callout-title">Wallet correctness rule</div><p>Money-like systems need immutable ledger entries, idempotency keys, transaction boundaries, audit logs, and reconciliation. Never trust only a mutable balance column without an audit trail.</p></div>
+      </section>
+
+      <section class="section" id="async">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Async</div><h2>RabbitMQ, queues, and real-time flows</h2><div class="subtitle">Async is about reliability, not just speed.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Topic</th><th>Must know</th><th>Project example</th></tr></thead>
+            <tbody>
+              <tr><td>Producer</td><td>Publish after DB commit using outbox when correctness matters</td><td>OrderCreated after order row exists</td></tr>
+              <tr><td>Consumer</td><td>Idempotent processing, retry limit, ack only after success</td><td>Wallet credit should not double-credit on redelivery</td></tr>
+              <tr><td>DLQ</td><td>Poison messages go to dead-letter queue after max retries</td><td>Bad Shiprocket payload is isolated for manual review</td></tr>
+              <tr><td>Ordering</td><td>Queue ordering is not global across partitions/consumers</td><td>Use per-order state machine and version checks</td></tr>
+              <tr><td>Socket.IO</td><td>Real-time notifications require auth, rooms, reconnect handling</td><td>Shipment status or admin dashboard updates</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"How do you prevent duplicate work in RabbitMQ?"</div><p>Strong answer: "Consumers must be idempotent. I store a processed event ID or use a natural idempotency key, perform the DB update in a transaction, and ack only after commit. Retries use backoff and after max attempts the message goes to a DLQ with enough context to debug."</p></div>
+      </section>
+
+      <section class="section" id="security">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Security</div><h2>JWT, OAuth, RBAC, and tenant safety</h2><div class="subtitle">Authentication identifies; authorization decides.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>JWT</h3><p>Validate signature, issuer, audience, expiry. Do not put secrets in payload. Support token revocation for logout/security events.</p></div>
+          <div class="card"><h3>Google OAuth</h3><p>OAuth proves identity through provider. Your app still creates users, sessions, roles, tenants, and authorization rules.</p></div>
+          <div class="card"><h3>RBAC</h3><p>Roles map to permissions. Enforce server-side on every route and data query, not only in frontend navigation.</p></div>
+          <div class="card"><h3>Multi-tenancy</h3><p>Every query must scope by tenant/org. Add indexes on tenant_id and test cross-tenant access denial.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="system">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">System Design</div><h2>Personalized Wallah answer skeleton</h2><div class="subtitle">Use this for project deep-dives.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Requirements:</strong> multivendor marketplace, customizable products, seller schemas, payments, shipments, wallet, notifications.</div>
+          <div class="check"><strong>Services:</strong> API gateway, auth, catalog, customization, cart, order, payment, wallet, shipment, seller, notification, admin.</div>
+          <div class="check"><strong>Sync path:</strong> checkout creates order and payment intent; order events drive wallet, notification, shipment workflows.</div>
+          <div class="check"><strong>Correctness:</strong> idempotency keys, transactions, immutable wallet ledger, webhook deduplication, DLQ for failed jobs.</div>
+          <div class="check"><strong>Scale:</strong> Redis cache/rate limits, RabbitMQ async processing, Prometheus/Grafana queue depth and API latency, horizontal services.</div>
+          <div class="check"><strong>Tradeoffs:</strong> microservices add deployment and observability complexity; useful only if domains and scale justify separation.</div>
+        </div>
+      </section>
+
+      <section class="section" id="deep-backend">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Deep Reference</div><h2>Backend project-building and interview reference</h2><div class="subtitle">Use this section when you need implementation-level recall.</div></div></div>
+
+        <div class="study-box">
+          <h3>What a senior interviewer is really testing</h3>
+          <p>They are not only asking whether you know Node, Redis, RabbitMQ, or Prisma. They are checking whether you can predict failure modes: duplicate requests, slow DB queries, stuck workers, race conditions, leaked permissions, partial external API failures, bad deploys, and poor observability. Every answer should mention correctness first, then scale, then operations.</p>
+        </div>
+
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Node.js request lifecycle</h3>
+            <p>A typical request flows through the reverse proxy, Express middleware, auth, validation, controller, service layer, repository/database calls, response mapping, and centralized error handling.</p>
+            <ul>
+              <li><strong>Middleware:</strong> attach request ID, parse JSON, validate content type, authenticate token, apply rate limit, log request start/end.</li>
+              <li><strong>Controller:</strong> HTTP-specific code only. Read params/body/query, call service, map result to status code.</li>
+              <li><strong>Service:</strong> business rules. Transactions, authorization decisions, idempotency, workflow orchestration.</li>
+              <li><strong>Repository:</strong> database queries. Keep SQL/Prisma details away from controllers.</li>
+              <li><strong>Error handler:</strong> convert domain errors into stable API error responses.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Event loop and performance</h3>
+            <p>Node handles many concurrent I/O operations well, but the JS thread still runs one piece of JS at a time. Heavy CPU work blocks all requests in that process.</p>
+            <ul>
+              <li>Good fit: REST APIs, API gateways, queue producers/consumers, integrations, websockets.</li>
+              <li>Risky inside request path: image processing, PDF generation, OCR, huge JSON parsing, encryption-heavy loops, complex report generation.</li>
+              <li>Fixes: worker threads, child processes, background jobs, streaming, pagination, moving CPU work to Python/service/lambda.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Layered backend folder structure</h3>
+            <p>Use clear boundaries so each feature can grow without turning into a controller full of business logic.</p>
+            <div class="code-block"><div class="code-title">Typical feature structure</div><pre>src/
+  modules/
+    orders/
+      orders.routes.ts
+      orders.controller.ts
+      orders.service.ts
+      orders.repository.ts
+      orders.schema.ts
+      orders.events.ts
+  middleware/
+    auth.ts
+    request-id.ts
+    error-handler.ts
+  lib/
+    prisma.ts
+    redis.ts
+    rabbitmq.ts</pre></div>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">DB</div><div><div class="section-kicker">Database</div><h2>Data modeling, transactions, and indexing</h2><div class="subtitle">Most backend interviews eventually become database interviews.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Topic</th><th>What to know deeply</th><th>Project application</th></tr></thead>
+            <tbody>
+              <tr><td>Data modeling</td><td>Choose relational tables for strong relationships and constraints; choose documents for flexible nested structures and high read locality.</td><td>Product customization schemas may fit MongoDB/documents; wallet ledger and orders fit SQL constraints.</td></tr>
+              <tr><td>Transactions</td><td>Use when multiple writes must commit or rollback together. Keep transactions short and avoid network calls inside them.</td><td>Order creation + ledger reservation + inventory decrement.</td></tr>
+              <tr><td>Row locks</td><td><code>SELECT ... FOR UPDATE</code> prevents concurrent modification of the same row until transaction commits.</td><td>Wallet withdrawal approval and balance movement.</td></tr>
+              <tr><td>Unique constraints</td><td>Database-enforced uniqueness is stronger than application checks.</td><td>Idempotency keys, provider event IDs, external mapping IDs.</td></tr>
+              <tr><td>Indexes</td><td>Composite indexes should match filter/sort patterns. Use query plans to verify.</td><td><code>(seller_id, status, created_at)</code> for seller orders dashboard.</td></tr>
+              <tr><td>Migrations</td><td>Use expand/contract for zero-downtime changes. Backfill in batches.</td><td>Adding payout status or tenant isolation columns safely.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-block"><div class="code-title">Idempotent create pattern</div><pre>POST /orders
+Idempotency-Key: client-generated-uuid
+
+1. Validate request and authenticated user.
+2. Check idempotency table for (user_id, key).
+3. If completed, return saved response.
+4. Start transaction.
+5. Insert order, order_items, initial status history.
+6. Save idempotency result.
+7. Commit.
+8. Publish OrderCreated event after commit or via outbox.</pre></div>
+
+        <div class="section-head"><div class="section-num">MS</div><div><div class="section-kicker">Microservices</div><h2>Microservices without hand-waving</h2><div class="subtitle">A 12-service claim must be backed by boundaries and tradeoffs.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>When microservices are justified</h3>
+            <p>Use microservices when different domains need independent deployability, scaling, ownership, or reliability boundaries. Do not split only because it sounds senior.</p>
+            <ul>
+              <li><strong>Good split:</strong> order, payment, wallet, shipment, notification, catalog, seller/admin.</li>
+              <li><strong>Bad split:</strong> tiny CRUD services that always change together and share the same database tables.</li>
+              <li><strong>Cost:</strong> distributed tracing, deployments, data consistency, contract testing, network failures.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Sync vs async communication</h3>
+            <p>Use synchronous HTTP when the caller needs an immediate answer. Use events/queues when work can happen after durable acceptance.</p>
+            <ul>
+              <li><strong>Sync:</strong> login, product details, checkout validation, admin reads.</li>
+              <li><strong>Async:</strong> send email, update seller wallet, create shipment, push notification, index search.</li>
+              <li><strong>Rule:</strong> user-facing command should complete after the minimum durable state change, not after every downstream side effect.</li>
+            </ul>
+          </div>
+          <div class="deep-item">
+            <h3>Data ownership</h3>
+            <p>Each service should own its database or at least its schema boundary. Other services ask through API/events, not direct table reads.</p>
+            <ul>
+              <li>Direct DB sharing creates hidden coupling and unsafe deploys.</li>
+              <li>Read models can be duplicated asynchronously when dashboards need aggregated data.</li>
+              <li>Use outbox/inbox patterns when events must reflect committed DB changes.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">RD</div><div><div class="section-kicker">Redis</div><h2>Redis patterns you should know</h2><div class="subtitle">Redis is not just "cache"; it is fast shared state with sharp edges.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Use case</th><th>Pattern</th><th>Failure mode</th></tr></thead>
+            <tbody>
+              <tr><td>Cache</td><td>Cache-aside: app reads cache, falls back to DB, stores with TTL</td><td>Stale data, stampede, invalidation bugs</td></tr>
+              <tr><td>Session</td><td>Store session/token metadata with expiry</td><td>Redis outage logs everyone out if no fallback strategy</td></tr>
+              <tr><td>OTP</td><td>Short TTL key, attempt counter, rate limit by phone/email/IP</td><td>Brute force if attempts are not limited</td></tr>
+              <tr><td>Token revocation</td><td>Blacklist token jti until token expiry</td><td>JWT logout impossible if no revocation strategy</td></tr>
+              <tr><td>Rate limiting</td><td>Atomic increment or token bucket per key</td><td>Local in-memory limiter fails across multiple instances</td></tr>
+              <tr><td>Distributed lock</td><td>Use only carefully with TTL and ownership token</td><td>Deadlocks or double ownership if lock handling is naive</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">MQ</div><div><div class="section-kicker">RabbitMQ</div><h2>Message queue implementation model</h2><div class="subtitle">At-least-once delivery means duplicates are normal.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Producer validates command and commits local DB state. If event correctness matters, it writes to an outbox table in the same transaction.</div>
+          <div class="flow-step">Publisher sends event to RabbitMQ exchange with message ID, event type, aggregate ID, timestamp, trace ID, and payload version.</div>
+          <div class="flow-step">Queue routes event to one or more consumers. Consumers process with prefetch limits so one worker does not reserve unlimited messages.</div>
+          <div class="flow-step">Consumer checks idempotency. If already processed, it acks and exits. Otherwise it performs work and commits its own DB transaction.</div>
+          <div class="flow-step">On transient failure, message is retried with delay/backoff. After max attempts, it goes to DLQ with error context for manual or automated recovery.</div>
+        </div>
+        <div class="answer"><div class="answer-q">"Does RabbitMQ guarantee exactly-once processing?"</div><p>No. In practical systems, assume at-least-once delivery. A message can be redelivered if the consumer crashes after doing work but before acking. Exactly-once business behavior comes from idempotent consumers, unique constraints, processed-message tables, and state machines.</p></div>
+
+        <div class="section-head"><div class="section-num">SEC</div><div><div class="section-kicker">Security</div><h2>Auth, RBAC, and tenant isolation checklist</h2><div class="subtitle">Security bugs are usually missing checks at one boundary.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Authentication:</strong> verify JWT signature, expiry, issuer, audience, and token revocation when needed.</div>
+          <div class="check"><strong>Authorization:</strong> check permission on the server for every action. UI hiding is not authorization.</div>
+          <div class="check"><strong>Tenant scoping:</strong> every query includes <code>organization_id</code>/<code>tenant_id</code>; test cross-tenant denial.</div>
+          <div class="check"><strong>RBAC model:</strong> roles are shortcuts for permissions; permissions should describe actions such as <code>order.refund</code>.</div>
+          <div class="check"><strong>Audit logs:</strong> record sensitive actions: payout approval, role changes, refund, document verification, manual data correction.</div>
+          <div class="check"><strong>Input validation:</strong> validate body/query/params at API boundary; never trust client-calculated price, role, tenant, or amount.</div>
+        </div>
+
+        <div class="section-head"><div class="section-num">ANS</div><div><div class="section-kicker">Interview Answers</div><h2>Backend answers worth memorizing</h2><div class="subtitle">Use these as patterns, not scripts.</div></div></div>
+        <div class="answer"><div class="answer-q">"How would you debug a slow API?"</div><p>I would start with metrics to confirm which endpoint and percentile is slow, then inspect traces/logs for where time is spent: app CPU, DB query, Redis, external API, queue wait, or network. If DB is slow, I run EXPLAIN ANALYZE and check indexes/query shape. If dependency is slow, I check timeouts, retries, and circuit breakers. I would avoid adding cache until I know the bottleneck and invalidation behavior.</p></div>
+        <div class="answer"><div class="answer-q">"How would you design a rate limiter?"</div><p>For distributed APIs, use Redis so all app instances share counters. For simple protection, fixed window or sliding window counters may work. For smoother traffic, use token bucket or leaky bucket. Choose key by IP, user ID, API key, or route. Return 429 with retry-after, and monitor limited request counts so legitimate users are not blocked by bad thresholds.</p></div>
+        <div class="answer"><div class="answer-q">"How do you make an API idempotent?"</div><p>The client sends an idempotency key per logical operation. The server stores that key with request hash, status, and response. If the same key arrives again, it returns the original result instead of repeating side effects. For payments/orders, the idempotency record and business write should be in the same transaction or protected by a unique constraint.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

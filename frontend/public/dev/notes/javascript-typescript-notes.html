@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript & TypeScript Notes</title>
+<meta name="description" content="Internal mechanics: execution model, closures, prototypes, async patterns, and advanced TypeScript types.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/javascript-typescript-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">JS & TS Deep Dive</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#execution"><span class="nav-num">01</span>Execution Model</a>
+    <a class="nav-item" href="#closures"><span class="nav-num">02</span>Closures & Scope</a>
+    <a class="nav-item" href="#prototypes"><span class="nav-num">03</span>Prototypes & Classes</a>
+    <a class="nav-item" href="#async"><span class="nav-num">04</span>Async Patterns</a>
+    <a class="nav-item" href="#typescript"><span class="nav-num">05</span>TypeScript Depth</a>
+    <a class="nav-item" href="#advanced"><span class="nav-num">06</span>Advanced Concepts</a>
+    <a class="nav-item" href="#tricky"><span class="nav-num">07</span>Tricky Questions</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Language Internals - Async - Types</div>
+      <h1>JavaScript & TypeScript <span>Interview Notes</span></h1>
+      <p>Master the internal mechanics of JS/TS. Covers the event loop, closures, prototypes, promises, advanced TypeScript types, and common tricky interview questions.</p>
+      <div class="tags"><span class="tag">JavaScript</span><span class="tag">TypeScript</span><span class="tag">Node.js</span><span class="tag">Event Loop</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="execution">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Internals</div><h2>Execution Model</h2><div class="subtitle">How JS runs under the hood.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Event Loop</h3><p>JS is single-threaded. The event loop continuously checks if the Call Stack is empty. If it is, it pushes tasks from the Task Queues to the stack.</p></div>
+          <div class="card"><h3>Micro vs Macrotasks</h3><p><strong>Microtasks:</strong> Promises (<code>.then</code>), <code>process.nextTick</code>, <code>queueMicrotask</code>. Higher priority. <br><strong>Macrotasks:</strong> <code>setTimeout</code>, <code>setInterval</code>, <code>setImmediate</code>, I/O.</p></div>
+          <div class="card"><h3>process.nextTick</h3><p>Node.js specific. Evaluated *before* the next event loop tick and before microtasks. Can cause starvation if used recursively.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="closures">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Scope</div><h2>Closures & Scope</h2><div class="subtitle">Functions remembering where they were born.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Lexical Scope</h3>
+            <p>A function's scope is determined by where it is physically written in the code, not where it is called.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Closure</h3>
+            <p>A closure is a function bundled together with references to its surrounding state (lexical environment). It gives you access to an outer function's scope from an inner function, even after the outer function has returned. Used for data privacy and currying.</p>
+          </div>
+        </div>
+        <div class="code-block"><div class="code-title">Closure Example (Data Privacy)</div><pre>function createCounter() {
+  let count = 0; // private variable
+  return function() {
+    count++;
+    return count;
+  };
+}
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2</pre></div>
+      </section>
+
+      <section class="section" id="prototypes">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Objects</div><h2>Prototypes &amp; Classes</h2><div class="subtitle">There is one mechanism here. Everything else is syntax on top of it.</div></div></div>
+
+        <p>JavaScript has no classes in the way C++ or Java has classes, and understanding that properly makes every confusing thing in this area stop being confusing. What it has is one rule: <strong>every object holds a hidden link to another object, and a failed property lookup follows that link.</strong> That is the entire mechanism. Inheritance, methods, <code>class</code>, <code>new</code>, and <code>instanceof</code> are all built out of it.</p>
+
+        <p>When you write <code>user.save()</code>, the engine looks for <code>save</code> on <code>user</code> itself. If it is not there, it follows the hidden link — the object's <code>[[Prototype]]</code> — and looks there. Then it follows that object's link. It continues until it finds the property or reaches an object whose link is <code>null</code>, at which point the answer is <code>undefined</code>. That path is the prototype chain, and it is walked on every property access.</p>
+
+        <div class="callout">
+          <div class="callout-title">The distinction that trips everyone up</div>
+          <p><code>__proto__</code> (properly <code>Object.getPrototypeOf(obj)</code>) is the link an object <em>uses</em> for lookups. <code>.prototype</code> is a property that exists only on functions, and it is not that function's own prototype — it is the object that will be <em>assigned as</em> <code>[[Prototype]]</code> to instances the function creates with <code>new</code>. One is what an object inherits from; the other is what a constructor hands out. They are different objects and the names are genuinely misleading.</p>
+        </div>
+
+        <h3>What <code>new</code> actually does</h3>
+        <p>Four steps, and being able to list them is a common interview question because it demystifies the whole model:</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-title">new Foo(args), written out</span><span class="code-lang">js</span></div>
+          <pre><code><span class="cmt">// 1. Create a fresh empty object.</span>
+<span class="kw">const</span> obj = {};
+<span class="cmt">// 2. Link it to the constructor's .prototype object.</span>
+Object.<span class="func">setPrototypeOf</span>(obj, Foo.prototype);
+<span class="cmt">// 3. Call the constructor with `this` bound to the new object.</span>
+<span class="kw">const</span> result = Foo.<span class="func">apply</span>(obj, args);
+<span class="cmt">// 4. Return that object -- unless the constructor returned its own object.</span>
+<span class="kw">return</span> (<span class="kw">typeof</span> result === <span class="str">'object'</span> &amp;&amp; result !== <span class="kw">null</span>) ? result : obj;</code></pre>
+        </div>
+
+        <p>Step 2 is why methods defined on <code>Foo.prototype</code> are shared: a thousand instances do not each get a copy of the method, they each hold a link to the one object that has it. That is a real memory property, not a detail — it is the reason methods go on the prototype and per-instance data goes on the instance.</p>
+
+        <h3><code>class</code> is sugar, with two real differences</h3>
+        <p>A <code>class</code> declaration produces a function whose <code>.prototype</code> carries the methods — exactly what people wrote by hand before 2015. <code>extends</code> sets up the chain between the two prototype objects, and <code>super()</code> calls the parent constructor with the current <code>this</code>. If you can explain <code>class</code> in terms of the prototype chain, you have understood it.</p>
+
+        <p>Two things are not merely sugar and are worth knowing. Class bodies run in strict mode always. And class declarations are hoisted but stay in the temporal dead zone, so unlike a <code>function</code> declaration you cannot use one before it appears — a subtle difference that produces a <code>ReferenceError</code> rather than the <code>undefined</code> people expect.</p>
+
+        <h3><code>this</code> is decided at call time</h3>
+        <p>The other half of the confusion in this area. In a normal function, <code>this</code> is not determined by where the function was written but by <em>how it was called</em>. Resolve it with this order:</p>
+
+        <table>
+          <thead><tr><th>Call shape</th><th><code>this</code> is</th></tr></thead>
+          <tbody>
+            <tr><td><code>new Foo()</code></td><td>The newly created object.</td></tr>
+            <tr><td><code>fn.call(x)</code> / <code>.apply(x)</code> / <code>.bind(x)</code></td><td>Explicitly <code>x</code>.</td></tr>
+            <tr><td><code>obj.method()</code></td><td><code>obj</code> — whatever is left of the dot, at the moment of the call.</td></tr>
+            <tr><td><code>fn()</code></td><td><code>undefined</code> in strict mode; the global object otherwise.</td></tr>
+            <tr><td>Arrow function</td><td>None of the above. Arrows have no <code>this</code> of their own; they close over the one from the enclosing scope, permanently.</td></tr>
+          </tbody>
+        </table>
+
+        <p>This is the source of the classic bug: <code>const save = user.save; save()</code> loses the receiver, because <code>this</code> was never attached to the function — it came from the dot. It is also why arrow functions fixed so much callback pain, and why an arrow is the wrong choice for an object method that needs <code>this</code>.</p>
+
+        <div class="analogy">
+          <div class="analogy-label">Analogy</div>
+          <p>The prototype chain is asking a question up a chain of desks. You ask your own desk first; if the answer is not there you pass it to the desk behind, and so on until someone answers or you run out of desks. Classical inheritance stamps a copy of the rulebook onto every desk. JavaScript hands every desk a pointer to the same rulebook — which is why changing that shared object is visible to everyone at once.</p>
+        </div>
+
+        <div class="answer">
+          <div class="answer-q">"How does inheritance work in JavaScript?"</div>
+          <p>"Through delegation rather than copying. Every object has a hidden link to another object, and when a property is not found on the object itself the engine follows that link and keeps following it until it finds the property or hits null. <code>class</code> and <code>extends</code> are syntax over exactly that — a class's methods live on one shared prototype object and instances link to it, which is why a thousand instances do not carry a thousand copies of a method. The distinction I would flag is between <code>.prototype</code>, which only functions have and which describes what their instances will link to, and an object's actual <code>[[Prototype]]</code>, which is the link it uses for lookups. Those two names sound like the same thing and are not."</p>
+        </div>
+      </section>
+
+      <section class="section" id="async">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Concurrency</div><h2>Async Patterns</h2><div class="subtitle">Handling time and network.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Combinator</th><th>Behavior</th><th>Use case</th></tr></thead>
+            <tbody>
+              <tr><td><code>Promise.all</code></td><td>Fails fast if any promise rejects. Waits for all to resolve.</td><td>Independent parallel requests (e.g., fetch user + fetch posts).</td></tr>
+              <tr><td><code>Promise.allSettled</code></td><td>Waits for all promises to settle (resolve or reject). Never fails fast.</td><td>Batch processing where partial success is acceptable.</td></tr>
+              <tr><td><code>Promise.race</code></td><td>Resolves or rejects as soon as the *first* promise settles.</td><td>Timeout mechanisms.</td></tr>
+              <tr><td><code>Promise.any</code></td><td>Resolves with the first fulfilled promise. Ignores rejections until all reject.</td><td>Querying multiple replica servers, take the fastest.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="typescript">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Types</div><h2>TypeScript Depth</h2><div class="subtitle">Beyond basic interfaces.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Generics</h3><p>Reusable components that work over a variety of types rather than a single one. <code>function identity&lt;T&gt;(arg: T): T</code></p></div>
+          <div class="card"><h3>Utility Types</h3><p><code>Partial&lt;T&gt;</code>, <code>Pick&lt;T, K&gt;</code>, <code>Omit&lt;T, K&gt;</code>, <code>Record&lt;K, T&gt;</code>. Used heavily in React props and API responses.</p></div>
+          <div class="card"><h3>Discriminated Unions</h3><p>Using a common literal property (like <code>type: 'success' | 'error'</code>) to narrow down a union type in a <code>switch</code> statement safely.</p></div>
+          <div class="card"><h3>satisfies Operator</h3><p>Validates that an object matches a type *without* widening its specific literal types. <code>const routes = { home: '/' } satisfies Record&lt;string, string&gt;</code></p></div>
+        </div>
+      </section>
+
+      <section class="section" id="advanced">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Depth</div><h2>Advanced Concepts</h2><div class="subtitle">The features you reach for rarely, and should be able to explain when you do.</div></div></div>
+
+        <h3>Iterators and generators</h3>
+        <p>Start with the protocol, because the syntax makes no sense without it. Anything is <em>iterable</em> if it has a method at the key <code>Symbol.iterator</code> that returns an object with a <code>next()</code> method, and <code>next()</code> returns <code>{ value, done }</code>. That is all <code>for...of</code>, spread, and destructuring know how to do — they call <code>next()</code> until <code>done</code> is true. Arrays, strings, <code>Map</code> and <code>Set</code> implement it; plain objects do not, which is precisely why <code>for...of</code> works on an array and throws on an object.</p>
+
+        <p>A generator is a function that builds that protocol for you. <code>function*</code> returns an object satisfying the iterator protocol, and <code>yield</code> suspends execution — with the local variables intact — until the next <code>next()</code> call resumes it. The property that makes generators genuinely useful is <strong>laziness</strong>: values are produced on demand, so a sequence can be infinite, or can pull pages from an API only as far as the consumer actually reads.</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-title">lazy pagination without loading everything</span><span class="code-lang">js</span></div>
+          <pre><code><span class="kw">async function</span>* <span class="func">allUsers</span>() {
+  <span class="kw">let</span> cursor = <span class="kw">null</span>;
+  <span class="kw">do</span> {
+    <span class="kw">const</span> page = <span class="kw">await</span> <span class="func">fetchPage</span>(cursor);
+    <span class="kw">yield</span>* page.items;   <span class="cmt">// hand out one item at a time</span>
+    cursor = page.next;
+  } <span class="kw">while</span> (cursor);
+}
+
+<span class="cmt">// Stops after 10 -- later pages are never requested.</span>
+<span class="kw">let</span> n = <span class="num">0</span>;
+<span class="kw">for await</span> (<span class="kw">const</span> user <span class="kw">of</span> <span class="func">allUsers</span>()) {
+  <span class="kw">if</span> (++n &gt; <span class="num">10</span>) <span class="kw">break</span>;
+}</code></pre>
+        </div>
+
+        <h3>Symbols</h3>
+        <p>A <code>Symbol</code> is a primitive whose only property is that it is unique — two symbols with the same description are still different keys. That makes them useful for metadata you want to attach to an object without colliding with real keys or showing up in <code>Object.keys()</code> and <code>JSON.stringify</code>. The well-known symbols are the interesting ones: <code>Symbol.iterator</code> makes your object work with <code>for...of</code>, <code>Symbol.asyncIterator</code> with <code>for await</code>. They are the hooks the language uses to let your objects participate in built-in syntax.</p>
+
+        <h3>Proxy and Reflect</h3>
+        <p>A <code>Proxy</code> wraps an object and intercepts the fundamental operations performed on it — property reads, writes, deletion, <code>in</code> checks. This is how reactivity systems know a value was read: Vue 3's reactivity and several ORMs are built on it. <code>Reflect</code> provides the default implementations, so a trap can do its own work and then forward to normal behaviour rather than reimplementing it.</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-title">a trap that forwards</span><span class="code-lang">js</span></div>
+          <pre><code><span class="kw">const</span> tracked = <span class="kw">new</span> <span class="func">Proxy</span>(target, {
+  <span class="func">get</span>(obj, key, receiver) {
+    <span class="func">track</span>(key);                                <span class="cmt">// the extra behaviour</span>
+    <span class="kw">return</span> Reflect.<span class="func">get</span>(obj, key, receiver);   <span class="cmt">// then the normal one</span>
+  }
+});</code></pre>
+        </div>
+
+        <h3>WeakMap and memory</h3>
+        <p>A normal <code>Map</code> holds a strong reference to its keys, so an object used as a key can never be garbage collected while the map lives — a genuine leak if the map is long-lived and the keys are DOM nodes or request objects. A <code>WeakMap</code> holds its keys weakly: if nothing else references the key, the entry disappears. The trade is that a <code>WeakMap</code> is not enumerable — you cannot list its contents, because what it contains can change whenever the collector runs. It is the right structure for associating private data with an object you do not own.</p>
+
+        <h3>Modules: ESM and CommonJS</h3>
+        <p>The difference that causes real problems is not syntax, it is <em>timing</em>. CommonJS <code>require()</code> is synchronous and resolved at runtime, so you can call it conditionally inside a function. ESM <code>import</code> is resolved statically before any code executes, which is what makes tree-shaking possible — a bundler can see which exports are unused because the graph is knowable without running anything. It is also why <code>import</code> cannot be placed inside an <code>if</code>, and why <code>await import()</code> exists for the cases where you genuinely need a runtime decision.</p>
+
+        <p>The second practical difference: CommonJS exports a value, ESM exports a <em>live binding</em>. If a module reassigns an exported variable later, an ESM importer sees the new value and a CommonJS importer keeps the old one.</p>
+
+        <div class="answer">
+          <div class="answer-q">"When would you use a generator?"</div>
+          <p>"When the consumer should control how much work happens. The property that makes generators worth reaching for is laziness — execution suspends at each <code>yield</code> with the local state intact, so nothing is computed until someone asks for the next value. The case I find genuinely useful is paginating an API: an async generator can expose a flat stream of items while only fetching the next page when the consumer actually reads that far, so a caller that breaks after ten items never triggers the later requests. Without it you either load everything up front or leak pagination handling into every call site."</p>
+        </div>
+      </section>
+
+      <section class="section" id="tricky">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Interview</div><h2>Tricky Questions</h2><div class="subtitle">The classic "what does this output" questions.</div></div></div>
+        <div class="answer"><div class="answer-q">"What is the difference between <code>==</code> and <code>===</code>?"</div><p><code>==</code> performs type coercion before comparison (e.g., <code>'1' == 1</code> is true). <code>===</code> checks both value and type without coercion (strict equality). Always use <code>===</code> unless specifically checking for <code>null</code>/<code>undefined</code> simultaneously (<code>x == null</code>).</p></div>
+        
+        <div class="answer"><div class="answer-q">"How does <code>this</code> work in JavaScript?"</div><p>In standard functions, <code>this</code> is determined by *how* the function is called (the object left of the dot). In arrow functions, <code>this</code> is lexically bound (it inherits <code>this</code> from the surrounding scope at the time of definition). <code>bind()</code>, <code>call()</code>, and <code>apply()</code> can explicitly set <code>this</code>.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

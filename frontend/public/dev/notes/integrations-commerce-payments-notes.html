@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integrations Commerce Payments Notes</title>
+<meta name="description" content="ETL, source-aware UPSERTs, payment lifecycle, wallet ledger, payouts, webhooks, shipping, and reconciliation.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/integrations-commerce-payments-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">Integrations, Commerce, Payments</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#etl"><span class="nav-num">01</span>ETL</a>
+    <a class="nav-item" href="#upserts"><span class="nav-num">02</span>UPSERTs</a>
+    <a class="nav-item" href="#payments"><span class="nav-num">03</span>Payments</a>
+    <a class="nav-item" href="#wallet"><span class="nav-num">04</span>Wallet/Payout</a>
+    <a class="nav-item" href="#shipping"><span class="nav-num">05</span>Shipping</a>
+    <a class="nav-item" href="#webhooks"><span class="nav-num">06</span>Webhooks</a>
+    <a class="nav-item" href="#deep-integrations"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Razorpay - Stripe - Shiprocket - Salesforce - SAP ETL</div>
+      <h1>Integrations and Commerce <span>Interview Notes</span></h1>
+      <p>This artifact covers the resume's most business-critical backend systems: cross-system synchronization, source-aware UPSERTs, payments, wallet correctness, shipping APIs, webhooks, reconciliation, and partial failures.</p>
+      <div class="tags"><span class="tag">Idempotency</span><span class="tag">Webhooks</span><span class="tag">ETL</span><span class="tag">Wallet ledger</span><span class="tag">Partial success</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="etl">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">ETL</div><h2>JS ETL platform story</h2><div class="subtitle">Bi-directional synchronization across SAP, Salesforce, and Ecommerce.</div></div></div>
+        <p>The resume claims a production-grade JS ETL platform with file-driven ingestion, REST propagation, merged outbound acknowledgement files, parallel processing, and 80-85 percent manual reconciliation reduction. Be ready to explain it like a system design.</p>
+        <div class="checklist">
+          <div class="check"><strong>Extract:</strong> receive SAP JSON payload files, validate schema, split records, attach source metadata.</div>
+          <div class="check"><strong>Transform:</strong> normalize fields, map IDs, convert statuses, validate required business rules.</div>
+          <div class="check"><strong>Load:</strong> UPSERT into Salesforce and Ecommerce through REST APIs with retries and idempotency.</div>
+          <div class="check"><strong>Acknowledge:</strong> generate merged outbound ack files with success/failure per record.</div>
+          <div class="check"><strong>Operate:</strong> logs, trace IDs, retry reports, partial-success handling, manual review queue.</div>
+        </div>
+      </section>
+
+      <section class="section" id="upserts">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Consistency</div><h2>Source-aware idempotent UPSERTs</h2><div class="subtitle">The core correctness claim in the integration platform.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Concept</th><th>Meaning</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td>Composite key</td><td>SAP ID + Salesforce ID + Ecommerce ID or a stable natural key</td><td>Prevents duplicates when the same entity arrives from multiple systems</td></tr>
+              <tr><td>Source awareness</td><td>Know which system sent the update and which fields it owns</td><td>Prevents lower-authority systems from overwriting authoritative data</td></tr>
+              <tr><td>Transaction boundary</td><td>Group local DB changes atomically</td><td>Avoids half-updated local state</td></tr>
+              <tr><td>Partial success</td><td>Some records or destinations can fail while others succeed</td><td>Batch does not need to fully fail; failures become retryable units</td></tr>
+              <tr><td>Fault isolation</td><td>Bad record does not stop the entire file</td><td>High-throughput integrations survive dirty data</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="answer"><div class="answer-q">"How do you prevent duplicate records in a sync pipeline?"</div><p>"I use stable external IDs and composite unique constraints, then perform idempotent UPSERTs instead of blind inserts. I keep a mapping table between SAP, Salesforce, and Ecommerce IDs, record the source and event ID, and make retries safe. If one destination fails, I persist the failed operation with enough context to retry without reprocessing successful work."</p></div>
+      </section>
+
+      <section class="section" id="payments">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Payments</div><h2>Razorpay and Stripe fundamentals</h2><div class="subtitle">Payments are distributed systems with money attached.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Payment Intent/Order</h3><p>Create server-side amount/currency/order reference. Never trust amount from client after creation.</p></div>
+          <div class="card"><h3>Idempotency</h3><p>Use idempotency keys so retries do not create duplicate charges or duplicate internal orders.</p></div>
+          <div class="card"><h3>Webhook Verification</h3><p>Verify provider signature. Treat webhook as source of truth for final payment state.</p></div>
+          <div class="card"><h3>Reconciliation</h3><p>Compare provider records with internal orders, payouts, refunds, and failed webhooks.</p></div>
+        </div>
+        <div class="callout red"><div class="callout-title">Payment rule</div><p>The client can start payment, but the server verifies final status with the provider and updates internal state idempotently. Never mark paid only because the frontend says payment succeeded.</p></div>
+      </section>
+
+      <section class="section" id="wallet">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Ledger</div><h2>Seller wallet and payout engine</h2><div class="subtitle">Financial accuracy requires auditability.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Feature</th><th>Design</th><th>Failure to avoid</th></tr></thead>
+            <tbody>
+              <tr><td>Commission snapshot</td><td>Store commission rate/value at order time</td><td>Historical orders changing when seller plan changes</td></tr>
+              <tr><td>Locked balance</td><td>Hold funds until return/refund window passes</td><td>Paying seller before order is final</td></tr>
+              <tr><td>Ledger</td><td>Append-only credit/debit entries</td><td>Unexplainable mutable balance edits</td></tr>
+              <tr><td>Withdrawal workflow</td><td>Admin approval, status machine, payout reference</td><td>Duplicate payouts or unapproved withdrawals</td></tr>
+              <tr><td>Audit trail</td><td>Who changed what, when, and why</td><td>No forensic trail during disputes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="shipping">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Shipping</div><h2>Shiprocket and external APIs</h2><div class="subtitle">Shipping APIs fail in messy real-world ways.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Rate Limits</h3><p>Throttle provider calls and retry 429 with backoff. Queue non-urgent sync jobs.</p></div>
+          <div class="card"><h3>Status Mapping</h3><p>Provider statuses must map to internal states. Unknown statuses should be logged and reviewed.</p></div>
+          <div class="card"><h3>Tracking Updates</h3><p>Use webhooks where available, plus periodic polling as fallback for missed events.</p></div>
+          <div class="card"><h3>Partial Failure</h3><p>Order can be paid but shipment creation can fail. Persist state and retry shipment independently.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="webhooks">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Webhooks</div><h2>Webhook handling checklist</h2><div class="subtitle">Providers retry; your endpoint must be safe.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Verify signature:</strong> reject forged requests before processing.</div>
+          <div class="check"><strong>Deduplicate:</strong> store provider event ID and ignore replays.</div>
+          <div class="check"><strong>Respond fast:</strong> enqueue heavy work and return 2xx after durable acceptance.</div>
+          <div class="check"><strong>Idempotent state machine:</strong> payment_succeeded twice should not double-credit wallet.</div>
+          <div class="check"><strong>Audit:</strong> store raw event payload, parsed event, processing status, retries, and errors.</div>
+          <div class="check"><strong>Recovery:</strong> reconciliation job should find missed or failed events.</div>
+        </div>
+        <div class="answer"><div class="answer-q">"What if the payment webhook arrives before your checkout API response?"</div><p>"That is normal in distributed systems. The webhook handler should be able to find the order by provider reference/idempotency key, or temporarily store the event as pending until the order exists. State transitions must be idempotent and order-independent where possible."</p></div>
+      </section>
+
+      <section class="section" id="deep-integrations">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Deep Reference</div><h2>Integration, commerce, and payment reference</h2><div class="subtitle">Use this when building or explaining real systems with external dependencies.</div></div></div>
+
+        <div class="study-box">
+          <h3>The main idea</h3>
+          <p>External integrations are unreliable by default: APIs time out, webhooks arrive late or twice, payloads change, providers rate-limit, and partial success is common. Strong engineers design integrations around idempotency, durable state, reconciliation, observability, and manual recovery paths.</p>
+        </div>
+
+        <div class="section-head"><div class="section-num">ETL</div><div><div class="section-kicker">Data Sync</div><h2>Production ETL architecture</h2><div class="subtitle">How to explain the SAP/Salesforce/Ecommerce platform in detail.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">File ingestion service detects or receives SAP JSON files, assigns batch ID, validates file-level schema, and stores original payload for replay/debugging.</div>
+          <div class="flow-step">Parser splits file into records, attaches source metadata, validates required fields, and writes accepted/rejected records into a durable staging table.</div>
+          <div class="flow-step">Transformer normalizes field names, data types, enums, timestamps, currency, address format, and external identifiers.</div>
+          <div class="flow-step">Resolver uses mapping table to connect SAP ID, Salesforce ID, Ecommerce ID, and internal canonical entity ID.</div>
+          <div class="flow-step">Loader performs idempotent UPSERTs to local DB and downstream APIs. Each record has independent status: pending, success, failed, retrying, skipped.</div>
+          <div class="flow-step">Acknowledgement generator merges per-record results into outbound ack files with success/failure reason and external references.</div>
+          <div class="flow-step">Operations dashboard shows batch status, record failures, retry count, manual review items, and reconciliation mismatches.</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Failure</th><th>Design response</th><th>What to say in interview</th></tr></thead>
+            <tbody>
+              <tr><td>One bad record in large file</td><td>Record-level validation and partial success</td><td>"The whole batch should not fail because one record is malformed."</td></tr>
+              <tr><td>Salesforce timeout after success</td><td>Idempotency key or external ID lookup before retry</td><td>"Timeout does not mean failure; it means unknown outcome."</td></tr>
+              <tr><td>Duplicate file replay</td><td>Batch ID, file hash, record keys, idempotent UPSERT</td><td>"Replay should produce same final state, not duplicates."</td></tr>
+              <tr><td>Schema drift</td><td>Versioned parser, validation, unknown-field logging</td><td>"Integrations need contracts and change detection."</td></tr>
+              <tr><td>Conflicting updates</td><td>Source priority and field ownership rules</td><td>"Not every system is authoritative for every field."</td></tr>
+              <tr><td>Downstream API rate limit</td><td>Queue, throttling, backoff, retry later</td><td>"Controlled delay is better than provider ban or data loss."</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">MAP</div><div><div class="section-kicker">Identity Mapping</div><h2>Canonical IDs and source-aware UPSERTs</h2><div class="subtitle">The heart of cross-system consistency.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Canonical entity model</h3>
+            <p>Create an internal canonical ID for each entity and map all external IDs to it. This prevents the system from treating the same customer/product/order as three different records.</p>
+            <div class="code-block"><div class="code-title">Mapping table idea</div><pre>entity_identity_map
+- canonical_id
+- entity_type        -- customer, product, order
+- sap_id
+- salesforce_id
+- ecommerce_id
+- source_of_truth
+- last_seen_at
+- created_at
+- updated_at</pre></div>
+          </div>
+          <div class="deep-item">
+            <h3>Field ownership</h3>
+            <p>Source-aware means knowing which system is allowed to update which fields. For example, SAP may own inventory and SKU, Ecommerce may own storefront description, Salesforce may own sales/account metadata.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Conflict resolution</h3>
+            <p>Use deterministic rules: source priority, updated_at only from trusted source, manual review for conflicting high-risk fields, and audit log for every overwrite.</p>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">PAY</div><div><div class="section-kicker">Payments</div><h2>Payment lifecycle in detail</h2><div class="subtitle">Payments require state machines, not boolean flags.</div></div></div>
+        <div class="flow">
+          <div class="flow-step">Client starts checkout. Server recalculates amount from trusted cart/product data and creates internal pending order.</div>
+          <div class="flow-step">Server creates provider payment order/intent and stores provider reference, amount, currency, user, and idempotency key.</div>
+          <div class="flow-step">Client completes payment using provider SDK. Frontend result is treated as untrusted until server verifies.</div>
+          <div class="flow-step">Provider webhook arrives. Server verifies signature, deduplicates event ID, fetches/validates provider status if needed, and updates payment state.</div>
+          <div class="flow-step">Order transitions to paid only once. Downstream events trigger shipment creation, seller wallet credit lock, invoice, and notification.</div>
+          <div class="flow-step">Reconciliation job compares internal payment states with provider reports to catch missed webhooks or manual provider changes.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Payment state</th><th>Meaning</th><th>Allowed next states</th></tr></thead>
+            <tbody>
+              <tr><td>created</td><td>Internal order/payment record created</td><td>provider_pending, failed, expired</td></tr>
+              <tr><td>provider_pending</td><td>Provider order/intent created, waiting for payment</td><td>authorized, captured, failed, expired</td></tr>
+              <tr><td>authorized</td><td>Funds authorized but not captured, provider-dependent</td><td>captured, voided, failed</td></tr>
+              <tr><td>captured</td><td>Payment confirmed and money captured</td><td>refunded, partially_refunded, disputed</td></tr>
+              <tr><td>failed</td><td>Payment failed or was abandoned</td><td>retry_created</td></tr>
+              <tr><td>refunded</td><td>Money returned to customer</td><td>closed</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><div class="section-num">LED</div><div><div class="section-kicker">Wallet</div><h2>Seller wallet and ledger design</h2><div class="subtitle">Balances are derived facts; ledger is the source of truth.</div></div></div>
+        <div class="deep-list">
+          <div class="deep-item">
+            <h3>Ledger entries</h3>
+            <p>Use append-only entries for every credit/debit. Each entry has amount, currency, seller ID, order ID, reason, status, idempotency key, and created_by/system actor.</p>
+            <div class="code-block"><div class="code-title">Ledger table shape</div><pre>wallet_ledger
+- id
+- seller_id
+- type              -- credit, debit, hold, release, payout
+- amount
+- currency
+- reference_type    -- order, refund, payout
+- reference_id
+- idempotency_key
+- status            -- pending, available, reversed, paid_out
+- created_at</pre></div>
+          </div>
+          <div class="deep-item">
+            <h3>Available vs locked balance</h3>
+            <p>When an order is paid, seller earnings may go to locked balance until return/refund window passes. After the lock period, funds move to available balance. Payouts debit available balance only.</p>
+          </div>
+          <div class="deep-item">
+            <h3>Reconciliation</h3>
+            <p>Periodically recompute balances from ledger and compare with stored wallet balance. Any mismatch should alert and block payouts until reviewed.</p>
+          </div>
+        </div>
+
+        <div class="section-head"><div class="section-num">WH</div><div><div class="section-kicker">Webhooks</div><h2>Webhook reliability pattern</h2><div class="subtitle">A webhook endpoint is an ingestion system.</div></div></div>
+        <div class="code-block"><div class="code-title">Webhook handler algorithm</div><pre>1. Read raw body exactly as provider signed it.
+2. Verify signature and timestamp tolerance.
+3. Parse event type and provider event ID.
+4. Insert event ID into webhook_events with unique constraint.
+5. If duplicate, return 200 immediately.
+6. Store raw payload and mark status = received.
+7. Enqueue processing job or process quickly.
+8. Handler updates domain state idempotently.
+9. Mark event processed or failed with error.
+10. Reconciliation catches anything missed.</pre></div>
+        <div class="answer"><div class="answer-q">"Why return 200 even for duplicate webhook?"</div><p>Because the provider only needs to know that your system has accepted or already processed the event. Returning an error for duplicates causes more retries. Duplicate delivery is normal, so deduplicate internally and return success when safe.</p></div>
+
+        <div class="section-head"><div class="section-num">REC</div><div><div class="section-kicker">Reconciliation</div><h2>Reconciliation and manual recovery</h2><div class="subtitle">The system must recover from unknown outcomes.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>Payment reconciliation:</strong> compare provider captured/refunded payments with internal order/payment records.</div>
+          <div class="check"><strong>Wallet reconciliation:</strong> recompute seller balances from ledger and compare with stored aggregates.</div>
+          <div class="check"><strong>Shipment reconciliation:</strong> poll provider for shipments without recent webhook updates.</div>
+          <div class="check"><strong>ETL reconciliation:</strong> compare record counts, success/failure statuses, and external IDs across SAP/Salesforce/Ecommerce.</div>
+          <div class="check"><strong>Manual review:</strong> failed records need clear error reason, retry button, raw payload, transformed payload, and audit history.</div>
+        </div>
+
+        <div class="section-head"><div class="section-num">ANS</div><div><div class="section-kicker">Interview Answers</div><h2>Integration answers worth memorizing</h2><div class="subtitle">These come up often in project deep-dives.</div></div></div>
+        <div class="answer"><div class="answer-q">"How do you handle partial success in third-party integrations?"</div><p>I model each record or downstream operation independently with its own status. Successful items are committed and acknowledged; failed items store the error, retry count, and next retry time. The batch status becomes completed_with_errors if needed. This avoids throwing away good work and lets operations retry only failed records.</p></div>
+        <div class="answer"><div class="answer-q">"What is your strategy for provider timeouts?"</div><p>A timeout means unknown outcome, not guaranteed failure. For create/payment operations I use idempotency keys or provider reference IDs, then query provider state before retrying blindly. Retries use backoff and a maximum attempt count, and unresolved cases go to manual review or reconciliation.</p></div>
+        <div class="answer"><div class="answer-q">"How would you prevent double payout?"</div><p>Use an immutable ledger, unique payout request IDs, transaction boundaries, row locks on wallet/account rows, idempotency keys for payout provider calls, and status transitions that allow payout execution only once. Reconciliation must compare payout provider records against internal ledger entries.</p></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

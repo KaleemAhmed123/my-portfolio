@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Engineering Handbook - Part 2</title>
+<meta name="description" content="Expanded systems, infrastructure, and senior interview appendix topics.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/handbook_part2">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Backend Handbook</div>
+    <div class="sidebar-title">Part 2 - Senior Systems and Operations</div>
+  </div>
+  <div class="tier-label">Tier 2 - Senior-Level Concepts</div>
+  <a class="nav-item" href="#ch11"><span class="nav-num">11</span>Distributed Systems</a>
+  <a class="nav-item" href="#ch12"><span class="nav-num">12</span>Load Balancing</a>
+  <a class="nav-item" href="#ch13"><span class="nav-num">13</span>Scaling</a>
+  <a class="nav-item" href="#ch14"><span class="nav-num">14</span>DB Replication</a>
+  <a class="nav-item" href="#ch15"><span class="nav-num">15</span>Sharding</a>
+  <a class="nav-item" href="#ch16"><span class="nav-num">16</span>Optimistic Locking</a>
+  <a class="nav-item" href="#ch17"><span class="nav-num">17</span>Event-Driven Arch</a>
+  <a class="nav-item" href="#ch18"><span class="nav-num">18</span>Circuit Breakers</a>
+  <a class="nav-item" href="#ch19"><span class="nav-num">19</span>Retry Strategies</a>
+  <a class="nav-item" href="#ch20"><span class="nav-num">20</span>Observability</a>
+  <div class="tier-label">Tier 3 - DevOps and Infra</div>
+  <a class="nav-item" href="#ch21"><span class="nav-num">21</span>Docker</a>
+  <a class="nav-item" href="#ch22"><span class="nav-num">22</span>Kubernetes</a>
+  <a class="nav-item" href="#ch23"><span class="nav-num">23</span>CI/CD</a>
+  <a class="nav-item" href="#ch24"><span class="nav-num">24</span>Reverse Proxy</a>
+  <a class="nav-item" href="#ch25"><span class="nav-num">25</span>API Design</a>
+  <div class="tier-label">Appendix - Interview Depth</div>
+  <a class="nav-item" href="#ch26"><span class="nav-num">26</span>HTTP/TCP/DNS</a>
+  <a class="nav-item" href="#ch27"><span class="nav-num">27</span>TLS and Security</a>
+  <a class="nav-item" href="#ch28"><span class="nav-num">28</span>Schema Migrations</a>
+  <a class="nav-item" href="#ch29"><span class="nav-num">29</span>Connection Pools</a>
+  <a class="nav-item" href="#ch30"><span class="nav-num">30</span>N+1 and ORMs</a>
+  <a class="nav-item" href="#ch31"><span class="nav-num">31</span>Outbox and Sagas</a>
+  <a class="nav-item" href="#ch32"><span class="nav-num">32</span>Testing Strategy</a>
+  <a class="nav-item" href="#ch33"><span class="nav-num">33</span>Secrets and Config</a>
+  <a class="nav-item" href="#ch34"><span class="nav-num">34</span>Files and Search</a>
+  <a class="nav-item" href="#ch35"><span class="nav-num">35</span>Interview Playbook</a>
+  <a class="nav-item" href="#master"><span class="nav-num">M</span>Master Reference</a>
+  <div class="tier-label">Resume Notes</div>
+  <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+  <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">RS</span>Resume Skill Map</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="hero-eyebrow">Senior Engineer's Reference - Part 2</div>
+    <h1>Backend Engineering<br><span>Systems Handbook</span></h1>
+    <p class="hero-desc">A deeper continuation of the backend handbook: distributed systems, deployment, operations, API design, and the missing interview topics that separate feature development from production engineering.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">senior interviews</span>
+      <span class="hero-tag">production tradeoffs</span>
+      <span class="hero-tag">system design</span>
+      <span class="hero-tag">operations</span>
+      <span class="hero-tag">appendix topics</span>
+      <a class="hero-tag" href="/dev/notes/resume-skill-map" style="text-decoration:none;">Resume Skill Map</a>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+<!-- TIER 2 DIVIDER -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t2">🚀 Tier 2 — Senior-Level Concepts</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 11: DISTRIBUTED SYSTEMS BASICS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter-header">
+    <div class="chapter-num t2">11</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Distributed Systems Basics</h2>
+      <div class="chapter-subtitle">Multiple servers, partial failures, and why the network always lies</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Once your system spans multiple machines, a whole new class of failures emerges. A server can be slow, not dead. A request might be received but the response lost. The same request might be processed twice. Clocks on different machines drift apart. These aren't edge cases — they're <strong>normal production conditions</strong> you must design around.</p>
+    <p>The famous <strong>Fallacies of Distributed Computing</strong>: the network is reliable, latency is zero, bandwidth is infinite, the network is secure, topology doesn't change. All of these are false — every single one. Your system must be designed assuming each will occasionally be violated.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Running a distributed system is like managing workers in different cities who can only communicate by postcards. A postcard might arrive late, arrive twice, never arrive, or arrive out of order. You can never be 100% sure if your colleague received your last message. Every decision must account for that uncertainty. This isn't a bug — it's the fundamental nature of distributed communication.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>CAP Theorem — The Fundamental Trade-off</h3></div>
+    <p>A distributed system can only guarantee <strong>two</strong> of three properties simultaneously. Since network partitions always happen (cables fail, switches crash), you're really choosing between C and A:</p>
+    <div class="cards">
+      <div class="card"><h4>C — Consistency</h4><p>Every read sees the most recent write. All nodes return same data. Refuse requests during partition to avoid stale reads.</p></div>
+      <div class="card"><h4>A — Availability</h4><p>Every request gets a response — not necessarily the latest data. Serve potentially stale data during partition rather than error.</p></div>
+      <div class="card"><h4>P — Partition Tolerance</h4><p>System keeps working when network between nodes fails. Non-negotiable in any real distributed system.</p></div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Choice</th><th>Behavior during partition</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag blue">CP</span></td><td>Refuse reads/writes to avoid stale data. Returns error.</td><td>PostgreSQL, HBase, ZooKeeper, etcd</td></tr>
+          <tr><td><span class="tag green">AP</span></td><td>Serve potentially stale data. Eventually consistent.</td><td>DynamoDB, Cassandra, CouchDB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example — Idempotency Key</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Idempotency key — safe retries in distributed systems</span></div>
+      <pre><span class="cmt">// Problem: request succeeds server-side but client never gets response</span>
+<span class="cmt">// Client retries → duplicate order created → customer charged twice</span>
+<span class="cmt">// Solution: idempotency key deduplicates at the server</span>
+
+app.<span class="fn">post</span>(<span class="str">'/orders'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> idempotencyKey = req.headers[<span class="str">'idempotency-key'</span>];
+  <span class="kw">if</span> (!idempotencyKey) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: <span class="str">'Idempotency-Key header required'</span> });
+  }
+
+  <span class="kw">const</span> lockKey = <span class="str">`idem:${idempotencyKey}`</span>;
+  <span class="kw">const</span> existing = <span class="kw">await</span> redis.<span class="fn">get</span>(lockKey);
+
+  <span class="kw">if</span> (existing) {
+    <span class="cmt">// Duplicate request — return cached result, don't reprocess</span>
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">200</span>).<span class="fn">json</span>(JSON.<span class="fn">parse</span>(existing));
+  }
+
+  <span class="kw">const</span> order = <span class="kw">await</span> <span class="fn">createOrder</span>(req.body);
+  <span class="kw">const</span> response = { orderId: order.id, status: <span class="str">'created'</span> };
+
+  <span class="cmt">// Cache result for 24h — client can safely retry within that window</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(lockKey, <span class="num">86400</span>, JSON.<span class="fn">stringify</span>(response));
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(response);
+});
+
+<span class="cmt">// Client: generate UUID ONCE before first attempt, reuse on all retries</span>
+<span class="kw">const</span> key = crypto.<span class="fn">randomUUID</span>();
+<span class="kw">await</span> <span class="fn">retryWithBackoff</span>(() =&gt;
+  fetch(<span class="str">'/orders'</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'Idempotency-Key'</span>: key },
+    body: JSON.<span class="fn">stringify</span>(orderData)
+  })
+);</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Design all mutation endpoints (payments, orders) to be <strong>idempotent</strong> via an idempotency key. Safe retries are the foundation of resilient distributed systems.</li>
+      <li>Never compare timestamps from different servers for ordering — clocks drift. Use logical clocks or monotonically increasing sequence IDs from a central source.</li>
+      <li>Any external service call can fail partially. Always design the recovery path: "What if this call succeeds on their side but I never get the response?"</li>
+      <li>Eventual consistency is fine for "number of likes on a post." It's dangerous for "user's available credit balance." Know which data requires strong consistency.</li>
+      <li>Use correlation/trace IDs that flow through every service call, log entry, and queue message. Essential for debugging distributed failures.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Explain the CAP theorem and how it affects your system design decisions."</div>
+    <div class="interview-weak"><span class="badge-weak">✗ Weak</span><p>"CAP says you can only have two of three: consistency, availability, partition tolerance."</p></div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"CAP says during a network partition — which will happen — you choose between consistency and availability. For a payment service I'd choose consistency — I'd rather return an error than serve stale balance data that causes an overdraft. For a product catalog, eventual consistency is fine — a price that's 2 seconds stale is acceptable. In practice, most systems are AP because availability is what users experience, but I apply strong consistency selectively where financial correctness matters."</p></div>
+    <div class="interview-q">"What is eventual consistency and when is it NOT appropriate?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Eventual consistency means all nodes converge to the same value given time — reads in between may return stale data. It's great for social features (likes, feeds), product catalogs, and search indexes. It's dangerous anywhere two operations that depend on the same value must be strongly ordered — financial balances, inventory counts, distributed locks. With eventual consistency, two threads could both read 'balance = $100' and both approve a $90 withdrawal."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">CAP Theorem</span><span class="cheat-val">Partitions always happen → choose C (refuse stale) or A (serve stale)</span></div>
+      <div class="cheat-row"><span class="cheat-key">Eventual consistency</span><span class="cheat-val">Writes propagate in time. Reads may be briefly stale. OK for non-critical data.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Idempotency key</span><span class="cheat-val">Client UUID per operation. Server deduplicates. Safe retries.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Partial failure</span><span class="cheat-val">Request succeeds on server, response lost. Design retry + dedup for this.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Clock drift</span><span class="cheat-val">Clocks differ across machines. Never order events by timestamp alone.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 12: LOAD BALANCING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch12">
+  <div class="chapter-header">
+    <div class="chapter-num t2">12</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Load Balancing</h2>
+      <div class="chapter-subtitle">Distributing traffic so no single server drowns while others idle</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>A load balancer sits in front of your server fleet and distributes incoming requests across multiple backend servers. It simultaneously acts as a <strong>traffic router</strong>, a <strong>health monitor</strong>, and a <strong>single entry point</strong> that hides backend complexity from clients.</p>
+    <p>Without a load balancer, adding a second server means clients need to know about both — which breaks everything. With one, clients always connect to the same address. When a backend dies, the LB stops sending traffic to it within seconds — automatic failover without code changes.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A load balancer is the host at a restaurant with multiple cashiers. You walk up, they assess which cashier has the shortest queue and direct you there. You don't pick your cashier. If cashier 3 goes on break, the host stops sending people there. When they return, they resume. You, the customer, just see "the restaurant" — the internal routing is invisible to you.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Algorithms Compared</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Algorithm</th><th>How it works</th><th>Best for</th><th>Weakness</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag purple">Round Robin</span></td><td>Rotate through servers in order: S1, S2, S3, S1...</td><td>Uniform request cost, same-spec servers</td><td>Ignores actual server load</td></tr>
+          <tr><td><span class="tag blue">Weighted RR</span></td><td>S1 gets 3× traffic based on weight config</td><td>Mixed server specs in fleet</td><td>Still ignores real-time load</td></tr>
+          <tr><td><span class="tag green">Least Connections</span></td><td>Route to server with fewest active connections</td><td>Variable-duration requests (streaming, uploads)</td><td>Slightly higher overhead to track</td></tr>
+          <tr><td><span class="tag amber">IP Hash</span></td><td>Hash client IP → always same server</td><td>Apps needing session affinity</td><td>Uneven distribution, breaks on server removal</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">NGINX</span><span class="code-title">Load balancer with health checks and weighted routing</span></div>
+      <pre><span class="fn">upstream</span> api_pool {
+  least_conn;
+
+  server api-1:<span class="num">3000</span> weight=<span class="num">3</span>;    <span class="cmt"># bigger server gets more traffic</span>
+  server api-2:<span class="num">3000</span> weight=<span class="num">1</span>;
+  server api-3:<span class="num">3000</span> max_fails=<span class="num">3</span> fail_timeout=<span class="num">30</span>s;
+
+  keepalive <span class="num">32</span>;  <span class="cmt"># persistent connections to backends — big perf win</span>
+}
+
+server {
+  listen <span class="num">443</span> ssl;
+  server_name api.myapp.com;
+
+  location /api/ {
+    proxy_pass http://api_pool;
+    proxy_set_header X-Real-IP $remote_addr;        <span class="cmt"># pass client IP</span>
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $host;
+    proxy_http_version <span class="num">1.1</span>;
+
+    proxy_connect_timeout <span class="num">5</span>s;
+    proxy_read_timeout <span class="num">30</span>s;
+
+    <span class="cmt"># Retry on failure for idempotent methods only</span>
+    proxy_next_upstream error timeout;
+  }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Deep health check endpoint — what your LB pings</span></div>
+      <pre><span class="cmt">// Shallow: just confirms process is alive</span>
+app.<span class="fn">get</span>(<span class="str">'/health'</span>, (req, res) =&gt; res.<span class="fn">json</span>({ status: <span class="str">'ok'</span> }));
+
+<span class="cmt">// Deep: confirms all dependencies are reachable</span>
+app.<span class="fn">get</span>(<span class="str">'/health/deep'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> checks = <span class="kw">await</span> Promise.<span class="fn">allSettled</span>([
+    db.<span class="fn">query</span>(<span class="str">'SELECT 1'</span>),
+    redis.<span class="fn">ping</span>(),
+  ]);
+
+  <span class="kw">const</span> healthy = checks.<span class="fn">every</span>(c =&gt; c.status === <span class="str">'fulfilled'</span>);
+
+  <span class="cmt">// 503 → LB removes this server from pool automatically</span>
+  res.<span class="fn">status</span>(healthy ? <span class="num">200</span> : <span class="num">503</span>).<span class="fn">json</span>({
+    db: checks[<span class="num">0</span>].status,
+    redis: checks[<span class="num">1</span>].status,
+  });
+});</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li><strong>Avoid sticky sessions</strong> (IP hash / cookie affinity). They create hot spots, break during server restarts, and make horizontal scaling painful. Store session in Redis instead — make your app stateless.</li>
+      <li>Health check endpoints must verify actual dependencies (DB, Redis) not just HTTP 200. A server that can't reach the DB shouldn't receive traffic even if its process is running.</li>
+      <li>Set <code style="font-family:var(--mono);font-size:11px">keepalive</code> connections between LB and backends — establishing a new TCP connection for every request adds ~1ms latency at scale.</li>
+      <li>Monitor LB access logs for 502/503 error spikes — they tell you which backend is struggling before your app metrics catch it.</li>
+      <li>AWS ALB + Auto Scaling Group is the managed equivalent of all this NGINX config. Use it — rolling your own is rarely worth the operational burden.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"A user logs in fine but gets logged out on the next request. What could cause this?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Classic sticky session problem. The login request hit Server A which stored the session in memory. The next request was load-balanced to Server B which has no knowledge of that session. Fix: externalize session storage to Redis — any server can look up any session. Then you can freely add/remove servers without losing sessions, and sessions survive server restarts."</p></div>
+    <div class="interview-q">"What's the difference between L4 and L7 load balancing?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Layer 4 load balances at the TCP/UDP level — routes packets without reading HTTP content. Very fast. Can't route based on URL or headers. Layer 7 reads HTTP — it can route /api/* to API servers and /static/* to a file server, read cookies for affinity, terminate SSL, and make smart routing decisions. AWS ALB and NGINX are L7. Network Load Balancer (NLB) is L4. Most web apps use L7."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Round robin</span><span class="cheat-val">Equal rotation. Simple. Good default for uniform workloads.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Least connections</span><span class="cheat-val">Route to server with fewest active. Best for variable-length requests.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Sticky session trap</span><span class="cheat-val">Creates hot spots. Store session in Redis instead. Make app stateless.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Deep health check</span><span class="cheat-val">Verify DB + Redis in /health. 503 = auto-removed from pool.</span></div>
+      <div class="cheat-row"><span class="cheat-key">X-Real-IP</span><span class="cheat-val">Pass original client IP through proxy. Essential for rate limiting / logging.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 13: SCALING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch13">
+  <div class="chapter-header">
+    <div class="chapter-num t2">13</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Horizontal vs Vertical Scaling</h2>
+      <div class="chapter-subtitle">Buy a bigger machine, or buy more machines — and why statelessness is everything</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p><strong>Vertical scaling (scale up)</strong>: replace your server with a more powerful one — more CPU cores, more RAM, faster disk. Simple. No code changes. But there's a ceiling, and one powerful machine is still a single point of failure.</p>
+    <p><strong>Horizontal scaling (scale out)</strong>: add more servers and distribute load across them. Theoretically unlimited. No single point of failure. But it requires your application to be <strong>stateless</strong> — which is the real engineering challenge that catches most teams off guard.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Vertical scaling is teaching one employee to work faster — there's a human limit. Horizontal scaling is hiring more employees with the same training manual. The challenge isn't hiring — it's making sure any employee can handle any customer, not just "the one who knows where the files are kept." That's statelessness: any server can handle any request at any time.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Making Your App Stateless</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Stateful (won't scale) vs Stateless (will scale)</span></div>
+      <pre><span class="cmt">// ❌ STATEFUL — only works with one server or sticky sessions</span>
+<span class="kw">const</span> sessions = <span class="kw">new</span> Map(); <span class="cmt">// in-memory — only on THIS process</span>
+app.<span class="fn">post</span>(<span class="str">'/login'</span>, (req, res) =&gt; {
+  <span class="kw">const</span> token = <span class="fn">generateToken</span>();
+  sessions.<span class="fn">set</span>(token, { userId: user.id }); <span class="cmt">// dies on server restart</span>
+  res.<span class="fn">json</span>({ token });
+});
+<span class="cmt">// Also stateful: files saved to /tmp/uploads (not on server 2)</span>
+<span class="cmt">// Also stateful: setInterval() per process (runs N times on N servers)</span>
+
+<span class="cmt">// ✅ STATELESS — any server can handle any request</span>
+
+<span class="cmt">// Sessions in Redis — shared across ALL servers</span>
+<span class="kw">import</span> connectRedis <span class="kw">from</span> <span class="str">'connect-redis'</span>;
+app.<span class="fn">use</span>(<span class="fn">session</span>({
+  store: <span class="kw">new</span> RedisStore({ client: redis }),
+  secret: process.env.SESSION_SECRET,
+  resave: <span class="kw">false</span>
+}));
+
+<span class="cmt">// Files in S3 — readable by any server</span>
+app.<span class="fn">post</span>(<span class="str">'/upload'</span>, upload.<span class="fn">single</span>(<span class="str">'file'</span>), <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> url = <span class="kw">await</span> s3.<span class="fn">upload</span>(req.file); <span class="cmt">// stored in S3, not local disk</span>
+  res.<span class="fn">json</span>({ url });
+});
+
+<span class="cmt">// Scheduled jobs via BullMQ — not setInterval() per server</span>
+<span class="cmt">// Caches in Redis — not in-process memory</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>Vertical vs Horizontal Comparison</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Aspect</th><th>Vertical (Scale Up)</th><th>Horizontal (Scale Out)</th></tr></thead>
+        <tbody>
+          <tr><td>How</td><td>Bigger CPU, RAM, disk</td><td>More server instances</td></tr>
+          <tr><td>Ceiling</td><td>Hard hardware limit</td><td>Theoretically unlimited</td></tr>
+          <tr><td>Complexity</td><td>Low — no code changes</td><td>High — requires stateless app</td></tr>
+          <tr><td>Downtime</td><td>Yes — must reboot to resize</td><td>No — add instances while running</td></tr>
+          <tr><td>Failure</td><td>One machine = one point of failure</td><td>Lose one server, others continue</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Vertical scale first when you need a quick fix — it's a 5-minute operation in the cloud. Use horizontal scaling for architectural resilience and sustained growth.</li>
+      <li>The database is the hardest piece to scale horizontally. Start with read replicas for read-heavy apps, then consider sharding only if that's insufficient.</li>
+      <li>Audit your app for statefulness before scaling: local file storage, in-memory sessions, in-process caches, per-process cron jobs. Each one is a blocker.</li>
+      <li>WebSockets require connection affinity. If you use WebSockets + horizontal scaling, use a pub/sub adapter (Socket.io Redis adapter) so messages reach the right server.</li>
+      <li>Auto-scaling: define min/max instance counts and CPU thresholds. Cloud adds/removes instances automatically. You pay only for what you need.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Why is stateless architecture important for horizontal scaling?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Stateless means any server can handle any request without needing context from previous requests. This lets you add servers freely and route any request to any of them. A stateful server (with in-memory session data) requires sticky sessions — all requests from a user must hit the same server. That breaks auto-scaling, creates hot spots, and means rebooting a server loses all its sessions. The fix is moving all state out of the server process: sessions to Redis, files to S3, caches to Redis — then every server is interchangeable."</p></div>
+    <div class="interview-q">"We're seeing high CPU on our single server. What are your options?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Short-term: vertical scale — upgrade to a larger instance, buys time. Then profile the CPU: is it a hot code path, a slow query, or just pure load? If it's genuine load, make the app stateless and horizontally scale behind a load balancer. If the bottleneck is actually the database (often the real answer on apps that look CPU-bound at the app tier), add read replicas to offload SELECT traffic. I'd also add caching to reduce how often we hit the DB at all."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Vertical</span><span class="cheat-val">Bigger machine. Fast to do. Hard ceiling. Single point of failure.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Horizontal</span><span class="cheat-val">More machines. Requires stateless app + LB. Theoretically unlimited.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Stateless requirements</span><span class="cheat-val">Sessions → Redis. Files → S3. Cache → Redis. Jobs → queue.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Auto-scaling</span><span class="cheat-val">Add/remove instances based on CPU/memory. Define min/max bounds.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 14: DATABASE REPLICATION -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch14">
+  <div class="chapter-header">
+    <div class="chapter-num t2">14</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Database Replication</h2>
+      <div class="chapter-subtitle">One writer, many readers — and what to do when the writer dies</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Replication continuously copies data from a <strong>primary</strong> to one or more <strong>replicas</strong>. This serves two distinct goals: <strong>scaling reads</strong> (distribute SELECT queries across replicas) and <strong>high availability</strong> (if the primary dies, promote a replica as the new primary).</p>
+    <p>The key challenge is <strong>replication lag</strong>. Most replication is asynchronous — the primary commits a write, then propagates it to replicas. Between those two moments, a replica can return stale data. On a healthy system this lag is sub-millisecond. Under heavy write load it can grow to seconds.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>The primary database is the original master copy of a book; replicas are photocopiers continuously making copies. Anyone can read from a copy, but edits only happen on the master. Copies are almost always up-to-date, but there's a brief moment after an edit where they don't have the latest changes — that's replication lag. If the master is destroyed, you promote a copy to be the new master.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Read/write splitting with replica lag awareness</span></div>
+      <pre><span class="kw">const</span> primary = <span class="kw">new</span> Pool({ host: process.env.DB_PRIMARY });
+<span class="kw">const</span> replicas = [
+  <span class="kw">new</span> Pool({ host: process.env.DB_REPLICA1 }),
+  <span class="kw">new</span> Pool({ host: process.env.DB_REPLICA2 }),
+];
+<span class="kw">let</span> rrIndex = <span class="num">0</span>;
+
+<span class="kw">function</span> <span class="fn">getReadPool</span>() {
+  <span class="kw">return</span> replicas[rrIndex++ % replicas.length]; <span class="cmt">// round-robin replicas</span>
+}
+
+<span class="cmt">// Writes ALWAYS go to primary</span>
+<span class="kw">const</span> <span class="fn">writeDB</span> = (sql, params) =&gt; primary.<span class="fn">query</span>(sql, params);
+
+<span class="cmt">// Reads go to replica by default, primary when consistency needed</span>
+<span class="kw">const</span> <span class="fn">readDB</span> = (sql, params, { usePrimary = <span class="kw">false</span> } = {}) =&gt;
+  (usePrimary ? primary : <span class="fn">getReadPool</span>()).<span class="fn">query</span>(sql, params);
+
+<span class="cmt">// "Read your own writes" — read from primary right after writing</span>
+app.<span class="fn">put</span>(<span class="str">'/profile'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">await</span> <span class="fn">writeDB</span>(<span class="str">'UPDATE users SET name=$1 WHERE id=$2'</span>, [req.body.name, req.user.id]);
+
+  <span class="cmt">// Read from primary — replica may not have the update yet</span>
+  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">readDB</span>(
+    <span class="str">'SELECT * FROM users WHERE id=$1'</span>, [req.user.id],
+    { usePrimary: <span class="kw">true</span> } <span class="cmt">// ← bypass replica lag for this response</span>
+  );
+  res.<span class="fn">json</span>(user);
+});</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL</span><span class="code-title">Monitor replication lag in PostgreSQL</span></div>
+      <pre><span class="cmt">-- On primary: see lag for each connected replica</span>
+<span class="kw">SELECT</span>
+  client_addr,
+  state,
+  write_lag,
+  replay_lag,
+  (sent_lsn - replay_lsn) <span class="kw">AS</span> lag_bytes
+<span class="kw">FROM</span> pg_stat_replication;
+
+<span class="cmt">-- On replica: how far behind is THIS replica?</span>
+<span class="kw">SELECT</span> now() - pg_last_xact_replay_timestamp() <span class="kw">AS</span> replication_delay;
+
+<span class="cmt">-- Alert if replication_delay > 5 seconds in production</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Async vs Sync Replication</h3></div>
+    <div class="cards">
+      <div class="card"><h4>Async (Default)</h4><p>Primary commits, then sends changes. Fast writes. Risk: data loss if primary crashes before replicating. Most common.</p></div>
+      <div class="card"><h4>Synchronous</h4><p>Primary waits for replica to confirm before committing. Zero data loss. Slower writes — every write waits for a network round-trip to the replica.</p></div>
+      <div class="card"><h4>Semi-Sync</h4><p>Wait for N of M replicas to ack. Balance of safety and speed. Postgres supports this via synchronous_standby_names.</p></div>
+      <div class="card"><h4>Failover</h4><p>Primary dies → promote replica. Managed DBs (RDS Multi-AZ) do this automatically in 20–60 seconds.</p></div>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Monitor replication lag in dashboards. Alert at &gt;100ms. Lag &gt;1s means the replica is falling behind under write load — investigate immediately.</li>
+      <li>The "read your own writes" problem is the #1 UX bug caused by read replicas. After a user makes a change, route that user's next read to the primary for at least one request.</li>
+      <li>Use managed database services (AWS RDS, Cloud SQL, Supabase) — they handle replication, monitoring, and automated failover. Only self-manage if cost justifies it at massive scale.</li>
+      <li>Failover time for managed DBs is 20–60 seconds. Your app must handle temporary DB unavailability with retries and circuit breakers — not crash.</li>
+      <li>Replicas can serve different roles: one for application read traffic, one for analytics (expensive queries won't affect prod), one as a warm standby for failover.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"A user updates their username. When they refresh the page, they see the old one. Why?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Classic replication lag bug. The write went to the primary, but the page reload read from a replica that hasn't received the update yet. The fix is 'read your own writes' consistency — after any write, route that user's next read to the primary for one request cycle. Alternatively, use a short version cookie: after a write, set a cookie that tells the app to read from primary for the next 1–2 seconds, then switch back to replicas."</p></div>
+    <div class="interview-q">"How does database failover work in a managed setup?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"In AWS RDS Multi-AZ, there's a synchronous standby replica in a different availability zone. When the primary fails, AWS automatically promotes the standby and updates the DNS CNAME that our app uses to connect. This takes 20–60 seconds during which the DB is unreachable. My app handles this with connection retries and circuit breakers — the brief outage is logged and alerts fire, but the app recovers automatically once the new primary is up."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Primary</span><span class="cheat-val">Accepts all writes. Single source of truth.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Replica</span><span class="cheat-val">Read-only copy. Replicates from primary. Can have many.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Async replication</span><span class="cheat-val">Fast writes. Possible data loss on crash. Default in most systems.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Sync replication</span><span class="cheat-val">Zero data loss. Slower — waits for replica ack on every write.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Read your own writes</span><span class="cheat-val">Route post-write reads to primary to avoid stale replica reads.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Failover time</span><span class="cheat-val">Managed DBs: 20–60s. Design app to tolerate brief unavailability.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 15: SHARDING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch15">
+  <div class="chapter-header">
+    <div class="chapter-num t2">15</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Sharding / Partitioning</h2>
+      <div class="chapter-subtitle">When one database — even with replicas — can't hold all your data</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Sharding splits your data across <strong>multiple database instances</strong> called shards. Each shard holds a subset of rows. A <strong>shard key</strong> determines which shard any given row lives on. This lets your database tier scale horizontally — but at an enormous complexity cost.</p>
+    <p>Sharding is a last resort. Exhaust every other option first: better indexing, caching, read replicas, query optimization, vertical scaling. Only shard when you've genuinely hit the limits of a single node. Most apps never need to. The ones that do (Facebook, Twitter, Uber) have dedicated database teams to manage it.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A phone directory that's grown too large for one book. You split it: A–M in one volume, N–Z in another. To find "Alice Smith" you go to the A–M book. To compare Alice and Zoe, you need both books. That's the cross-shard query problem — anything requiring data from multiple shards needs to be coordinated at the application level, since the database can't JOIN across shard boundaries.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Sharding Strategies</h3></div>
+    <div class="cards">
+      <div class="card"><h4>Hash Sharding</h4><p><code style="font-family:var(--mono);font-size:11px">shard = hash(id) % N</code>. Even distribution. No range queries. Adding shards requires consistent hashing to avoid re-migrating all data.</p></div>
+      <div class="card"><h4>Range Sharding</h4><p>id 1–1M → shard A, 1M–2M → shard B. Range queries are efficient. Risk of hotspots — new users always hit the newest shard.</p></div>
+      <div class="card"><h4>Directory Sharding</h4><p>Lookup table: user 123 → shard C. Flexible, rebalanceable. The lookup table itself is a bottleneck and single point of failure.</p></div>
+      <div class="card"><h4>Geo Sharding</h4><p>US users → US shard, EU users → EU shard. Reduces latency, satisfies data residency laws (GDPR). Complex for users who travel.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Application-level shard routing</span></div>
+      <pre><span class="kw">const</span> SHARD_COUNT = <span class="num">4</span>;
+<span class="kw">const</span> shards = [
+  <span class="kw">new</span> Pool({ host: <span class="str">'shard-0.db'</span> }),
+  <span class="kw">new</span> Pool({ host: <span class="str">'shard-1.db'</span> }),
+  <span class="kw">new</span> Pool({ host: <span class="str">'shard-2.db'</span> }),
+  <span class="kw">new</span> Pool({ host: <span class="str">'shard-3.db'</span> }),
+];
+
+<span class="kw">const</span> <span class="fn">getShard</span> = (userId) =&gt; shards[userId % SHARD_COUNT];
+
+<span class="cmt">// Single user lookup — fast, hits only one shard</span>
+<span class="kw">async function</span> <span class="fn">getUser</span>(userId) {
+  <span class="kw">return</span> <span class="fn">getShard</span>(userId).<span class="fn">query</span>(<span class="str">'SELECT * FROM users WHERE id=$1'</span>, [userId]);
+}
+
+<span class="cmt">// Cross-shard query — expensive, must fan out to all shards</span>
+<span class="cmt">// AVOID WHERE POSSIBLE. Use secondary indexes in Redis instead.</span>
+<span class="kw">async function</span> <span class="fn">findByEmail</span>(email) {
+  <span class="kw">const</span> results = <span class="kw">await</span> Promise.<span class="fn">all</span>(
+    shards.<span class="fn">map</span>(pool =&gt; pool.<span class="fn">query</span>(<span class="str">'SELECT * FROM users WHERE email=$1'</span>, [email]))
+  );
+  <span class="kw">return</span> results.<span class="fn">flatMap</span>(r =&gt; r.rows)[<span class="num">0</span>] || <span class="kw">null</span>;
+}
+
+<span class="cmt">// Better: maintain a secondary index in Redis</span>
+<span class="cmt">// On user creation: redis.set(`email:${email}`, userId)</span>
+<span class="kw">async function</span> <span class="fn">findByEmailFast</span>(email) {
+  <span class="kw">const</span> userId = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">`email:${email}`</span>);
+  <span class="kw">if</span> (!userId) <span class="kw">return null</span>;
+  <span class="kw">return</span> <span class="fn">getUser</span>(parseInt(userId)); <span class="cmt">// → routed to correct shard</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Choose your shard key carefully and <strong>never change it</strong>. Re-sharding is one of the most painful migrations possible — you're essentially moving every row in your database.</li>
+      <li>Best shard key: high cardinality, evenly distributed, present in most queries. <code style="font-family:var(--mono);font-size:11px">user_id</code> is usually good. <code style="font-family:var(--mono);font-size:11px">created_at</code> is bad (new shard always gets all new writes).</li>
+      <li>Cross-shard JOINs are not possible in SQL. Design your schema so entities queried together live on the same shard — shard <code style="font-family:var(--mono);font-size:11px">orders</code> on <code style="font-family:var(--mono);font-size:11px">user_id</code> so a user's orders co-locate with their profile.</li>
+      <li>Consider managed sharding: Vitess (MySQL), Citus (Postgres), CockroachDB, PlanetScale. These abstract much of the routing and migration complexity.</li>
+      <li>Maintain secondary indexes (Redis or Elasticsearch) for attributes you need to query across shards — email, phone, username — to avoid expensive fan-out queries.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you shard a users table with 1 billion rows?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"First I'd verify sharding is actually necessary — maybe read replicas and vertical scale are sufficient. If not, I'd use hash sharding on user_id with consistent hashing, so adding shards later only migrates ~1/N of data instead of everything. I'd keep a secondary index in Redis for email-based lookups to avoid fan-out queries. I'd also co-shard the orders table on user_id, so a user's profile and orders live on the same shard and I can still JOIN them locally."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Shard key</span><span class="cheat-val">Routes rows to shards. Choose once. Never change. High cardinality.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Hash sharding</span><span class="cheat-val">hash(id) % N. Even distribution. No range queries.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Fan-out query</span><span class="cheat-val">Must query all shards when shard key absent. Expensive. Use secondary index.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Consistent hashing</span><span class="cheat-val">Adding shard moves only ~1/N data. Better than simple modulo.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Last resort</span><span class="cheat-val">Try indexing → caching → replicas → vertical first. Sharding is complex.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 16: OPTIMISTIC LOCKING -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch16">
+  <div class="chapter-header">
+    <div class="chapter-num t2">16</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Optimistic Locking</h2>
+      <div class="chapter-subtitle">Assume the best, verify on commit, retry on conflict</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Optimistic locking avoids holding database locks during the read-modify-write cycle. Instead of locking a row when you read it, you <strong>optimistically assume no conflict will happen</strong>. When you write back, you include a version guard in the WHERE clause. If someone else modified the row between your read and write, the guard fails — 0 rows updated — and you retry with a fresh read.</p>
+    <p>The opposite, pessimistic locking (<code style="font-family:var(--mono);color:var(--teal)">SELECT FOR UPDATE</code>), locks the row on read and blocks all other writers until you commit. Safe but creates contention under load. Optimistic locking has zero blocking — at the cost of possible retries when conflicts occur.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Editing a Wikipedia article. You open the page (read without lock), make edits, click Save. Wikipedia checks: has anyone else edited this since you opened it? If yes — conflict, merge required. If no — your edit goes through. No one is blocked from reading while you edit. Conflicts are detected on save. That's optimistic locking.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL + Node.js</span><span class="code-title">Optimistic lock with version column and retry loop</span></div>
+      <pre><span class="cmt">-- Schema: version column incremented on every write</span>
+<span class="kw">ALTER TABLE</span> products <span class="kw">ADD COLUMN</span> version <span class="type">INT NOT NULL DEFAULT</span> <span class="num">1</span>;
+
+<span class="cmt">-- UPDATE includes version guard — only succeeds if no concurrent write</span>
+<span class="kw">UPDATE</span> products
+  <span class="kw">SET</span> stock = stock - $<span class="num">1</span>, version = version + <span class="num">1</span>, updated_at = now()
+  <span class="kw">WHERE</span> id = $<span class="num">2</span> <span class="kw">AND</span> version = $<span class="num">3</span>;   <span class="cmt">-- ← the guard</span>
+<span class="cmt">-- rowCount=1 → success. rowCount=0 → conflict, retry.</span></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Full retry loop with exponential backoff</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">deductStock</span>(productId, quantity, maxRetries = <span class="num">5</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">0</span>; attempt &lt; maxRetries; attempt++) {
+
+    <span class="cmt">// 1. Read current state (including version)</span>
+    <span class="kw">const</span> { rows: [p] } = <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">'SELECT id, stock, version FROM products WHERE id=$1'</span>, [productId]
+    );
+
+    <span class="kw">if</span> (!p) <span class="kw">throw new</span> Error(<span class="str">'Product not found'</span>);
+    <span class="kw">if</span> (p.stock &lt; quantity) <span class="kw">throw new</span> Error(<span class="str">'Insufficient stock'</span>);
+
+    <span class="cmt">// 2. Conditional write — WHERE version = old_version</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+      UPDATE products SET stock = stock - $1, version = version + 1
+      WHERE id = $2 AND version = $3
+    `</span>, [quantity, productId, p.version]);
+
+    <span class="kw">if</span> (result.rowCount === <span class="num">1</span>) {
+      <span class="kw">return</span> { success: <span class="kw">true</span>, newStock: p.stock - quantity };
+    }
+
+    <span class="cmt">// 3. Version mismatch — concurrent write won. Wait and retry.</span>
+    <span class="kw">const</span> delay = <span class="num">10</span> * Math.<span class="fn">pow</span>(<span class="num">2</span>, attempt) + Math.<span class="fn">random</span>() * <span class="num">10</span>;
+    <span class="kw">await</span> <span class="kw">new</span> Promise(r =&gt; setTimeout(r, delay));
+  }
+  <span class="kw">throw new</span> Error(<span class="str">`Conflict after ${maxRetries} attempts`</span>);
+}
+
+<span class="cmt">// REST API pattern: ETags + If-Match headers</span>
+<span class="cmt">// GET /products/42 → ETag: "v5"</span>
+<span class="cmt">// PUT /products/42 If-Match: "v5" → 412 Precondition Failed if version changed</span>
+app.<span class="fn">put</span>(<span class="str">'/products/:id'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> version = parseInt(req.headers[<span class="str">'if-match'</span>]);
+  <span class="kw">if</span> (!version) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">428</span>).<span class="fn">json</span>({ error: <span class="str">'If-Match required'</span> });
+
+  <span class="kw">const</span> result = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+    UPDATE products SET price=$1, version=version+1 WHERE id=$2 AND version=$3
+  `</span>, [req.body.price, req.params.id, version]);
+
+  <span class="kw">if</span> (result.rowCount === <span class="num">0</span>) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">412</span>).<span class="fn">json</span>({ error: <span class="str">'Resource was modified by another client'</span> });
+  }
+  res.<span class="fn">json</span>({ success: <span class="kw">true</span> });
+});</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Use optimistic for <strong>low-contention</strong> scenarios: profile edits, CMS updates, config changes. Use pessimistic (<code style="font-family:var(--mono);font-size:11px">SELECT FOR UPDATE</code>) for high-contention: inventory flash sales, wallet balances.</li>
+      <li>Under very high contention, optimistic locking degrades to a spin-wait. If conflict rate exceeds ~20%, switch to pessimistic — the lock overhead is cheaper than constant retries.</li>
+      <li>ORMs like Sequelize and TypeORM support optimistic locking natively via <code style="font-family:var(--mono);font-size:11px">@Version()</code> decorators. Use them rather than hand-rolling.</li>
+      <li>Track conflict rate as a metric. A spike indicates a hot row or a bug causing write storms — both need investigation.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"When would you choose optimistic over pessimistic locking?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"It depends on contention. Pessimistic blocks all concurrent writers — great when conflicts are common (flash sale inventory) because it avoids retry overhead. Optimistic never blocks — great when conflicts are rare (user editing their own profile) because you avoid lock overhead entirely. I'd also choose optimistic for REST APIs where you can't hold a DB transaction open across multiple HTTP requests — ETag + If-Match gives the same guarantee without a long-lived lock."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Version column</span><span class="cheat-val">Integer incremented on every write. WHERE version=:old is the guard.</span></div>
+      <div class="cheat-row"><span class="cheat-key">0 rows updated</span><span class="cheat-val">Version mismatch = concurrent write won. Re-read and retry.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Use for</span><span class="cheat-val">Low-contention: profile edits, CMS updates, configs.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Avoid for</span><span class="cheat-val">High-contention: flash sale inventory, wallet deductions.</span></div>
+      <div class="cheat-row"><span class="cheat-key">HTTP equivalent</span><span class="cheat-val">ETag header + If-Match request → 412 Precondition Failed on conflict.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 17: EVENT-DRIVEN ARCHITECTURE -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch17">
+  <div class="chapter-header">
+    <div class="chapter-num t2">17</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Event-Driven Architecture</h2>
+      <div class="chapter-subtitle">Services that react to what happened, not to direct commands</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>In a traditional architecture, Service A calls Service B directly: <code style="font-family:var(--mono);color:var(--teal)">emailService.sendWelcome(user)</code>. This creates <strong>tight coupling</strong> — A knows about B, A breaks if B is slow or down, and every new requirement means changing A.</p>
+    <p>In event-driven architecture, A emits an event: <code style="font-family:var(--mono);color:var(--green)">user.registered</code>. Any interested service subscribes and reacts independently. A doesn't know who's listening. Adding a new consumer requires <strong>zero changes to the publisher</strong>. This is the deepest form of decoupling.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A newspaper vs phone calls. If a news agency called every subscriber individually to report each story, they'd be tightly coupled and impossibly slow. Instead, they publish a newspaper — whoever is interested reads it and reacts. New subscribers just add their address. The agency never changes its process. That's event-driven: publish once, multiple independent consumers react at their own pace.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js + Kafka</span><span class="code-title">Event-driven order fulfillment</span></div>
+      <pre><span class="cmt">// ORDER SERVICE — emits event, knows NOTHING about downstream</span>
+<span class="kw">async function</span> <span class="fn">createOrder</span>(orderData) {
+  <span class="kw">const</span> order = <span class="kw">await</span> db.<span class="fn">insert</span>(<span class="str">'orders'</span>, orderData);
+
+  <span class="kw">await</span> producer.<span class="fn">send</span>({
+    topic: <span class="str">'order.created'</span>,
+    messages: [{
+      key: String(order.id),          <span class="cmt">// same key → same partition → ordered</span>
+      value: JSON.<span class="fn">stringify</span>({
+        eventId: crypto.<span class="fn">randomUUID</span>(),  <span class="cmt">// for idempotency dedup</span>
+        eventType: <span class="str">'order.created'</span>,
+        occurredAt: <span class="kw">new</span> Date().<span class="fn">toISOString</span>(),
+        data: { orderId: order.id, userId: order.userId, items: order.items }
+      })
+    }]
+  });
+  <span class="kw">return</span> order;  <span class="cmt">// done — no email, no inventory, no analytics calls</span>
+}
+
+<span class="cmt">// INVENTORY SERVICE — independent consumer</span>
+<span class="kw">const</span> inventoryConsumer = kafka.<span class="fn">consumer</span>({ groupId: <span class="str">'inventory-service'</span> });
+<span class="kw">await</span> inventoryConsumer.<span class="fn">subscribe</span>({ topic: <span class="str">'order.created'</span> });
+<span class="kw">await</span> inventoryConsumer.<span class="fn">run</span>({
+  eachMessage: <span class="kw">async</span> ({ message }) =&gt; {
+    <span class="kw">const</span> event = JSON.<span class="fn">parse</span>(message.value);
+    <span class="kw">await</span> <span class="fn">reserveInventory</span>(event.data.items);
+    <span class="kw">await</span> producer.<span class="fn">send</span>({ topic: <span class="str">'inventory.reserved'</span>, messages: [{ value: JSON.<span class="fn">stringify</span>(event.data) }] });
+  }
+});
+
+<span class="cmt">// EMAIL SERVICE — another independent consumer of the SAME event</span>
+<span class="kw">const</span> emailConsumer = kafka.<span class="fn">consumer</span>({ groupId: <span class="str">'email-service'</span> });
+<span class="kw">await</span> emailConsumer.<span class="fn">subscribe</span>({ topic: <span class="str">'order.created'</span> });
+<span class="kw">await</span> emailConsumer.<span class="fn">run</span>({
+  eachMessage: <span class="kw">async</span> ({ message }) =&gt; {
+    <span class="kw">const</span> event = JSON.<span class="fn">parse</span>(message.value);
+    <span class="kw">await</span> <span class="fn">sendOrderConfirmation</span>(event.data.userId, event.data.orderId);
+    <span class="cmt">// Completely independent — adding this consumer required zero changes to order service</span>
+  }
+});</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>The Saga Pattern — Distributed Transactions Without 2PC</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Flow Diagram</span><span class="code-title">Saga with compensation on failure</span></div>
+      <pre><span class="cmt">// Happy path (forward flow)</span>
+order.created     → inventory.<span class="fn">reserve</span>()   → inventory.reserved
+inventory.reserved → payment.<span class="fn">charge</span>()     → payment.charged
+payment.charged   → order.<span class="fn">fulfill</span>()      → order.fulfilled ✓
+
+<span class="cmt">// Compensation path (if payment fails)</span>
+payment.failed    → inventory.<span class="fn">release</span>()  → inventory.released
+                  → order.<span class="fn">cancel</span>()       → order.cancelled ✓
+
+<span class="cmt">// Key: each step is a LOCAL transaction + event emission</span>
+<span class="cmt">// No distributed lock held across services</span>
+<span class="cmt">// All compensating actions must be idempotent</span></pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Name events as <strong>immutable past-tense facts</strong>: <code style="font-family:var(--mono);font-size:11px">order.created</code> not <code style="font-family:var(--mono);font-size:11px">create.order</code>. Include enough data for consumers to act without calling back to you.</li>
+      <li>Include <code style="font-family:var(--mono);font-size:11px">eventId</code> in every event. Consumers should check if they've already processed this ID before acting — at-least-once delivery means duplicates will occur.</li>
+      <li>Version event schemas. Consumers on old code must still work when schemas evolve. Use versioned topics (<code style="font-family:var(--mono);font-size:11px">order.created.v2</code>) or include a version field in the payload.</li>
+      <li>Kafka retains events by default for 7 days. New consumers can replay all past events to rebuild state — enormously powerful for adding new services to an existing system.</li>
+      <li>Debugging event-driven systems is hard — a single user action spawns 5+ async events. Use distributed tracing (OpenTelemetry) with a trace ID that flows through every event.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What are the advantages and disadvantages of event-driven architecture?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Advantages: loose coupling — services evolve independently. Scalability — each consumer scales independently based on its own load. Resilience — if the email service is down, events queue up and deliver when it recovers. Adding new consumers requires zero changes to producers. Disadvantages: debugging is hard — a request fans out into async events and tracing a failure requires distributed tracing infrastructure. Eventual consistency — you can't guarantee all effects of an event happen atomically. Schema evolution is tricky. For simple CRUD apps, it's over-engineering — I'd only reach for it when direct coupling is causing real pain."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Event naming</span><span class="cheat-val">Past tense noun: order.created, payment.failed, user.registered</span></div>
+      <div class="cheat-row"><span class="cheat-key">Event payload</span><span class="cheat-val">Include: eventId, eventType, occurredAt, data. Self-contained.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Consumer group</span><span class="cheat-val">Each service has its own group. Each gets every message independently.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Saga pattern</span><span class="cheat-val">Distributed txn via local txns + compensating actions on failure.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Idempotency</span><span class="cheat-val">At-least-once delivery → check eventId before processing.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 18: CIRCUIT BREAKERS -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch18">
+  <div class="chapter-header">
+    <div class="chapter-num t2">18</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Circuit Breakers</h2>
+      <div class="chapter-subtitle">Stop hammering a failing service — fail fast, degrade gracefully</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>When Service B is failing, Service A shouldn't keep sending requests to it. Each failed request might wait 30 seconds before timing out — holding a thread and connection for 30 seconds. Under load, A's thread pool fills up waiting for B. Then A starts failing too. The failure propagates. That's a <strong>cascading failure</strong>, and it's how one misbehaving microservice brings down the entire system.</p>
+    <p>A circuit breaker monitors failure rate and "trips" when it exceeds a threshold. While open, calls fail immediately with an error or fallback — no thread held, no timeout waited. After a cooldown, one test request probes whether B has recovered.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>An electrical circuit breaker in your home. When there's a fault, it trips — breaking the circuit instantly instead of letting wires overheat and cause a fire. You don't keep running appliances while it's tripped. You wait, fix the issue, then reset the breaker. Software circuit breakers are identical: trip on failure threshold, stop sending requests, test after cooldown, reset when healthy.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Three States</h3></div>
+    <div class="cards">
+      <div class="card"><h4>🟢 Closed</h4><p>Normal operation. Requests pass through to downstream. Failure counter tracked in a rolling window.</p></div>
+      <div class="card"><h4>🔴 Open</h4><p>Threshold breached. All calls fail immediately with error or fallback. Downstream gets zero traffic.</p></div>
+      <div class="card"><h4>🟡 Half-Open</h4><p>Cooldown expired. One probe request allowed. Success → Closed. Failure → back to Open.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Circuit breaker with opossum + fallback + observability</span></div>
+      <pre><span class="kw">import</span> CircuitBreaker <span class="kw">from</span> <span class="str">'opossum'</span>;
+
+<span class="kw">async function</span> <span class="fn">callPaymentService</span>(payload) {
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://payment.internal/charge'</span>, {
+    method: <span class="str">'POST'</span>,
+    body: JSON.<span class="fn">stringify</span>(payload),
+    signal: AbortSignal.<span class="fn">timeout</span>(<span class="num">3000</span>)
+  });
+  <span class="kw">if</span> (!response.ok) <span class="kw">throw new</span> Error(<span class="str">`Payment error: ${response.status}`</span>);
+  <span class="kw">return</span> response.<span class="fn">json</span>();
+}
+
+<span class="kw">const</span> breaker = <span class="kw">new</span> CircuitBreaker(callPaymentService, {
+  timeout: <span class="num">3000</span>,                  <span class="cmt">// trip if takes > 3s</span>
+  errorThresholdPercentage: <span class="num">50</span>,   <span class="cmt">// trip if 50%+ calls fail</span>
+  resetTimeout: <span class="num">30000</span>,            <span class="cmt">// try again after 30s</span>
+  volumeThreshold: <span class="num">10</span>,            <span class="cmt">// min 10 calls before can trip (avoids startup noise)</span>
+  rollingCountTimeout: <span class="num">10000</span>,     <span class="cmt">// measure failure rate over last 10s</span>
+});
+
+<span class="cmt">// Fallback: graceful degradation when circuit is Open</span>
+breaker.<span class="fn">fallback</span>((payload, err) =&gt; ({
+  status: <span class="str">'queued'</span>,
+  message: <span class="str">'Payment is being processed. You will receive an email confirmation.'</span>,
+  retryAfter: <span class="num">30</span>
+}));
+
+<span class="cmt">// Observability — instrument state changes as metrics</span>
+breaker.<span class="fn">on</span>(<span class="str">'open'</span>, () =&gt; {
+  metrics.<span class="fn">increment</span>(<span class="str">'circuit_breaker.payment.open'</span>);
+  logger.<span class="fn">error</span>(<span class="str">'⚡ Payment circuit OPEN — service unavailable'</span>);
+});
+breaker.<span class="fn">on</span>(<span class="str">'halfOpen'</span>, () =&gt; logger.<span class="fn">info</span>(<span class="str">'🔍 Payment circuit HALF-OPEN — probing...'</span>));
+breaker.<span class="fn">on</span>(<span class="str">'close'</span>, () =&gt; logger.<span class="fn">info</span>(<span class="str">'✅ Payment circuit CLOSED — service recovered'</span>));
+
+<span class="cmt">// Usage</span>
+<span class="kw">const</span> result = <span class="kw">await</span> breaker.<span class="fn">fire</span>({ amount: <span class="num">100</span>, currency: <span class="str">'USD'</span> });
+<span class="cmt">// If circuit is open: returns the fallback object immediately</span>
+<span class="cmt">// If circuit is closed: calls payment service normally</span></pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Every external service call should have a circuit breaker — payments, emails, third-party APIs, internal microservices. All of them can fail.</li>
+      <li>Design a meaningful <strong>fallback</strong> for every circuit. Don't just return an error — return a degraded experience: queue the payment, show cached data, disable the feature gracefully.</li>
+      <li>Instrument circuit state changes as metrics. Monitor <code style="font-family:var(--mono);font-size:11px">circuit.open</code> events in your dashboards — they're an early warning that a dependency is struggling.</li>
+      <li>Set <code style="font-family:var(--mono);font-size:11px">volumeThreshold</code> to prevent tripping on startup when only 1–2 requests have been made — a single failure shouldn't open the circuit.</li>
+      <li>Combine with retries: retries handle transient failures on a healthy service; circuit breakers handle sustained outages. They're complementary, not alternatives.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How do you prevent a failing downstream service from taking down your entire system?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Cascading failures happen when a slow dependency holds threads until the calling service's thread pool is exhausted, then it fails too. Two-part solution: first, always set timeouts on every external call — fail after 3 seconds, not 30. Second, wrap the call in a circuit breaker that trips when failure rate exceeds a threshold. While open, calls fail immediately — no thread held. After a cooldown, one probe tests recovery. The key addition is a meaningful fallback — during the outage, users see 'payment being processed' rather than an error page."</p></div>
+    <div class="interview-q">"What's the difference between a circuit breaker and a retry?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Retries handle transient failures — momentary blips. If a service is completely down, retrying wastes time and resources and makes the problem worse. A circuit breaker handles sustained outages: after N% failure rate, stop trying and fail fast. They work together: retries handle the noise of individual request failures, circuit breakers handle the signal that a service is actually down."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Closed state</span><span class="cheat-val">Normal. Calls pass through. Tracking failure rate.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Open state</span><span class="cheat-val">Tripped. All calls fail immediately. Downstream gets no traffic.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Half-Open state</span><span class="cheat-val">One probe request after cooldown. Success → Closed. Fail → Open.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Fallback</span><span class="cheat-val">Graceful degradation. Queue it. Cache it. Disable the feature.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Cascading failure</span><span class="cheat-val">B slow → A thread pool full → A fails → C fails. Circuit breakers prevent this.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 19: RETRY STRATEGIES -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch19">
+  <div class="chapter-header">
+    <div class="chapter-num t2">19</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Retry Strategies</h2>
+      <div class="chapter-subtitle">Retry smarter — exponential backoff, jitter, and knowing when NOT to retry</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Transient failures are normal in distributed systems — a network blip, a server restart, a brief overload. The naive response is to retry immediately. The problem: if a service is overloaded and 1,000 clients all retry every 100ms, you've created a <strong>thundering herd</strong> — you're DDoSing the already-struggling service with retry traffic.</p>
+    <p>The production solution is <strong>exponential backoff with jitter</strong>: each retry waits longer than the last (exponential), with random variance (jitter) to spread retries across time and prevent synchronized retry storms.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>You're calling a friend whose phone is busy. Option A (bad): call back every second. Option B (backoff): wait 1s, 2s, 4s, 8s. Better. But if 500 people are doing the same thing, they all retry at exactly t=2s, t=4s — synchronized surges. Option C (backoff + jitter): wait 1s ±0.3s, 2s ±0.6s. Everyone retries at slightly different times, spreading load. The service gets breathing room between each wave.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Production-grade retry with backoff, jitter, and error discrimination</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">withRetry</span>(fn, options = {}) {
+  <span class="kw">const</span> {
+    maxAttempts = <span class="num">5</span>,
+    baseDelay = <span class="num">1000</span>,     <span class="cmt">// 1 second</span>
+    maxDelay = <span class="num">30000</span>,     <span class="cmt">// cap at 30 seconds</span>
+    jitterFactor = <span class="num">0.3</span>,  <span class="cmt">// ±30% randomness</span>
+    onRetry = <span class="kw">null</span>
+  } = options;
+
+  <span class="kw">let</span> lastError;
+
+  <span class="kw">for</span> (<span class="kw">let</span> attempt = <span class="num">1</span>; attempt &lt;= maxAttempts; attempt++) {
+    <span class="kw">try</span> {
+      <span class="kw">return await</span> <span class="fn">fn</span>(attempt);
+    } <span class="kw">catch</span> (err) {
+      lastError = err;
+
+      <span class="cmt">// NEVER retry client errors — they won't succeed on retry</span>
+      <span class="kw">if</span> (err.status && err.status &gt;= <span class="num">400</span> && err.status &lt; <span class="num">500</span>) <span class="kw">throw</span> err;
+
+      <span class="kw">if</span> (attempt === maxAttempts) <span class="kw">break</span>;
+
+      <span class="cmt">// Exponential: 1s, 2s, 4s, 8s, 16s — capped at 30s</span>
+      <span class="kw">const</span> exponential = Math.<span class="fn">min</span>(baseDelay * Math.<span class="fn">pow</span>(<span class="num">2</span>, attempt - <span class="num">1</span>), maxDelay);
+      <span class="cmt">// Jitter: ±30% — breaks synchronization across many retrying clients</span>
+      <span class="kw">const</span> jitter = exponential * jitterFactor * (Math.<span class="fn">random</span>() * <span class="num">2</span> - <span class="num">1</span>);
+      <span class="kw">const</span> delay = Math.<span class="fn">max</span>(<span class="num">0</span>, exponential + jitter);
+
+      <span class="fn">onRetry</span>?.({ attempt, delay, error: err.message });
+      <span class="kw">await</span> <span class="kw">new</span> Promise(r =&gt; setTimeout(r, delay));
+    }
+  }
+
+  <span class="kw">throw new</span> Error(<span class="str">`Failed after ${maxAttempts} attempts: ${lastError?.message}`</span>);
+}
+
+<span class="cmt">// Usage: payment with retry</span>
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">withRetry</span>(
+  <span class="kw">async</span> (attempt) =&gt; <span class="fn">callPaymentAPI</span>(payload),
+  {
+    maxAttempts: <span class="num">4</span>,
+    baseDelay: <span class="num">500</span>,
+    onRetry: ({ attempt, delay }) =&gt;
+      logger.<span class="fn">warn</span>(<span class="str">`Payment retry ${attempt}, waiting ${Math.round(delay)}ms`</span>)
+  }
+);
+
+<span class="cmt">// Approximate retry delays (with ±30% jitter):</span>
+<span class="cmt">// Attempt 2: ~500ms, Attempt 3: ~1s, Attempt 4: ~2s</span></pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Only retry on <strong>transient errors</strong>: network errors (ECONNRESET, ETIMEDOUT), 429 Too Many Requests (respect the Retry-After header), 503 Service Unavailable. Never retry 4xx — they represent bad requests that won't succeed on retry.</li>
+      <li>Retries require idempotency. Retrying a POST that creates an order can create duplicates. Always use idempotency keys on mutation endpoints that will be retried.</li>
+      <li>Respect <code style="font-family:var(--mono);font-size:11px">Retry-After</code> headers from 429 responses — the server knows the correct backoff window, don't override it with your own.</li>
+      <li>In a microservices system, consider a <strong>retry budget</strong>: cap retries at 10% of total outgoing requests. This prevents retry amplification during cascading failures.</li>
+      <li>Log every retry attempt with attempt number and delay. These logs are invaluable for diagnosing which dependencies are flaky in production.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you implement retries for a payment API call?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Exponential backoff with jitter — ~500ms, ~1s, ~2s — max 3–4 attempts. Critically, only retry on 5xx and network errors, never on 4xx. Most importantly, I generate an idempotency key before the first attempt and reuse it across all retries — this prevents charging the customer twice if a retry hits after the first attempt actually succeeded but the response was lost in transit."</p></div>
+    <div class="interview-q">"What is the thundering herd problem in the context of retries?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"When many clients all fail simultaneously and all retry at the same fixed delays, they create synchronized traffic spikes that hammer the recovering service. Say 1,000 clients get a 503, they all wait exactly 2 seconds and retry simultaneously — that's a 1,000 req burst at t=2s. Jitter (random variance on the delay) breaks that synchronization. Instead of all retrying at t=2s, they retry spread across t=1.7s to t=2.3s. Same total load, but distributed — giving the service time to handle each sub-wave."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Exponential backoff</span><span class="cheat-val">delay = base × 2^attempt. Doubles each retry. Cap at 30s.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Jitter</span><span class="cheat-val">±30% random variance. Prevents thundering herd on synchronized retries.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Retry 5xx only</span><span class="cheat-val">Server errors may be transient. 4xx = client error, won't change on retry.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Idempotency key</span><span class="cheat-val">Generate once, reuse on all retries. Prevents duplicate side effects.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Retry-After</span><span class="cheat-val">Respect header on 429. Server specifies correct backoff window.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 20: OBSERVABILITY -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch20">
+  <div class="chapter-header">
+    <div class="chapter-num t2">20</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t2-tag">Tier 2</div>
+      <h2>Observability</h2>
+      <div class="chapter-subtitle">If you can't see it, you can't fix it — logs, metrics, and traces</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Observability is your ability to understand what's happening inside your system by looking at its external outputs. Monitoring tells you <em>when</em> something is wrong. Observability tells you <em>why</em>. The difference is critical at 2am when an alert fires and you need to diagnose a problem you've never seen before — without adding new instrumentation first.</p>
+    <p><strong>Three pillars</strong>: <strong>Logs</strong> tell you what happened (narrative). <strong>Metrics</strong> tell you how the system is performing (numbers over time). <strong>Traces</strong> show you how a single request flowed through every service (the journey map).</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Observability is the cockpit instruments. Logs are the flight recorder — detailed record of every event. Metrics are the gauges (altitude, speed, fuel) — real-time numbers you glance at continuously. Traces are the flight path — which route did this request take through your microservices? When you have all three, you can diagnose any problem. Flying blind means you only know there's a crash when users tweet about it.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Structured logging with pino + trace ID</span></div>
+      <pre><span class="kw">import</span> pino <span class="kw">from</span> <span class="str">'pino'</span>;
+<span class="kw">import</span> { randomUUID } <span class="kw">from</span> <span class="str">'crypto'</span>;
+
+<span class="kw">const</span> logger = pino({ level: process.env.LOG_LEVEL || <span class="str">'info'</span> });
+
+<span class="cmt">// Middleware: attach request-scoped logger with trace ID</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">const</span> traceId = req.headers[<span class="str">'x-trace-id'</span>] || <span class="fn">randomUUID</span>();
+  res.<span class="fn">setHeader</span>(<span class="str">'x-trace-id'</span>, traceId);  <span class="cmt">// return it so clients can correlate</span>
+
+  req.log = logger.<span class="fn">child</span>({
+    traceId,
+    requestId: <span class="fn">randomUUID</span>(),
+    userId: req.user?.id,
+    path: req.path,
+    method: req.method,
+    ip: req.ip
+  });
+  req.startTime = Date.<span class="fn">now</span>();
+  <span class="fn">next</span>();
+});
+
+<span class="cmt">// Log request completion with timing</span>
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  res.<span class="fn">on</span>(<span class="str">'finish'</span>, () =&gt; {
+    req.log.<span class="fn">info</span>({ statusCode: res.statusCode, durationMs: Date.<span class="fn">now</span>() - req.startTime }, <span class="str">'Request completed'</span>);
+  });
+  <span class="fn">next</span>();
+});
+
+<span class="cmt">// In route handlers — same structured context everywhere</span>
+app.<span class="fn">post</span>(<span class="str">'/orders'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  req.log.<span class="fn">info</span>({ amount: req.body.amount }, <span class="str">'Creating order'</span>);
+  <span class="kw">try</span> {
+    <span class="kw">const</span> order = <span class="kw">await</span> <span class="fn">createOrder</span>(req.body);
+    req.log.<span class="fn">info</span>({ orderId: order.id }, <span class="str">'Order created'</span>);
+    res.<span class="fn">json</span>(order);
+  } <span class="kw">catch</span> (err) {
+    req.log.<span class="fn">error</span>({ err: err.message }, <span class="str">'Order creation failed'</span>);
+    <span class="kw">throw</span> err;
+  }
+});</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Prometheus metrics — request rate, errors, latency</span></div>
+      <pre><span class="kw">import</span> { Counter, Histogram, register } <span class="kw">from</span> <span class="str">'prom-client'</span>;
+
+<span class="kw">const</span> httpRequests = <span class="kw">new</span> Counter({
+  name: <span class="str">'http_requests_total'</span>,
+  help: <span class="str">'Total HTTP requests'</span>,
+  labelNames: [<span class="str">'method'</span>, <span class="str">'route'</span>, <span class="str">'status_code'</span>]
+});
+
+<span class="kw">const</span> httpLatency = <span class="kw">new</span> Histogram({
+  name: <span class="str">'http_request_duration_ms'</span>,
+  help: <span class="str">'HTTP latency in milliseconds'</span>,
+  labelNames: [<span class="str">'method'</span>, <span class="str">'route'</span>],
+  buckets: [<span class="num">5</span>, <span class="num">10</span>, <span class="num">25</span>, <span class="num">50</span>, <span class="num">100</span>, <span class="num">250</span>, <span class="num">500</span>, <span class="num">1000</span>, <span class="num">2500</span>]
+});
+
+app.<span class="fn">use</span>((req, res, next) =&gt; {
+  <span class="kw">const</span> end = httpLatency.<span class="fn">startTimer</span>({ method: req.method, route: req.route?.path });
+  res.<span class="fn">on</span>(<span class="str">'finish'</span>, () =&gt; {
+    httpRequests.<span class="fn">inc</span>({ method: req.method, route: req.route?.path, status_code: res.statusCode });
+    <span class="fn">end</span>();
+  });
+  <span class="fn">next</span>();
+});
+
+app.<span class="fn">get</span>(<span class="str">'/metrics'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  res.<span class="fn">set</span>(<span class="str">'Content-Type'</span>, register.<span class="fn">contentType</span>());
+  res.<span class="fn">end</span>(<span class="kw">await</span> register.<span class="fn">metrics</span>());
+});
+
+<span class="cmt">// Grafana alert rule example:</span>
+<span class="cmt">// Fire when: rate(http_requests_total{status_code=~"5.."}[5m])</span>
+<span class="cmt">//            / rate(http_requests_total[5m]) > 0.05</span>
+<span class="cmt">// For: 2 consecutive minutes</span>
+<span class="cmt">// Then: page on-call via PagerDuty</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>The Four Golden Signals</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Signal</th><th>What to measure</th><th>Alert threshold (example)</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag amber">Latency</span></td><td>p50, p95, p99 response times — NOT average</td><td>p99 &gt; 2× baseline for 5 minutes</td></tr>
+          <tr><td><span class="tag blue">Traffic</span></td><td>Requests per second by endpoint</td><td>Anomaly detection (too low = traffic stopped)</td></tr>
+          <tr><td><span class="tag red">Errors</span></td><td>5xx error rate, caught exceptions, timeout rate</td><td>&gt;1% error rate for 2 minutes</td></tr>
+          <tr><td><span class="tag purple">Saturation</span></td><td>CPU %, memory %, thread pool, queue depth</td><td>CPU &gt;80% sustained, queue growing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Why p99 over average?</strong> If 99% of requests take 50ms but 1% take 5 seconds, your average looks fine at ~100ms — but 1 in 100 users waits 5 seconds. Average hides the tail. p99 surfaces it. Your slowest users are still your users.</p>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Log <strong>structured JSON always</strong> — <code style="font-family:var(--mono);font-size:11px">{"level":"error","userId":123,"msg":"Payment failed"}</code> is searchable and filterable. Plain strings require regex and are miserable at scale.</li>
+      <li>Every log entry must include a trace ID. Without it, debugging means searching by timestamp — painful and imprecise.</li>
+      <li>Alert on <strong>symptoms</strong> not causes. "5% error rate" → page immediately. "CPU 80%" → investigate at normal hours. Users experience errors and latency, not CPU percentage.</li>
+      <li>Distributed tracing is non-negotiable in microservices. A slow request might be slow in service C, called by B, called by A. Without tracing, you're guessing.</li>
+      <li>Use <code style="font-family:var(--mono);font-size:11px">OpenTelemetry</code> SDK for instrumentation — it's vendor-neutral and works with Datadog, Jaeger, Grafana Tempo, and others without code changes.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"Your API's p99 latency spiked to 5 seconds at 2am. Walk me through how you'd debug it."</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"First I check metrics: did traffic spike simultaneously? If yes — scaling or rate limiting. If traffic is normal — something internal degraded. Next, distributed traces filtered to requests &gt;2s — which service/component added the latency? Is it the DB? An external API call? Then logs filtered to that time window for the slow endpoint — any common patterns? Same query? Same user? Same error? If DB-related, I check slow query logs and replication lag. Finally, correlation with deploy events — was there a deploy around that time?"</p></div>
+    <div class="interview-q">"What's the difference between monitoring and observability?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Monitoring checks predefined thresholds — 'alert when error rate exceeds 5%.' Good for known problems. Observability lets you ask arbitrary questions about your system's behavior from the outside — even questions you didn't anticipate. High observability means when a novel failure occurs at 2am, you can figure out what's wrong without adding new instrumentation first. Monitoring tells you when something is broken. Observability tells you why."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Logs</span><span class="cheat-val">What happened. Structured JSON. Always include traceId.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Metrics</span><span class="cheat-val">How it performs. p99 latency, error rate, req/s, saturation.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Traces</span><span class="cheat-val">Where time was spent across services. OpenTelemetry → Jaeger/Datadog.</span></div>
+      <div class="cheat-row"><span class="cheat-key">p99 vs average</span><span class="cheat-val">Average hides the 1% who suffer. p99 surfaces tail latency.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Golden signals</span><span class="cheat-val">Latency + Traffic + Errors + Saturation. Monitor all four.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Alert on symptoms</span><span class="cheat-val">Error rate up → page. CPU up → investigate at normal hours.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TIER 3 DIVIDER -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t3">🛠 Tier 3 — DevOps + Infrastructure</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 21: DOCKER -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch21">
+  <div class="chapter-header">
+    <div class="chapter-num t3">21</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t3-tag">Tier 3</div>
+      <h2>Docker</h2>
+      <div class="chapter-subtitle">"It works on my machine" — and now it works everywhere</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p>Docker packages your application with all its dependencies — runtime, libraries, configs — into a <strong>container</strong>: an isolated, portable unit. The same container runs identically on your laptop, in CI, and on a production server. No more "works on my machine."</p>
+    <p>A <strong>Docker image</strong> is the blueprint — a read-only layered filesystem built from instructions in a Dockerfile. A <strong>container</strong> is a running instance of an image. Images are immutable. Containers are ephemeral — if one crashes, K8s spins up a new one from the same image in seconds.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Before Docker: deploying code was like giving someone a recipe and expecting them to already have the exact same kitchen, appliances, and ingredient brands. Docker is like delivering a pre-packed meal kit — the recipe, ingredients, and tools all in one box. They just run it. Every time. Identical result regardless of whose kitchen it is.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Dockerfile</span><span class="code-title">Production Node.js image with multi-stage build</span></div>
+      <pre><span class="cmt"># ── Stage 1: Build ── install ALL deps, compile TypeScript</span>
+<span class="kw">FROM</span> node:20-alpine <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+
+<span class="cmt"># Copy package files FIRST — Docker layer cache</span>
+<span class="cmt"># This layer only rebuilds when package.json changes, not on every code edit</span>
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci
+
+<span class="kw">COPY</span> tsconfig.json .
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> npm run build
+
+<span class="cmt"># ── Stage 2: Production ── only what's needed to RUN</span>
+<span class="kw">FROM</span> node:20-alpine <span class="kw">AS</span> production
+<span class="kw">WORKDIR</span> /app
+
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci --omit=dev  <span class="cmt"># no dev dependencies in prod image</span>
+
+<span class="kw">COPY</span> --from=builder /app/dist ./dist  <span class="cmt"># only compiled output</span>
+
+<span class="kw">USER</span> node              <span class="cmt"># NEVER run as root in production</span>
+<span class="kw">ENV</span> NODE_ENV=production
+<span class="kw">EXPOSE</span> 3000
+<span class="kw">CMD</span> ["node", "dist/server.js"]
+
+<span class="cmt"># Result: builder ~800MB → production image ~120MB</span>
+<span class="cmt"># Smaller = faster deploys, smaller attack surface</span></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">docker-compose.yml</span><span class="code-title">Full local dev environment with hot reload</span></div>
+      <pre><span class="kw">services</span>:
+  <span class="fn">app</span>:
+    <span class="kw">build</span>: { context: ., target: builder }
+    <span class="kw">command</span>: npm run dev
+    <span class="kw">ports</span>: ["3000:3000"]
+    <span class="kw">environment</span>:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:secret@db:5432/myapp
+      REDIS_URL: redis://redis:6379
+    <span class="kw">volumes</span>:
+      - ./src:/app/src  <span class="cmt"># hot reload: src changes appear instantly</span>
+    <span class="kw">depends_on</span>:
+      <span class="fn">db</span>: { condition: service_healthy }
+
+  <span class="fn">db</span>:
+    <span class="kw">image</span>: postgres:16-alpine
+    <span class="kw">environment</span>: { POSTGRES_PASSWORD: secret, POSTGRES_DB: myapp }
+    <span class="kw">ports</span>: ["5432:5432"]
+    <span class="kw">volumes</span>:
+      - pg_data:/var/lib/postgresql/data  <span class="cmt"># persist across restarts</span>
+    <span class="kw">healthcheck</span>:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+
+  <span class="fn">redis</span>:
+    <span class="kw">image</span>: redis:7-alpine
+    <span class="kw">ports</span>: ["6379:6379"]
+    <span class="kw">command</span>: redis-server --appendonly yes
+
+<span class="kw">volumes</span>:
+  <span class="kw">pg_data</span>:</pre>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Always use <strong>multi-stage builds</strong>. A single-stage image includes build tools, dev dependencies, and TypeScript source — your prod image ends up 5–10× larger than needed. Larger = slower deploys and more vulnerability surface.</li>
+      <li>Never run containers as root. Add <code style="font-family:var(--mono);font-size:11px">USER node</code>. If a vulnerability is exploited, the attacker has limited filesystem access.</li>
+      <li>Pin image versions: <code style="font-family:var(--mono);font-size:11px">node:20.15.1-alpine</code> not <code style="font-family:var(--mono);font-size:11px">node:latest</code>. Latest changes without warning and can silently break builds.</li>
+      <li>Add a <code style="font-family:var(--mono);font-size:11px">.dockerignore</code> file to exclude <code style="font-family:var(--mono);font-size:11px">node_modules</code>, <code style="font-family:var(--mono);font-size:11px">.git</code>, <code style="font-family:var(--mono);font-size:11px">*.env</code>. Sending a 500MB build context to the Docker daemon on every build is slow and wasteful.</li>
+      <li>Order Dockerfile instructions from least → most frequently changed: base image → packages → <code style="font-family:var(--mono);font-size:11px">package.json</code> → <code style="font-family:var(--mono);font-size:11px">npm install</code> → source code. This maximizes layer cache reuse.</li>
+      <li>Never bake secrets into images. Pass them as runtime environment variables injected by the orchestrator (K8s Secrets, AWS Secrets Manager).</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What is a multi-stage Docker build and why use it?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Multi-stage uses multiple FROM instructions. The builder stage installs all dev dependencies and compiles TypeScript. The production stage starts fresh, copies only the compiled output — no TypeScript compiler, no nodemon, no test libraries. This reduces image size from ~900MB to ~120MB. Smaller images deploy faster, use less registry storage, and have a smaller attack surface. Without multi-stage, you're shipping your entire build toolchain to production servers."</p></div>
+    <div class="interview-q">"How do you manage secrets in Docker containers?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Never bake secrets into the image — they appear in image history and any registry you push to. In development, I use .env files with docker-compose env_file (but never commit them to git). In production, secrets are injected at runtime as environment variables by the orchestration layer — Kubernetes Secrets, AWS Secrets Manager via ECS, or Vault. The container reads them from environment variables at startup. The image itself contains zero credentials."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Image vs Container</span><span class="cheat-val">Image = immutable blueprint. Container = running instance (ephemeral).</span></div>
+      <div class="cheat-row"><span class="cheat-key">Multi-stage build</span><span class="cheat-val">Build stage → copy artifacts → production stage. Smaller, secure images.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Layer cache order</span><span class="cheat-val">COPY package.json → npm install → COPY src. Cache the slow npm install layer.</span></div>
+      <div class="cheat-row"><span class="cheat-key">USER node</span><span class="cheat-val">Never run as root. Limits blast radius of any exploit.</span></div>
+      <div class="cheat-row"><span class="cheat-key">.dockerignore</span><span class="cheat-val">Exclude node_modules, .git, *.env from build context.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 22: KUBERNETES -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch22">
+  <div class="chapter-header">
+    <div class="chapter-num t3">22</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t3-tag">Tier 3</div>
+      <h2>Kubernetes Basics</h2>
+      <div class="chapter-subtitle">The operating system for your distributed application</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p>Kubernetes (K8s) manages containers across a cluster of machines. You declare <em>desired state</em> — "run 3 replicas of this API" — and K8s continuously works to achieve and maintain it. Containers crash? K8s restarts them. Load spikes? K8s adds pods. A node dies? K8s reschedules its pods elsewhere. All automatically, without SSH or manual intervention.</p>
+    <p>The paradigm shift: you stop thinking about <em>servers</em> and start thinking about <em>desired state and resources</em>. You don't deploy by SSHing into machines — you update a YAML manifest and Kubernetes figures out how to make it so.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Kubernetes is an operations manager for a fleet of servers. You say "I want 5 copies of the API service running, with at least 512MB RAM each, spread across different buildings." The manager schedules workers (pods), replaces any who stop showing up (restarts crashed containers), moves them to healthier buildings (reschedules from failed nodes), and hires more or lays off based on demand (auto-scaling). You never talk to individual workers — only to the manager.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">YAML</span><span class="code-title">Complete Deployment + Service + HPA with probes and resource limits</span></div>
+      <pre><span class="kw">apiVersion</span>: apps/v1
+<span class="kw">kind</span>: Deployment
+<span class="kw">metadata</span>: { name: api, namespace: production }
+<span class="kw">spec</span>:
+  <span class="kw">replicas</span>: 3
+  <span class="kw">selector</span>:
+    <span class="kw">matchLabels</span>: { app: api }
+  <span class="kw">strategy</span>:
+    <span class="kw">type</span>: RollingUpdate
+    <span class="kw">rollingUpdate</span>: { maxUnavailable: 1, maxSurge: 1 }
+  <span class="kw">template</span>:
+    <span class="kw">metadata</span>:
+      <span class="kw">labels</span>: { app: api }
+    <span class="kw">spec</span>:
+      <span class="kw">containers</span>:
+      - <span class="kw">name</span>: api
+        <span class="kw">image</span>: myrepo/api:1.2.3    <span class="cmt"># NEVER :latest in production</span>
+        <span class="kw">ports</span>: [{ containerPort: 3000 }]
+        <span class="kw">env</span>:
+        - <span class="kw">name</span>: DATABASE_URL
+          <span class="kw">valueFrom</span>:
+            <span class="kw">secretKeyRef</span>: { name: api-secrets, key: database-url }
+        <span class="kw">resources</span>:
+          <span class="kw">requests</span>: { cpu: "100m", memory: "128Mi" }   <span class="cmt"># scheduler uses this</span>
+          <span class="kw">limits</span>: { cpu: "500m", memory: "512Mi" }      <span class="cmt"># hard cap — OOM kill if exceeded</span>
+        <span class="kw">readinessProbe</span>:    <span class="cmt"># traffic only sent when pod is READY</span>
+          <span class="kw">httpGet</span>: { path: /health, port: 3000 }
+          <span class="kw">initialDelaySeconds</span>: 10
+          <span class="kw">periodSeconds</span>: 5
+          <span class="kw">failureThreshold</span>: 3
+        <span class="kw">livenessProbe</span>:     <span class="cmt"># restart pod if DEADLOCKED</span>
+          <span class="kw">httpGet</span>: { path: /health, port: 3000 }
+          <span class="kw">initialDelaySeconds</span>: 30
+          <span class="kw">periodSeconds</span>: 10
+          <span class="kw">failureThreshold</span>: 5
+---
+<span class="kw">apiVersion</span>: v1
+<span class="kw">kind</span>: Service
+<span class="kw">metadata</span>: { name: api, namespace: production }
+<span class="kw">spec</span>:
+  <span class="kw">selector</span>: { app: api }
+  <span class="kw">ports</span>: [{ port: 80, targetPort: 3000 }]
+---
+<span class="kw">apiVersion</span>: autoscaling/v2
+<span class="kw">kind</span>: HorizontalPodAutoscaler
+<span class="kw">metadata</span>: { name: api-hpa, namespace: production }
+<span class="kw">spec</span>:
+  <span class="kw">scaleTargetRef</span>: { apiVersion: apps/v1, kind: Deployment, name: api }
+  <span class="kw">minReplicas</span>: 2
+  <span class="kw">maxReplicas</span>: 20
+  <span class="kw">metrics</span>:
+  - <span class="kw">type</span>: Resource
+    <span class="kw">resource</span>: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Core Resources</h3></div>
+    <div class="cards">
+      <div class="card"><h4>Pod</h4><p>Smallest unit. Ephemeral. Managed by Deployments. Never reference pods directly in production configs.</p></div>
+      <div class="card"><h4>Deployment</h4><p>Manages desired replica count and rolling updates. <code style="font-family:var(--mono);font-size:11px">kubectl rollout undo</code> for instant rollback.</p></div>
+      <div class="card"><h4>Service</h4><p>Stable DNS name + IP for a set of pods. Load balances traffic to matching pods. Internal comms use service names.</p></div>
+      <div class="card"><h4>Ingress</h4><p>HTTP routing at cluster edge. api.example.com → api-service. TLS termination via cert-manager.</p></div>
+      <div class="card"><h4>ConfigMap / Secret</h4><p>Config and credentials injected as env vars. Never bake into images. Secrets should come from an external manager.</p></div>
+      <div class="card"><h4>HPA</h4><p>Auto-scales pods based on CPU/memory/custom metrics. Set min=2 so no single point of failure.</p></div>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Always set <strong>resource requests AND limits</strong>. Without requests, the scheduler places pods randomly. Without limits, one runaway pod OOMs an entire node, killing all other pods on it.</li>
+      <li><strong>Readiness probe</strong>: controls traffic routing — failing = removed from Service endpoints. For slow startups. <strong>Liveness probe</strong>: controls pod lifecycle — failing = pod killed and restarted. For deadlock detection. Wrong choice = chaos.</li>
+      <li>Never use <code style="font-family:var(--mono);font-size:11px">:latest</code> tag in production. Always pin to a specific version or Git SHA — predictable, rollback-able.</li>
+      <li>Use <code style="font-family:var(--mono);font-size:11px">kubectl rollout undo deployment/api</code> to instantly roll back a bad deploy. This only works reliably with pinned image versions.</li>
+      <li>Store secrets in an external manager (AWS Secrets Manager, HashiCorp Vault) and sync to K8s Secrets via the External Secrets Operator — base64 in a YAML file is not encryption.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What's the difference between a readiness probe and a liveness probe?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Different purposes. Readiness controls traffic routing — when a pod's readiness probe fails, K8s removes it from the Service's endpoint list, stopping new requests to it. Used for pods not yet ready to serve traffic (still warming up, loading caches). Liveness controls pod lifecycle — when it fails, K8s kills and restarts the pod. Used for pods that are stuck or deadlocked and would never recover on their own. Mixing them up causes either unnecessary restarts or dead pods receiving live traffic."</p></div>
+    <div class="interview-q">"How does a rolling deployment work?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"With RollingUpdate, K8s starts a new pod with the new image, waits for its readiness probe to pass, then terminates one old pod. It repeats until all pods are updated. maxUnavailable controls how many old pods can be down at once; maxSurge controls extra pods temporarily. At every point during rollout, live pods serve traffic — zero downtime. The readiness probe is critical: without it, K8s sends traffic to pods that haven't finished starting."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">Pod</span><span class="cheat-val">Smallest unit. Ephemeral. Managed by Deployments, never directly.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Readiness probe</span><span class="cheat-val">Fails → removed from Service. For startup delays.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Liveness probe</span><span class="cheat-val">Fails → pod restarted. For deadlocks and zombies.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Resource limits</span><span class="cheat-val">Requests = scheduler hint. Limits = hard cap. Always set both.</span></div>
+      <div class="cheat-row"><span class="cheat-key">kubectl rollout undo</span><span class="cheat-val">Instant rollback to previous image. Only works with pinned tags.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 23: CI/CD -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch23">
+  <div class="chapter-header">
+    <div class="chapter-num t3">23</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t3-tag">Tier 3</div>
+      <h2>CI/CD</h2>
+      <div class="chapter-subtitle">Every commit deployable — automating the path from code to production</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p><strong>Continuous Integration (CI)</strong>: Every push automatically triggers a pipeline — build, lint, test. If any step fails, the PR is blocked. The goal: catch bugs at the moment of introduction, not days later when someone else encounters them.</p>
+    <p><strong>Continuous Deployment (CD)</strong>: Every commit that passes CI on the main branch is automatically deployed to production. No manual deploy steps. Deployments become so routine and automated that they're boring. The more frequent, the smaller each change, the lower the risk per deploy.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>CI/CD is a car assembly line with quality gates. Every car (commit) passes through: paint (lint), then engine test (unit tests), then full inspection (integration tests). A car failing any gate stops the line — it doesn't proceed to delivery. A car passing all gates ships automatically. You never manually inspect individual cars — the process itself guarantees quality.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">GitHub Actions</span><span class="code-title">Full CI/CD: test → build → deploy to Kubernetes</span></div>
+      <pre><span class="kw">name</span>: CI/CD Pipeline
+<span class="kw">on</span>:
+  <span class="kw">push</span>: { branches: [main] }
+  <span class="kw">pull_request</span>: { branches: [main] }
+
+<span class="kw">env</span>:
+  IMAGE_NAME: myrepo/api
+  IMAGE_TAG: "${{ github.sha }}"   <span class="cmt"># pin to git SHA — reproducible</span>
+
+<span class="kw">jobs</span>:
+  <span class="fn">test</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">services</span>:
+      <span class="kw">postgres</span>:
+        <span class="kw">image</span>: postgres:16-alpine
+        <span class="kw">env</span>: { POSTGRES_PASSWORD: testpassword, POSTGRES_DB: testdb }
+        <span class="kw">options</span>: --health-cmd pg_isready --health-retries 5
+      <span class="kw">redis</span>: { image: redis:7-alpine }
+    <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: actions/checkout@v4
+    - <span class="kw">uses</span>: actions/setup-node@v4
+      <span class="kw">with</span>: { node-version: '20', cache: 'npm' }
+    - <span class="kw">run</span>: npm ci
+    - <span class="kw">run</span>: npm run typecheck
+    - <span class="kw">run</span>: npm run lint
+    - <span class="kw">run</span>: npm run test:unit
+    - <span class="kw">run</span>: npm run test:integration
+      <span class="kw">env</span>:
+        DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/testdb
+
+  <span class="fn">build</span>:
+    <span class="kw">needs</span>: test
+    <span class="kw">if</span>: github.ref == 'refs/heads/main'
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: actions/checkout@v4
+    - <span class="kw">uses</span>: docker/login-action@v3
+      <span class="kw">with</span>: { username: "${{ secrets.DOCKER_USER }}", password: "${{ secrets.DOCKER_TOKEN }}" }
+    - <span class="kw">uses</span>: docker/build-push-action@v5
+      <span class="kw">with</span>:
+        push: true
+        tags: "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+        cache-from: type=gha     <span class="cmt"># GitHub Actions layer cache</span>
+        cache-to: type=gha,mode=max
+
+  <span class="fn">deploy</span>:
+    <span class="kw">needs</span>: build
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">environment</span>: production   <span class="cmt"># optional: requires manual approval in GH settings</span>
+    <span class="kw">steps</span>:
+    - <span class="kw">uses</span>: actions/checkout@v4
+    - <span class="kw">name</span>: Deploy to Kubernetes
+      <span class="kw">run</span>: |
+        kubectl set image deployment/api api="${IMAGE_NAME}:${IMAGE_TAG}"
+        kubectl rollout status deployment/api --timeout=5m  <span class="cmt"># wait for rollout</span>
+    - <span class="kw">name</span>: Notify on failure
+      <span class="kw">if</span>: failure()
+      <span class="kw">run</span>: |
+        curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+          -d '{"text":"🚨 Deploy failed! SHA: ${{ github.sha }}"}'</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>Deployment Strategies</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Strategy</th><th>How it works</th><th>Downtime</th><th>Rollback</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag blue">Rolling</span></td><td>Swap pods one by one. K8s default.</td><td>None</td><td>~1–2 min</td><td>Default production choice</td></tr>
+          <tr><td><span class="tag green">Blue-Green</span></td><td>Two full environments. Switch LB at once.</td><td>None</td><td>Instant</td><td>High-risk releases, DB migrations</td></tr>
+          <tr><td><span class="tag amber">Canary</span></td><td>5% → 10% → 50% → 100% traffic shift.</td><td>None</td><td>Fast (reduce %)</td><td>Risky changes, validate at real scale</td></tr>
+          <tr><td><span class="tag purple">Feature Flag</span></td><td>Deploy dark. Enable per user/cohort.</td><td>None</td><td>Instant toggle</td><td>Decouple deploy from release</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Run tests against the same Postgres and Redis versions as production. "Tests pass but prod breaks" is almost always an environment difference.</li>
+      <li>The deploy job should wait for <code style="font-family:var(--mono);font-size:11px">kubectl rollout status</code> to complete before marking success. A pipeline that says "deploy succeeded" but left pods in CrashLoopBackOff is lying.</li>
+      <li>Feature flags (LaunchDarkly, Unleash, or homemade Redis-backed) decouple deploy from release. Deploy on Monday, enable the feature on Friday after 4 days of monitoring. The code is already in prod — you're just turning it on.</li>
+      <li>Always send a deploy notification to Slack: deployer, commit SHA, link to PR. When something breaks, you need to know exactly which deploy to blame.</li>
+      <li>Keep CI fast — target under 5 minutes. A 20-minute pipeline kills iteration speed. Parallelize test suites, cache npm aggressively, split long integration test suites.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What's the difference between blue-green and canary deployments?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Blue-green: two identical production environments. Deploy to the inactive one (green), then switch the load balancer over instantly. If something's wrong, one config change reverts to blue — seconds. Cost: 2× infrastructure. Canary: route a small percentage of real traffic (5%) to the new version, monitor error rates and latency, then progressively increase. You get real-user validation before full rollout, and failures affect only 5% of users. I'd use blue-green for big database migrations where instant rollback is critical, and canary for feature releases where I want gradual real-world validation."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">CI</span><span class="cheat-val">Build + lint + test on every commit. Failing CI blocks merge.</span></div>
+      <div class="cheat-row"><span class="cheat-key">CD</span><span class="cheat-val">Auto-deploy passing main commits. Trust the tests.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Blue-green</span><span class="cheat-val">Two envs. Instant switch. Instant rollback. Needs 2× cost.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Canary</span><span class="cheat-val">Gradual traffic shift. Real-user validation. Limits blast radius.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Feature flag</span><span class="cheat-val">Deploy dark. Enable per user. Decouple deploy from release.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Pin image SHA</span><span class="cheat-val">Tag with git SHA not :latest. Reproducible and rollback-able.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 24: REVERSE PROXY -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch24">
+  <div class="chapter-header">
+    <div class="chapter-num t3">24</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t3-tag">Tier 3</div>
+      <h2>Reverse Proxy</h2>
+      <div class="chapter-subtitle">The traffic cop, SSL terminator, and security shield in front of your servers</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p>A reverse proxy sits between the internet and your backend servers. Clients always connect to the proxy — your actual servers are never directly exposed. The proxy handles SSL termination, request routing, compression, static file serving, and rate limiting — offloading all of this from your application code so it can focus on business logic.</p>
+    <p><strong>Forward proxy</strong> (different thing): client-side, anonymizes client requests. <strong>Reverse proxy</strong>: server-side, protects and optimizes backend services. NGINX, Caddy, Traefik, HAProxy are the common choices.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>A reverse proxy is a hotel's front desk. Every guest (request) goes through the front desk — they never wander into the kitchen or staff areas (backend servers). The front desk checks IDs (auth headers), enforces limits (rate limiting), directs people to the right department (routing), and handles general services (compression, SSL, static files). The hotel's actual operations happen behind the desk, protected from direct public access.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Example</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">NGINX</span><span class="code-title">Production reverse proxy with SSL, compression, rate limiting</span></div>
+      <pre><span class="cmt"># Rate limiting zones</span>
+<span class="fn">limit_req_zone</span> $binary_remote_addr zone=api:10m rate=10r/s;
+<span class="fn">limit_req_zone</span> $binary_remote_addr zone=login:10m rate=1r/s;  <span class="cmt"># strict for auth</span>
+
+<span class="fn">upstream</span> api_pool {
+  least_conn;
+  server api-1:3000;
+  server api-2:3000;
+  keepalive 32;
+}
+
+<span class="cmt"># Redirect HTTP → HTTPS</span>
+<span class="fn">server</span> {
+  listen 80;
+  <span class="kw">return</span> 301 https://$host$request_uri;
+}
+
+<span class="fn">server</span> {
+  listen 443 ssl http2;
+  server_name api.myapp.com;
+
+  ssl_certificate /etc/letsencrypt/live/api.myapp.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/api.myapp.com/privkey.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_session_cache shared:SSL:10m;
+
+  <span class="cmt"># Security headers</span>
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header X-Content-Type-Options nosniff;
+  add_header X-Frame-Options DENY;
+
+  <span class="cmt"># Compression — reduces response size 60-80% for JSON/HTML</span>
+  gzip on;
+  gzip_types application/json text/html text/css application/javascript;
+  gzip_min_length 1000;
+
+  <span class="cmt"># API traffic → Node.js backends</span>
+  location /api/ {
+    limit_req zone=api burst=20 nodelay;
+
+    proxy_pass http://api_pool;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;         <span class="cmt"># pass original client IP</span>
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+    proxy_next_upstream error timeout;
+  }
+
+  <span class="cmt"># Auth endpoints — strict rate limit (brute force protection)</span>
+  location /api/auth/ {
+    limit_req zone=login burst=5;
+    proxy_pass http://api_pool;
+  }
+
+  <span class="cmt"># Static assets — served directly from disk, max caching</span>
+  location /static/ {
+    root /var/www;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    access_log off;
+  }
+
+  <span class="cmt"># Block common scanner paths</span>
+  location ~ /(wp-admin|phpMyAdmin|.env) { return 404; }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>SSL Termination</h3></div>
+    <p>SSL/TLS is computationally expensive — handshakes, certificate verification, encryption. <strong>SSL termination at the proxy</strong> means: the proxy handles the HTTPS connection from clients, then forwards requests to backends over plain HTTP on the internal (trusted) network. Your Node.js servers don't deal with TLS at all — simpler and faster.</p>
+    <p>This is safe when your internal network is a trusted VPC or private network. The alternative (re-encrypting from proxy to backend via mTLS) adds complexity most apps don't need unless you have strict compliance requirements.</p>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Set <code style="font-family:var(--mono);font-size:11px">proxy_set_header X-Real-IP $remote_addr</code> — without this, your app sees all requests as coming from the proxy (127.0.0.1), making IP-based rate limiting and geo-detection useless.</li>
+      <li>Use <strong>Caddy</strong> if you want automatic HTTPS — it provisions and renews Let's Encrypt certificates automatically. NGINX requires certbot separately.</li>
+      <li>Serve static assets (JS, CSS, images) directly from NGINX — it's 10–50× faster than proxying to Node.js. Put a CDN (CloudFront, Fastly) in front for global distribution.</li>
+      <li>Set <code style="font-family:var(--mono);font-size:11px">Strict-Transport-Security</code> (HSTS) — tells browsers to always use HTTPS for your domain, even if the user types <code style="font-family:var(--mono);font-size:11px">http://</code>.</li>
+      <li>In cloud environments, use a managed load balancer (AWS ALB, GCP CLB) instead of maintaining NGINX — they handle scaling, health checks, SSL certs, and DDoS protection automatically.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"What does a reverse proxy do and why use one?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"A reverse proxy is the entry point to your infrastructure. It provides: SSL termination (backends don't handle TLS), load balancing across instances, rate limiting before requests hit application code, gzip compression, static file serving, and security headers. It also hides your internal architecture — clients only see the proxy's IP. In production I'd use NGINX or a cloud load balancer. The key value is separation of concerns: Node.js handles business logic; the proxy handles infrastructure concerns."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">SSL termination</span><span class="cheat-val">HTTPS to proxy, HTTP to backend. Backends simpler and faster.</span></div>
+      <div class="cheat-row"><span class="cheat-key">X-Real-IP</span><span class="cheat-val">Must forward client IP. Without it, app sees proxy IP for all requests.</span></div>
+      <div class="cheat-row"><span class="cheat-key">HSTS</span><span class="cheat-val">Strict-Transport-Security header. Forces HTTPS at the browser level.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Gzip</span><span class="cheat-val">Compress JSON/HTML. 60-80% size reduction. Set at proxy level.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Static files</span><span class="cheat-val">NGINX serves from disk. 10-50× faster than proxying to Node.js.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAPTER 25: API DESIGN -->
+<!-- ============================================================ -->
+<section class="chapter" id="ch25">
+  <div class="chapter-header">
+    <div class="chapter-num t3">25</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier t3-tag">Tier 3</div>
+      <h2>API Design</h2>
+      <div class="chapter-subtitle">APIs are forever — design them like you'll be stuck with them</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p>APIs are contracts between your service and its consumers. Once published, they're extremely hard to change — clients depend on the exact URL structure, response shapes, and behavior you defined. A bad field name in v1 will haunt you for years. Design thoughtfully upfront, because the cost of fixing a bad API is proportional to the number of clients that have integrated with it.</p>
+    <p>Good API design is about three things: <strong>predictability</strong> (behaves as expected, follows conventions), <strong>consistency</strong> (similar operations look and behave similarly), and <strong>evolvability</strong> (you can add features without breaking existing clients).</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">🎭 Analogy</div>
+    <p>Designing an API is like laying a city's streets. Once streets are paved and buildings built around them, moving a street is enormously expensive — too many addresses depend on it. You can add new roads but can't easily rename or remove old ones. Get the foundational grid right before building, because you'll live with these decisions for decades. Versioning is your escape hatch when you absolutely must move a street.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Code Examples</h3></div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">Node.js</span><span class="code-title">Consistent errors + cursor pagination + versioning + idempotency</span></div>
+      <pre><span class="cmt">// Consistent error shape — every error looks the same across the API</span>
+<span class="kw">class</span> ApiError <span class="kw">extends</span> Error {
+  <span class="fn">constructor</span>(statusCode, code, message, details = <span class="kw">null</span>) {
+    <span class="kw">super</span>(message);
+    <span class="kw">this</span>.statusCode = statusCode;
+    <span class="kw">this</span>.code = code;       <span class="cmt">// machine-readable: 'INSUFFICIENT_FUNDS'</span>
+    <span class="kw">this</span>.details = details; <span class="cmt">// validation errors, extra context</span>
+  }
+}
+
+<span class="cmt">// Global error handler — uniform output regardless of where error originated</span>
+app.<span class="fn">use</span>((err, req, res, next) =&gt; {
+  <span class="kw">if</span> (err <span class="kw">instanceof</span> ApiError) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(err.statusCode).<span class="fn">json</span>({
+      error: { code: err.code, message: err.message, details: err.details, traceId: req.traceId }
+    });
+  }
+  res.<span class="fn">status</span>(500).<span class="fn">json</span>({ error: { code: <span class="str">'INTERNAL_ERROR'</span>, message: <span class="str">'Something went wrong'</span> } });
+});
+
+<span class="cmt">// Cursor-based pagination — stable, O(log n), scales to billions of rows</span>
+app.<span class="fn">get</span>(<span class="str">'/v1/orders'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> limit = Math.<span class="fn">min</span>(parseInt(req.query.limit) || <span class="num">20</span>, <span class="num">100</span>); <span class="cmt">// cap max page size</span>
+  <span class="kw">const</span> cursor = req.query.cursor ? parseInt(req.query.cursor) : <span class="num">0</span>;
+
+  <span class="cmt">// Fetch one extra row to check if there's a next page</span>
+  <span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`
+    SELECT * FROM orders WHERE user_id = $1 AND id > $2
+    ORDER BY id ASC LIMIT $3
+  `</span>, [req.user.id, cursor, limit + <span class="num">1</span>]);
+
+  <span class="kw">const</span> hasMore = rows.length > limit;
+  <span class="kw">const</span> data = hasMore ? rows.<span class="fn">slice</span>(<span class="num">0</span>, limit) : rows;
+
+  res.<span class="fn">json</span>({
+    data,
+    pagination: {
+      hasMore,
+      nextCursor: hasMore ? data[data.length - <span class="num">1</span>].id : <span class="kw">null</span>,
+      count: data.length
+    }
+  });
+});
+
+<span class="cmt">// Versioning — /v1 stays alive with deprecation warnings</span>
+app.<span class="fn">use</span>(<span class="str">'/v1'</span>, v1Router);
+app.<span class="fn">use</span>(<span class="str">'/v2'</span>, v2Router);
+
+v1Router.<span class="fn">use</span>((req, res, next) =&gt; {
+  res.<span class="fn">setHeader</span>(<span class="str">'Deprecation'</span>, <span class="str">'true'</span>);
+  res.<span class="fn">setHeader</span>(<span class="str">'Sunset'</span>, <span class="str">'Sat, 31 Dec 2025 23:59:59 GMT'</span>);
+  <span class="fn">next</span>();
+});
+
+<span class="cmt">// Idempotent POST with idempotency key</span>
+v2Router.<span class="fn">post</span>(<span class="str">'/payments'</span>, authenticate, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> key = req.headers[<span class="str">'idempotency-key'</span>];
+  <span class="kw">if</span> (!key) <span class="kw">throw new</span> ApiError(<span class="num">400</span>, <span class="str">'MISSING_IDEMPOTENCY_KEY'</span>, <span class="str">'Idempotency-Key required'</span>);
+
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">`idem:${req.user.id}:${key}`</span>);
+  <span class="kw">if</span> (cached) {
+    res.<span class="fn">setHeader</span>(<span class="str">'Idempotent-Replayed'</span>, <span class="str">'true'</span>);
+    <span class="kw">return</span> res.<span class="fn">json</span>(JSON.<span class="fn">parse</span>(cached));
+  }
+
+  <span class="kw">const</span> payment = <span class="kw">await</span> <span class="fn">processPayment</span>(req.body, req.user.id);
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">`idem:${req.user.id}:${key}`</span>, <span class="num">86400</span>, JSON.<span class="fn">stringify</span>(payment));
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(payment);
+});</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>REST vs GraphQL</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Aspect</th><th>REST</th><th>GraphQL</th></tr></thead>
+        <tbody>
+          <tr><td>Data shape</td><td>Fixed per endpoint — server decides</td><td>Client specifies exactly what fields it needs</td></tr>
+          <tr><td>Overfetching</td><td>Common — GET /user returns all fields</td><td>Never — client selects fields</td></tr>
+          <tr><td>Multiple resources</td><td>Multiple HTTP requests needed</td><td>One request, nested queries</td></tr>
+          <tr><td>HTTP caching</td><td>Works natively (GET is cacheable)</td><td>Harder (queries are POSTs)</td></tr>
+          <tr><td>Best for</td><td>Public APIs, mobile, simple CRUD, CDN-cacheable</td><td>Complex dashboards, multiple client types</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="prod-tips">
+    <div class="prod-label">⚡ Production Tips</div>
+    <ul>
+      <li>Use cursor-based pagination — <code style="font-family:var(--mono);font-size:11px">LIMIT 20 OFFSET 100000</code> reads 100,020 rows every time. <code style="font-family:var(--mono);font-size:11px">WHERE id &gt; :cursor ORDER BY id LIMIT 20</code> is O(log n) with an index, stable under inserts, and scales to billions of rows.</li>
+      <li>Version your APIs from day one. <code style="font-family:var(--mono);font-size:11px">/v1/</code> costs almost nothing and saves enormous pain later. Breaking change? Add to <code style="font-family:var(--mono);font-size:11px">/v2/</code>, keep <code style="font-family:var(--mono);font-size:11px">/v1/</code> alive for 6 months with Deprecation and Sunset headers.</li>
+      <li>Document with OpenAPI 3.0. From it you can generate: interactive docs (Swagger UI), client SDKs in any language, mock servers for frontend development, and contract tests.</li>
+      <li>Include a machine-readable error code in every error response — <code style="font-family:var(--mono);font-size:11px">INSUFFICIENT_FUNDS</code>, not just 402. HTTP status codes don't have enough granularity for clients to respond correctly.</li>
+      <li>Require idempotency keys on all POST endpoints that cause financial side effects. Document this requirement clearly — clients must generate the key before the first attempt and reuse it across all retries.</li>
+    </ul>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">🎯 Interview Prep</div>
+    <div class="interview-q">"How would you design a paginated API for a large dataset?"</div>
+    <div class="interview-weak"><span class="badge-weak">✗ Weak</span><p>"Use page=1&amp;pageSize=20."</p></div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Cursor-based pagination over offset. Offset has two problems: performance (LIMIT 20 OFFSET 100000 reads 100,020 rows and discards them) and instability (new items shift pages, so page 2 returns different results on each fetch). Cursor-based uses the last seen ID as anchor: <code style="font-family:var(--mono)">WHERE id &gt; :cursor ORDER BY id LIMIT 20</code>. Response includes a nextCursor (the last item's ID). This is O(log n) with an index, stable under insertions, and scales to billions of rows with no degradation."</p></div>
+    <div class="interview-q">"How do you handle breaking API changes without breaking clients?"</div>
+    <div class="interview-strong"><span class="badge-strong">✓ Strong</span><p>"Three strategies. First — additive changes are non-breaking: add new fields, never remove them. Old clients ignore unknown fields. Second — for breaking changes, introduce /v2 and keep /v1 alive with Deprecation and Sunset headers so clients know migration is needed. Third — feature flags for incremental rollouts. I set a sunset date (6 months), actively monitor which API keys are still calling v1, reach out to those clients, then finally shut down /v1 once all have migrated."</p></div>
+  </div>
+
+  <div class="cheatsheet">
+    <div class="cheatsheet-header">Quick Reference</div>
+    <div class="cheatsheet-body">
+      <div class="cheat-row"><span class="cheat-key">URL structure</span><span class="cheat-val">/v1/resource-plural/:id/sub-resource. Nouns. Consistent.</span></div>
+      <div class="cheat-row"><span class="cheat-key">HTTP verbs</span><span class="cheat-val">GET=read, POST=create, PUT=replace, PATCH=update, DELETE=remove</span></div>
+      <div class="cheat-row"><span class="cheat-key">Cursor pagination</span><span class="cheat-val">WHERE id > cursor ORDER BY id LIMIT n. O(log n). Stable.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Error shape</span><span class="cheat-val">{"error":{"code":"MACHINE_CODE","message":"Human text","traceId":"..."}}</span></div>
+      <div class="cheat-row"><span class="cheat-key">Versioning</span><span class="cheat-val">/v1/ from day one. Breaking changes → /v2. Keep v1 with Sunset header.</span></div>
+      <div class="cheat-row"><span class="cheat-key">Idempotency key</span><span class="cheat-val">Client header on POST mutations. Server deduplicates. Safe retries.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX: MISSING SENIOR INTERVIEW TOPICS -->
+<!-- ============================================================ -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t1">Appendix - Concepts Senior Interviews Expect</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<section class="chapter" id="ch26">
+  <div class="chapter-header">
+    <div class="chapter-num">26</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>HTTP, TCP, DNS, and the Request Lifecycle</h2>
+      <div class="chapter-subtitle">What really happens after a user presses Enter</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>A backend engineer should understand the full request path: browser checks cache, resolves DNS, opens a TCP connection, negotiates TLS, sends HTTP, passes through CDN/proxy/load balancer, reaches the app, queries dependencies, and returns a response. Production bugs often hide in the spaces between these layers.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>DNS</h4><p>Maps name to IP. TTL controls how long resolvers cache answers. Low TTL helps failover but increases lookup traffic.</p></div>
+    <div class="card"><h4>TCP</h4><p>Reliable ordered byte stream. Handshake, congestion control, retransmits, connection reuse, and head-of-line blocking matter for latency.</p></div>
+    <div class="card"><h4>HTTP/1.1</h4><p>Text protocol, keep-alive, one in-flight response per connection unless pipelining. Simple and common.</p></div>
+    <div class="card"><h4>HTTP/2</h4><p>Multiplexes streams over one TCP connection. Reduces connection count, but TCP packet loss can still affect all streams.</p></div>
+    <div class="card"><h4>HTTP/3</h4><p>Runs over QUIC/UDP. Faster connection setup and better behavior under packet loss for modern clients.</p></div>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">Interview Prep</div>
+    <div class="interview-q">"Walk me through what happens when a browser calls api.example.com/orders."</div>
+    <div class="interview-strong"><span class="badge-strong">Strong</span><p>"First browser and OS caches are checked, then DNS resolves the hostname. The client opens TCP or QUIC, negotiates TLS, sends HTTP with headers/body, traffic may hit a CDN or reverse proxy, then a load balancer routes to a healthy backend. The app authenticates, validates, queries DB/cache/queues, returns a status code and response headers. I would mention timeouts, connection reuse, cache headers, trace IDs, and where failures can happen."</p></div>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">DNS TTL</span><span class="cheat-val">Long TTL reduces lookups. Short TTL helps failover. Clients may still cache longer than expected.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Keep-alive</span><span class="cheat-val">Reuse TCP/TLS connections. Huge latency win for service-to-service traffic.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Timeouts</span><span class="cheat-val">Set connect, read, write, and overall deadlines. Infinite timeout equals resource leak.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Status codes</span><span class="cheat-val">400 validation, 401 unauthenticated, 403 forbidden, 404 missing, 409 conflict, 429 limited, 5xx server-side.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch27">
+  <div class="chapter-header">
+    <div class="chapter-num">27</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>TLS, Encryption, and Practical Security</h2>
+      <div class="chapter-subtitle">Protect data in transit, at rest, and in logs</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Core Concept</h3></div>
+    <p>TLS gives confidentiality, integrity, and server identity for data in transit. It does not make an insecure app secure. Backend security also means correct password hashing, secret storage, authorization checks, input validation, audit logs, dependency patching, and safe defaults.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Topic</th><th>Use</th><th>Common mistake</th></tr></thead>
+      <tbody>
+        <tr><td>TLS</td><td>Encrypt traffic and verify server identity</td><td>Terminating TLS but forgetting secure cookies / forwarded proto</td></tr>
+        <tr><td>Password hashing</td><td>Argon2id, bcrypt, or scrypt with per-user salt</td><td>Using SHA256 directly</td></tr>
+        <tr><td>Encryption at rest</td><td>Protect disk/object storage if media is stolen</td><td>Thinking it replaces row-level auth checks</td></tr>
+        <tr><td>JWT</td><td>Signed claims with expiry</td><td>Putting secrets/PII in the payload or accepting alg=none</td></tr>
+        <tr><td>Audit logs</td><td>Track security-relevant actions</td><td>Logging passwords, tokens, or full payment details</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">Production Tips</div><ul>
+    <li>Use HSTS after HTTPS is stable so browsers refuse plaintext downgrade attempts.</li>
+    <li>Set cookies with <code>HttpOnly</code>, <code>Secure</code>, and a deliberate <code>SameSite</code> value.</li>
+    <li>Use short-lived access tokens and refresh-token rotation for high-risk apps.</li>
+    <li>Keep authorization server-side. Never trust hidden UI controls as permission checks.</li>
+  </ul></div>
+
+  <div class="interview">
+    <div class="interview-label">Interview Prep</div>
+    <div class="interview-q">"How should passwords be stored?"</div>
+    <div class="interview-strong"><span class="badge-strong">Strong</span><p>"Never encrypt passwords for later decryption. Store a slow password hash using Argon2id, bcrypt, or scrypt with a unique salt per password and a cost factor tuned for the server. Add rate limiting and breach detection. A database leak should not immediately reveal user passwords."</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch28">
+  <div class="chapter-header">
+    <div class="chapter-num">28</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Schema Migrations and Backward Compatibility</h2>
+      <div class="chapter-subtitle">Change databases without breaking running code</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Expand / Contract</h3></div>
+    <p>Production deploys are not instantaneous. Old and new app versions may run at the same time, workers may lag, and replicas may apply changes later. Safe migrations are backward compatible: expand the schema first, deploy code that can read/write both shapes, backfill, then contract the old column later.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Migration Pattern</span><span class="code-title">Rename column without downtime</span></div>
+  <pre><span class="cmt">-- Bad: ALTER TABLE users RENAME COLUMN name TO full_name; old app breaks immediately</span>
+
+<span class="cmt">-- 1. Expand</span>
+ALTER TABLE users ADD COLUMN full_name text;
+
+<span class="cmt">-- 2. Dual write in app: write both name and full_name</span>
+<span class="cmt">-- 3. Backfill in small batches, not one huge lock-heavy update</span>
+WITH batch AS (
+  SELECT id FROM users WHERE full_name IS NULL ORDER BY id LIMIT 1000
+)
+UPDATE users
+SET full_name = users.name
+FROM batch
+WHERE users.id = batch.id;
+
+<span class="cmt">-- 4. Switch reads to full_name after backfill is complete</span>
+<span class="cmt">-- 5. Contract in later deploy</span>
+ALTER TABLE users DROP COLUMN name;</pre>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">Add column</span><span class="cheat-val">Usually safe. Avoid non-null with default on huge tables unless DB handles it metadata-only.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Backfill</span><span class="cheat-val">Run in batches. Monitor locks, replication lag, CPU, and write amplification.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Drop column</span><span class="cheat-val">Do only after all app versions and jobs no longer read it.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Indexes</span><span class="cheat-val">Create concurrently/online where supported. Index builds can block writes on some engines.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch29">
+  <div class="chapter-header">
+    <div class="chapter-num">29</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Connection Pools, Timeouts, and Backpressure</h2>
+      <div class="chapter-subtitle">Most outages are resource exhaustion wearing a disguise</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--red)"></div><h3>Core Concept</h3></div>
+    <p>A connection pool limits how many concurrent connections your app opens to a dependency. Too small and requests queue inside your app. Too large and you overload the database. Senior engineers size pools deliberately and add backpressure so failure is controlled instead of cascading.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>Pool Size</h4><p>Total app instances times pool size must fit within the DB max connections, with room for migrations and admin access.</p></div>
+    <div class="card"><h4>Queue Timeout</h4><p>If a request waits too long for a connection, fail fast. Do not allow unlimited in-process queues.</p></div>
+    <div class="card"><h4>Request Deadline</h4><p>Carry a deadline through all downstream calls. Stop doing work after the client has gone away.</p></div>
+    <div class="card"><h4>Backpressure</h4><p>Reject or shed load when saturated. Better a fast 503 than a slow global outage.</p></div>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">Interview Prep</div>
+    <div class="interview-q">"Why did adding more pods make the database slower?"</div>
+    <div class="interview-strong"><span class="badge-strong">Strong</span><p>"Each pod probably opened its own pool. Ten pods with pool size 30 means 300 DB connections. More connections do not mean more throughput once the DB is CPU/IO bound; they add context switching and lock contention. I would cap total connections, use PgBouncer if needed, tune pool size from observed latency, and add queue timeouts/backpressure."</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch30">
+  <div class="chapter-header">
+    <div class="chapter-num">30</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>ORMs, N+1 Queries, and Data Access Boundaries</h2>
+      <div class="chapter-subtitle">Convenience is good until it hides the query plan</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--pink)"></div><h3>Core Concept</h3></div>
+    <p>ORMs speed up development but can hide expensive query patterns. The classic N+1 bug loads a list, then queries related data one row at a time. Ten rows look fine. Ten thousand rows melt the database.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">Pattern</span><span class="code-title">N+1 query and fix</span></div>
+  <pre><span class="cmt">// Bad: 1 query for orders + N queries for each customer</span>
+<span class="kw">const</span> orders = <span class="kw">await</span> Order.<span class="fn">findAll</span>();
+<span class="kw">for</span> (<span class="kw">const</span> order <span class="kw">of</span> orders) {
+  order.customer = <span class="kw">await</span> Customer.<span class="fn">findByPk</span>(order.customerId);
+}
+
+<span class="cmt">// Better: eager load or join in one bounded query</span>
+<span class="kw">const</span> orders = <span class="kw">await</span> Order.<span class="fn">findAll</span>({
+  include: [{ model: Customer, attributes: [<span class="str">'id'</span>, <span class="str">'name'</span>] }],
+  limit: <span class="num">100</span>
+});</pre>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">Production Tips</div><ul>
+    <li>Turn on query logging in development and tests for critical endpoints.</li>
+    <li>Put hard limits on list endpoints. Unbounded ORM queries become accidental table scans.</li>
+    <li>Use raw SQL for complex reports, hot paths, locking, and advanced database features.</li>
+    <li>Measure query count per request. A sudden jump often means N+1 returned.</li>
+  </ul></div>
+</section>
+
+<section class="chapter" id="ch31">
+  <div class="chapter-header">
+    <div class="chapter-num">31</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Outbox Pattern, Sagas, and Distributed Transactions</h2>
+      <div class="chapter-subtitle">When one local transaction is not enough</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>Core Concept</h3></div>
+    <p>Databases and message brokers do not automatically commit together. If you save an order then fail before publishing <code>OrderCreated</code>, downstream systems never hear about it. If you publish first then DB commit fails, consumers react to an order that does not exist. The outbox pattern fixes this by writing business data and an event record in the same database transaction.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">SQL</span><span class="code-title">Transactional outbox</span></div>
+  <pre>BEGIN;
+INSERT INTO orders (id, user_id, status) VALUES ($1, $2, <span class="str">'created'</span>);
+INSERT INTO outbox_events (id, type, payload, published_at)
+VALUES ($3, <span class="str">'OrderCreated'</span>, $4, NULL);
+COMMIT;
+
+<span class="cmt">-- Separate publisher polls unpublished events, publishes to broker, then marks published.</span></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Pattern</th><th>Use when</th><th>Tradeoff</th></tr></thead>
+      <tbody>
+        <tr><td>Outbox</td><td>Need reliable event publish after DB change</td><td>Publisher and duplicate handling required</td></tr>
+        <tr><td>Inbox</td><td>Consumers need idempotent event processing</td><td>Stores processed message IDs</td></tr>
+        <tr><td>Saga</td><td>Long workflow spans services</td><td>Needs compensating actions, not true rollback</td></tr>
+        <tr><td>2PC</td><td>Strict atomic commit across resources</td><td>Slow, complex, availability risk; rare in web systems</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="chapter" id="ch32">
+  <div class="chapter-header">
+    <div class="chapter-num">32</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Testing Strategy for Backend Systems</h2>
+      <div class="chapter-subtitle">Confidence comes from the right tests at the right boundary</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--green)"></div><h3>Test Pyramid in Practice</h3></div>
+    <p>Good backend testing is not "unit tests everywhere." It is a layered strategy: unit tests for pure logic, integration tests for database and queues, contract tests between services, end-to-end tests for a few critical flows, and load tests for capacity assumptions.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h4>Unit</h4><p>Fast tests for business logic, validators, mappers, and policy decisions. No network or real DB.</p></div>
+    <div class="card"><h4>Integration</h4><p>Use real Postgres/Redis when behavior matters: transactions, indexes, constraints, locks.</p></div>
+    <div class="card"><h4>Contract</h4><p>Producer and consumer agree on API/event shape. Prevents independent service deploys from breaking clients.</p></div>
+    <div class="card"><h4>E2E</h4><p>Few, high-value tests for login, checkout, payment, webhook, and recovery flows.</p></div>
+    <div class="card"><h4>Load</h4><p>Validates p95/p99 latency, pool sizes, queue throughput, and database saturation points.</p></div>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">Interview Prep</div>
+    <div class="interview-q">"What would you test for a payment endpoint?"</div>
+    <div class="interview-strong"><span class="badge-strong">Strong</span><p>"Unit test validation and amount calculations, integration test idempotency and transaction behavior with a real DB, mock the payment provider with contract expectations, test webhook replay/dedup, and add concurrency tests so two requests with the same idempotency key cannot double-charge. I would also test failure paths: provider timeout, DB commit failure, and retry behavior."</p></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch33">
+  <div class="chapter-header">
+    <div class="chapter-num">33</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Configuration, Secrets, and Environments</h2>
+      <div class="chapter-subtitle">Config changes behavior; secrets grant power</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Core Concept</h3></div>
+    <p>Configuration should be explicit, validated at startup, and different per environment. Secrets should never live in Git, logs, images, or frontend bundles. Treat secrets as credentials with rotation, auditability, and least privilege.</p>
+  </div>
+
+  <div class="cheatsheet"><div class="cheatsheet-header">Quick Reference</div><div class="cheatsheet-body">
+    <div class="cheat-row"><span class="cheat-key">12-factor config</span><span class="cheat-val">Store deploy-specific config in environment or secret manager, not hardcoded files.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Startup validation</span><span class="cheat-val">Fail fast if required env vars are missing or malformed.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Rotation</span><span class="cheat-val">Support old and new keys during rollout. Rotate without downtime.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Least privilege</span><span class="cheat-val">App gets only the permissions it needs. Separate read/write/admin credentials.</span></div>
+    <div class="cheat-row"><span class="cheat-key">Secret scanning</span><span class="cheat-val">Run pre-commit/CI scanners and revoke leaked credentials immediately.</span></div>
+  </div></div>
+</section>
+
+<section class="chapter" id="ch34">
+  <div class="chapter-header">
+    <div class="chapter-num">34</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>File Storage, Search, and Externalized State</h2>
+      <div class="chapter-subtitle">Do not put durable user data on app server disk</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--blue)"></div><h3>Core Concept</h3></div>
+    <p>App containers are disposable. User uploads belong in object storage such as S3/GCS/Azure Blob, metadata belongs in the database, and search belongs in a search engine when relational indexes are no longer enough. Externalized state is what lets your app scale horizontally.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Need</th><th>Good default</th><th>Production notes</th></tr></thead>
+      <tbody>
+        <tr><td>User uploads</td><td>Object storage</td><td>Use pre-signed URLs, validate type/size, scan risky files, store metadata in DB</td></tr>
+        <tr><td>Images/video</td><td>Object storage + CDN</td><td>Generate variants asynchronously; keep originals immutable</td></tr>
+        <tr><td>Full-text search</td><td>Postgres FTS first, then OpenSearch/Elasticsearch</td><td>Search index is eventually consistent; DB remains source of truth</td></tr>
+        <tr><td>Exports/reports</td><td>Background job + object storage</td><td>Do not generate huge files inside HTTP request lifecycle</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prod-tips"><div class="prod-label">Production Tips</div><ul>
+    <li>Never trust file extensions. Validate MIME type and inspect file signatures where needed.</li>
+    <li>Use pre-signed upload URLs so large files do not pass through your API servers.</li>
+    <li>Keep DB as source of truth and rebuild search indexes from DB/events when needed.</li>
+    <li>Use CDN cache headers intentionally: immutable for versioned assets, short TTL for user-sensitive content.</li>
+  </ul></div>
+</section>
+
+<section class="chapter" id="ch35">
+  <div class="chapter-header">
+    <div class="chapter-num">35</div>
+    <div class="chapter-meta">
+      <div class="chapter-tier" style="color:var(--accent2)">Appendix</div>
+      <h2>Backend Interview Playbook</h2>
+      <div class="chapter-subtitle">How to answer like someone who has operated production systems</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Answer Structure</h3></div>
+    <p>For every backend interview answer, move from correctness to scale to operations. Name the failure mode, choose a concrete pattern, explain tradeoffs, and say how you would observe it in production.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Question Type</th><th>Strong answer includes</th><th>Metrics to mention</th></tr></thead>
+      <tbody>
+        <tr><td>Slow API</td><td>Trace request, check DB query plan, cache only after measuring</td><td>p95/p99 latency, DB time, query count, error rate</td></tr>
+        <tr><td>Queue backlog</td><td>Producer rate vs consumer rate, retries, poison messages, DLQ</td><td>queue depth, age of oldest job, retry count, worker saturation</td></tr>
+        <tr><td>Database hot spot</td><td>Indexing, lock contention, sharding key, write amplification</td><td>lock wait, CPU, IOPS, slow queries, replication lag</td></tr>
+        <tr><td>External dependency down</td><td>Timeouts, retries with jitter, circuit breaker, fallback, idempotency</td><td>dependency error rate, breaker state, timeout count</td></tr>
+        <tr><td>Security incident</td><td>Contain, revoke credentials, audit logs, patch, rotate, postmortem</td><td>affected users, failed auth, unusual IPs, token usage</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="interview">
+    <div class="interview-label">Universal Template</div>
+    <div class="interview-q">"How would you improve this backend system?"</div>
+    <div class="interview-strong"><span class="badge-strong">Strong</span><p>"I would first define the bottleneck or risk using metrics. If latency is high, I would inspect traces and query plans before adding cache. If correctness is at risk, I would add transactions, locks, idempotency, or constraints. If reliability is weak, I would add timeouts, retries with jitter, circuit breakers, and DLQs. Then I would monitor p99 latency, error rate, saturation, and business metrics to confirm improvement."</p></div>
+  </div>
+</section>
+
+<!-- MASTER CHEATSHEET -->
+<div class="tier-divider">
+  <div class="tier-divider-line"></div>
+  <div class="tier-divider-badge t1">📋 Master Reference</div>
+  <div class="tier-divider-line"></div>
+</div>
+
+<section class="chapter" id="master">
+  <div class="chapter-header">
+    <div class="chapter-num" style="background:rgba(124,106,247,0.12);border-color:rgba(124,106,247,0.25);color:var(--accent2);">✦</div>
+    <div class="chapter-meta">
+      <h2>The Senior Engineer Mindset</h2>
+      <div class="chapter-subtitle">The difference is in how you think, not just what you know</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--accent)"></div><h3>Junior vs Senior: The Real Gap</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Topic</th><th>Junior Says</th><th>Senior Says</th></tr></thead>
+        <tbody>
+          <tr><td>Caching</td><td>"I added Redis."</td><td>"Cache-aside with 5min TTL, stampede mutex, 92% hit rate → 8× DB load reduction."</td></tr>
+          <tr><td>Email on signup</td><td>"I send it in the request."</td><td>"Enqueued to BullMQ — SMTP can fail or hang. User shouldn't wait 3s for signup to complete."</td></tr>
+          <tr><td>Retries</td><td>"I retry the request."</td><td>"Exponential backoff + jitter, max 4 attempts, only 5xx, idempotency key prevents duplicate charges."</td></tr>
+          <tr><td>Slow query</td><td>"I'll add an index."</td><td>"EXPLAIN ANALYZE first. Seq scan on 8M rows. Composite index (user_id, status). Trade-off: +5ms writes."</td></tr>
+          <tr><td>Payment flow</td><td>"I wrap it in a transaction."</td><td>"Txn with SELECT FOR UPDATE, idempotency key, dead letter queue, circuit breaker on payment API."</td></tr>
+          <tr><td>Auth bug</td><td>"The user isn't logged in."</td><td>"401 = authentication failed. 403 = authenticated but unauthorized. Different root causes, different fixes."</td></tr>
+          <tr><td>Service down</td><td>"Service is down, users see errors."</td><td>"Circuit breaker tripped. Fallback returns queued status. Users notified by email when it completes."</td></tr>
+          <tr><td>Scaling</td><td>"I'll upgrade the server."</td><td>"Profiled: DB reads are the bottleneck. Added read replicas. Cost: replication lag — added read-your-own-writes."</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--teal)"></div><h3>5-Step Framework for Any Technical Problem</h3></div>
+    <div class="cards">
+      <div class="card"><h4>1. Understand the Problem</h4><p>What failure mode are we solving? What happens at 10×, 100×, 1000× scale? What's the cost of getting this wrong?</p></div>
+      <div class="card"><h4>2. Naive Solution</h4><p>The simplest approach. Why does it break under load or failure? Name the exact failure mode.</p></div>
+      <div class="card"><h4>3. Production Solution</h4><p>The real approach with specific tools, algorithms, and patterns named. Show production-grade options.</p></div>
+      <div class="card"><h4>4. Trade-offs</h4><p>What does this cost? Complexity, latency, consistency, operational overhead? Senior engineers always reason about trade-offs.</p></div>
+      <div class="card"><h4>5. Monitoring</h4><p>How do you know it's working? What metrics do you watch? What does failure look like in dashboards?</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--amber)"></div><h3>Recommended Learning Order</h3></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Phase</th><th>Topics</th><th>Why this order</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag purple">Phase 1 — Foundation</span></td><td>Concurrency → Transactions → Indexing</td><td>Everything else builds on these. Master these before anything else.</td></tr>
+          <tr><td><span class="tag blue">Phase 2 — Scale</span></td><td>Caching → Rate Limiting → Queues → Background Workers</td><td>Your tools for handling production load. Each builds on Phase 1.</td></tr>
+          <tr><td><span class="tag green">Phase 3 — Security</span></td><td>AuthN/AuthZ → CSRF/XSS → Webhooks → Idempotency</td><td>Correctness guarantees. Required before any real production deployment.</td></tr>
+          <tr><td><span class="tag" style="background:rgba(45,212,191,0.1);color:var(--teal);border-color:rgba(45,212,191,0.3);">Phase 4 — Distribution</span></td><td>Distributed Systems → Replication → Sharding → Circuit Breakers → Retries</td><td>When one machine isn't enough. Understand Phases 1–3 first.</td></tr>
+          <tr><td><span class="tag amber">Phase 5 — Operations</span></td><td>Observability → Docker → K8s → CI/CD → Reverse Proxy → API Design</td><td>How you ship and operate systems. Meaningful after you understand what you're shipping.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label"><div class="section-icon" style="background:var(--red)"></div><h3>Universal Production Anti-Patterns</h3></div>
+    <div class="prod-tips" style="border-left-color:var(--red);background:rgba(248,113,113,0.05);border-color:rgba(248,113,113,0.18);">
+      <div class="prod-label" style="color:var(--red);">🚫 Never Do These in Production</div>
+      <ul>
+        <li style="color:#e88;">Never do network calls (HTTP, SMTP, external APIs) inside a DB transaction — holding a lock while waiting for a network timeout is catastrophic for throughput.</li>
+        <li style="color:#e88;">Never retry 4xx errors — they're client errors that won't succeed on retry. You'll just spam the service with guaranteed failures.</li>
+        <li style="color:#e88;">Never store sessions or file uploads on local server disk — breaks horizontal scaling immediately and silently.</li>
+        <li style="color:#e88;">Never use :latest Docker image in production — non-deterministic, impossible to reliably roll back, can change without warning.</li>
+        <li style="color:#e88;">Never cache mutable data without a clear invalidation strategy — cache inconsistency bugs are the hardest to debug and reproduce in production.</li>
+        <li style="color:#e88;">Never log sensitive data (passwords, API keys, credit card numbers, full JWTs) — logs are often stored in plaintext and shared with third-party monitoring services.</li>
+        <li style="color:#e88;">Never ignore replication lag — the "read your own writes" bug is a real UX disaster that's easy to miss in single-server development.</li>
+        <li style="color:#e88;">Never skip resource limits in Kubernetes — one OOM pod can kill an entire node and all neighboring pods, causing a cascading outage.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="interview" style="margin-top:1.5rem;">
+    <div class="interview-label">🎯 The Universal Interview Answer Framework</div>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:1.25rem;">Structure every system design answer around these four elements — interviewers award points for each one:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+      <div style="padding:1.1rem;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--accent2);margin-bottom:6px;font-size:13px;font-family:var(--mono)">01 / Problem</div>
+        <div style="color:var(--text2);font-size:13px;line-height:1.5;">"Without this, under concurrent load we get a race condition / overselling / cache stampede / cascading failure." Name the exact failure mode.</div>
+      </div>
+      <div style="padding:1.1rem;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--teal);margin-bottom:6px;font-size:13px;font-family:var(--mono)">02 / Solution</div>
+        <div style="color:var(--text2);font-size:13px;line-height:1.5;">"SELECT FOR UPDATE in a transaction", "cache-aside with Redis SETEX and stampede mutex", "BullMQ with exponential backoff." Name specific tools.</div>
+      </div>
+      <div style="padding:1.1rem;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--amber);margin-bottom:6px;font-size:13px;font-family:var(--mono)">03 / Trade-offs</div>
+        <div style="color:var(--text2);font-size:13px;line-height:1.5;">"Optimistic locking: zero blocking but retries under high contention — I'd switch to pessimistic if conflict rate exceeded 20%." Always acknowledge cost.</div>
+      </div>
+      <div style="padding:1.1rem;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
+        <div style="font-weight:600;color:var(--green);margin-bottom:6px;font-size:13px;font-family:var(--mono)">04 / Observability</div>
+        <div style="color:var(--text2);font-size:13px;line-height:1.5;">"I'd monitor cache hit rate, conflict retry rate, queue depth, p99 latency." Shows you've operated this in production and know what breaks.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+  </div><!-- /content-area -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.chapter');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</div>
+</body>
+</html>

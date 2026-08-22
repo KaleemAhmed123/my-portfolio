@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design Interview Notes</title>
+<meta name="description" content="Interview framework, capacity math, building blocks, and worked examples applying real projects to system design.">
+<link rel="canonical" href="https://kaleemahmed.in/dev/notes/system-design-notes">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interview-artifacts.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo">Resume Interview Notes</div><div class="sidebar-title">System Design</div></div>
+    <div class="nav-label">Back</div>
+    <a class="nav-item" href="/dev/notes"><span class="nav-num">HM</span>Homepage</a>
+    <a class="nav-item" href="/dev/notes/resume-skill-map"><span class="nav-num">MAP</span>Skill Map</a>
+    <div class="nav-label">Sections</div>
+    <a class="nav-item" href="#framework"><span class="nav-num">01</span>Framework</a>
+    <a class="nav-item" href="#capacity"><span class="nav-num">02</span>Capacity</a>
+    <a class="nav-item" href="#blocks"><span class="nav-num">03</span>Building Blocks</a>
+    <a class="nav-item" href="#classic"><span class="nav-num">04</span>Classic Problems</a>
+    <a class="nav-item" href="#tradeoffs"><span class="nav-num">05</span>Trade-offs</a>
+    <a class="nav-item" href="#projects"><span class="nav-num">06</span>Your Projects</a>
+    <a class="nav-item" href="#reference"><span class="nav-num">07</span>Deep Reference</a>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="eyebrow">Architecture - Scaling - Trade-offs</div>
+      <h1>System Design <span>Interview Notes</span></h1>
+      <p>Use this page to master the system design round. Covers the 6-step framework, capacity estimation, core building blocks, classic distributed system problems, and how to present your own projects (Eudoro, Gaza40+, DataSync) as system design answers.</p>
+      <div class="tags"><span class="tag">System Design</span><span class="tag">Scalability</span><span class="tag">Trade-offs</span><span class="tag">Microservices</span></div>
+    </section>
+
+    <div class="content">
+      <section class="section" id="framework">
+        <div class="section-head"><div class="section-num">01</div><div><div class="section-kicker">Methodology</div><h2>The 6-Step Interview Framework</h2><div class="subtitle">Never jump straight to the architecture diagram. Control the pace.</div></div></div>
+        <div class="flow">
+          <div class="flow-step"><strong>1. Requirements (3-5 min):</strong> Clarify functional (what it does) and non-functional (scale, latency, CAP theorem trade-offs). Ask questions.</div>
+          <div class="flow-step"><strong>2. Capacity Estimation (3-5 min):</strong> Back-of-the-envelope math. DAU, QPS, storage, bandwidth. Keep it simple (10^5, 10^6).</div>
+          <div class="flow-step"><strong>3. API Design (3-5 min):</strong> Define endpoints, HTTP methods, request/response JSON payload shape.</div>
+          <div class="flow-step"><strong>4. Data Model (3-5 min):</strong> SQL vs NoSQL. Tables, primary keys, foreign keys, partition keys.</div>
+          <div class="flow-step"><strong>5. High-Level Design (10-15 min):</strong> Draw the boxes. Client -> LB -> App Servers -> DB/Cache. Satisfy the happy path.</div>
+          <div class="flow-step"><strong>6. Deep Dive & Bottlenecks (10 min):</strong> Address scaling limits, single points of failure, edge cases, and specific interviewer probes.</div>
+        </div>
+      </section>
+
+      <section class="section" id="capacity">
+        <div class="section-head"><div class="section-num">02</div><div><div class="section-kicker">Math</div><h2>Capacity Estimation (Back-of-Envelope)</h2><div class="subtitle">Show you understand scale magnitude. Don't stress exact numbers.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Daily Active Users (DAU)</h3><p>Determine total users, DAU, and requests per user per day. <br>Ex: 10M DAU * 10 req/day = 100M req/day.</p></div>
+          <div class="card"><h3>QPS (Queries Per Second)</h3><p>Divide daily requests by 10^5 (approx seconds in a day: 86,400). <br>Ex: 100M / 10^5 = 1,000 QPS. Peak QPS = 2x or 3x average.</p></div>
+          <div class="card"><h3>Storage</h3><p>Size per object * objects per day * 5 years.<br>Ex: 10M text posts/day * 1KB = 10GB/day. 3.6TB/year. 18TB for 5 years.</p></div>
+          <div class="card"><h3>Bandwidth</h3><p>Ingress: Writes/sec * size. Egress: Reads/sec * size.<br>Ex: 100 writes/sec * 1MB = 100MB/s ingress bandwidth.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="blocks">
+        <div class="section-head"><div class="section-num">03</div><div><div class="section-kicker">Components</div><h2>Building Blocks</h2><div class="subtitle">The tools in your architectural toolbelt.</div></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Component</th><th>When to use</th><th>Example tech</th></tr></thead>
+            <tbody>
+              <tr><td>Load Balancer</td><td>Distribute traffic, prevent overloading single nodes.</td><td>Nginx, AWS ALB, HAProxy</td></tr>
+              <tr><td>CDN</td><td>Serve static assets quickly globally.</td><td>Cloudflare, AWS CloudFront</td></tr>
+              <tr><td>Cache</td><td>Reduce DB load, fast read access.</td><td>Redis, Memcached</td></tr>
+              <tr><td>Message Queue</td><td>Async processing, decoupling, buffer spikes.</td><td>RabbitMQ, Kafka, SQS</td></tr>
+              <tr><td>Blob Storage</td><td>Large files (images, video, documents).</td><td>AWS S3, Cloudflare R2</td></tr>
+              <tr><td>Search Engine</td><td>Full-text search, complex querying.</td><td>Elasticsearch, Algolia</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="classic">
+        <div class="section-head"><div class="section-num">04</div><div><div class="section-kicker">Patterns</div><h2>Classic Problems</h2><div class="subtitle">Core architectures that are repeated in interviews.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>URL Shortener</h3><p><strong>Core:</strong> Map long URL to short 7-char hash (Base62). <br><strong>DB:</strong> Relational or NoSQL. Key-Value is fine. <br><strong>Bottleneck:</strong> Reads heavily outweigh writes. Add Redis cache.</p></div>
+          <div class="card"><h3>Chat System (WhatsApp)</h3><p><strong>Core:</strong> Real-time bi-directional messaging. <br><strong>Protocol:</strong> WebSockets. <br><strong>Architecture:</strong> Chat servers, presence servers, push notifications, message sync queues.</p></div>
+          <div class="card"><h3>Rate Limiter</h3><p><strong>Core:</strong> Prevent abuse. <br><strong>Algorithms:</strong> Token bucket, Leaky bucket, Sliding window. <br><strong>Storage:</strong> Redis (fast reads/writes, atomic operations via Lua scripts).</p></div>
+          <div class="card"><h3>News Feed</h3><p><strong>Core:</strong> Aggregate content from followed users. <br><strong>Pattern:</strong> Fan-out on write (push model for normal users), Fan-out on read (pull model for celebrities). Cache heavy.</p></div>
+        </div>
+      </section>
+      
+      <section class="section" id="tradeoffs">
+        <div class="section-head"><div class="section-num">05</div><div><div class="section-kicker">Decisions</div><h2>Trade-offs</h2><div class="subtitle">Every architecture decision has a cost. Be ready to discuss it.</div></div></div>
+        <div class="checklist">
+          <div class="check"><strong>SQL vs NoSQL:</strong> Relational data with ACID guarantees vs Flexible schema, horizontal scaling, key-value lookups.</div>
+          <div class="check"><strong>Consistency vs Availability (CAP):</strong> In a partition (P), do you want the latest data (C - might error out) or *any* data (A - might be stale)?</div>
+          <div class="check"><strong>Monolith vs Microservices:</strong> Fast initial dev, simple deployment vs independent scaling, fault isolation, tech diversity (but high operational overhead).</div>
+          <div class="check"><strong>Sync vs Async:</strong> Real-time response but blocks thread vs fast initial response, processing in background (queues), requires polling/webhooks.</div>
+        </div>
+      </section>
+
+      <section class="section" id="projects">
+        <div class="section-head"><div class="section-num">06</div><div><div class="section-kicker">Your Work</div><h2>Your Projects as System Designs</h2><div class="subtitle">How to map your actual work to system design concepts.</div></div></div>
+        <div class="grid">
+          <div class="card"><h3>Eudoro (Marketplace)</h3><p><strong>Pattern:</strong> Microservices, Event-Driven. <br><strong>Talk about:</strong> Order creation decoupling. Webhook receives Razorpay event -> RabbitMQ -> Order service. Ensures no dropped orders during traffic spikes.</p></div>
+          <div class="card"><h3>Forever Yours (Shaza)</h3><p><strong>Pattern:</strong> Real-time, RAG Pipeline. <br><strong>Talk about:</strong> WebRTC signaling via Socket.io. Vector search latency. Trade-off: using Jina embeddings + Redis caching to speed up the retrieval pipeline for the AI companion.</p></div>
+          <div class="card"><h3>Gaza40+</h3><p><strong>Pattern:</strong> RBAC, Secure Data. <br><strong>Talk about:</strong> Access control at the API level (not just UI). Streaming documents from R2 to prevent unauthorized direct S3 access. Background queue for CSV exports to prevent timeout.</p></div>
+          <div class="card"><h3>DataSync (ETL Hub)</h3><p><strong>Pattern:</strong> Middleware, Batch Processing. <br><strong>Talk about:</strong> Decoupling 3 systems. Polling vs Push. Handling idempotency (upserts on composite keys) so re-running a file doesn't duplicate records.</p></div>
+        </div>
+      </section>
+      <section class="section" id="reference">
+        <div class="section-head"><div class="section-num">07</div><div><div class="section-kicker">Lookup</div><h2>Deep Reference</h2><div class="subtitle">The numbers and definitions worth having loaded before the interview, not derived during it.</div></div></div>
+
+        <p>Everything above is reasoning you build in the room. This section is the opposite: facts you should be able to state without working them out, because time spent deriving them is time not spent on the design.</p>
+
+        <h3>Latency, by order of magnitude</h3>
+        <p>Do not memorize exact figures — hardware moves and precision is not the point. Memorize the <em>ratios</em>, because the whole value of these numbers is knowing what dominates.</p>
+
+        <table>
+          <thead><tr><th>Operation</th><th>Rough time</th><th>What it implies</th></tr></thead>
+          <tbody>
+            <tr><td>L1 / L2 cache reference</td><td>~1 ns</td><td>Free, relative to anything below.</td></tr>
+            <tr><td>Main memory reference</td><td>~100 ns</td><td>~100× cache. Why data locality matters in hot loops.</td></tr>
+            <tr><td>SSD random read</td><td>~100 µs</td><td>~1,000× memory. Why an in-memory cache in front of a database is worth having.</td></tr>
+            <tr><td>Network round trip, same datacenter</td><td>~0.5 ms</td><td>Cheap enough that a service call is fine; not so cheap that 50 of them are.</td></tr>
+            <tr><td>Disk seek (spinning)</td><td>~10 ms</td><td>The reason B-trees are shaped the way they are.</td></tr>
+            <tr><td>Round trip across continents</td><td>~150 ms</td><td>Bounded by the speed of light. No amount of optimization fixes it — only moving the data closer, which is what a CDN is.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <div class="callout-title">The one that changes designs</div>
+          <p>A cross-continental round trip is roughly 150 ms and cannot be optimized away, because it is physics rather than software. That single fact justifies CDNs, edge caching, regional replicas, and why a chatty client-server protocol that is fine in a datacenter is unusable over the public internet. If you remember one number, remember this one and what it forces.</p>
+        </div>
+
+        <h3>Capacity arithmetic</h3>
+        <p>Estimation questions are testing whether you can keep the units straight under mild pressure, not whether you are right. Round aggressively and say you are rounding.</p>
+
+        <table>
+          <thead><tr><th>Fact</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Seconds in a day</td><td>86,400 — call it 100k</td></tr>
+            <tr><td>1 million writes/day</td><td>~12 writes/second average</td></tr>
+            <tr><td>Peak versus average</td><td>Assume 2–3× average; say which you are using</td></tr>
+            <tr><td>Bytes: KB → MB → GB → TB</td><td>×1,000 each (use decimal, it is faster and close enough)</td></tr>
+            <tr><td>A row of typical metadata</td><td>~1 KB unless it holds text or blobs</td></tr>
+            <tr><td>1M rows × 1 KB</td><td>~1 GB — the anchor most storage estimates hang off</td></tr>
+            <tr><td>Read:write ratio, consumer apps</td><td>Often 100:1 or higher. State your assumption, it drives everything.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Consistency vocabulary</h3>
+        <table>
+          <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Strong consistency</strong></td><td>Every read returns the most recent write. Costs coordination, and therefore latency.</td></tr>
+            <tr><td><strong>Eventual consistency</strong></td><td>Replicas converge if writes stop. Says nothing about how long, which is why "eventual" needs a number attached in practice.</td></tr>
+            <tr><td><strong>Read-your-writes</strong></td><td>A user always sees their own last write. Much weaker than strong consistency and usually what the product actually needs.</td></tr>
+            <tr><td><strong>Monotonic reads</strong></td><td>Time never appears to run backwards for one reader. Prevents the "my comment disappeared then came back" bug.</td></tr>
+            <tr><td><strong>Quorum</strong></td><td>With <code>R + W &gt; N</code>, a read set and a write set must overlap, so a read is guaranteed to see the latest write.</td></tr>
+            <tr><td><strong>CAP</strong></td><td>Under a network <em>partition</em>, choose consistency or availability. It says nothing about the normal case, which is where the misuse comes from.</td></tr>
+            <tr><td><strong>PACELC</strong></td><td>The honest extension: under Partition, A or C; Else, Latency or Consistency. Covers the 99% of the time when nothing is partitioned.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Pattern index</h3>
+        <div class="grid">
+          <div class="card"><h3>Idempotency key</h3><p>Client-supplied unique id, stored with its result. Makes retries safe. Reach for it whenever a network can retry a non-idempotent action.</p></div>
+          <div class="card"><h3>Outbox</h3><p>Write the domain change and the event to publish in one local transaction; a relay publishes from that table. Removes the "saved but never published" gap between a database and a broker.</p></div>
+          <div class="card"><h3>Saga</h3><p>A long-running workflow as a series of local transactions with compensating actions. What replaces distributed transactions once data spans services.</p></div>
+          <div class="card"><h3>Circuit breaker</h3><p>After repeated failures, stop calling a dependency for a while. Stops one slow service from consuming every thread in its callers — the mechanism behind most cascading failures.</p></div>
+          <div class="card"><h3>Backpressure</h3><p>Bound your queues. An unbounded queue converts an overload into an out-of-memory crash and hides the problem until it is fatal.</p></div>
+          <div class="card"><h3>Cache-aside</h3><p>Read cache, miss, read database, populate. The default. Its hard part is invalidation, and its failure mode is the stampede when a hot key expires.</p></div>
+          <div class="card"><h3>Bloom filter</h3><p>Probabilistic set membership: definitely-not-present or maybe-present, in very little memory. Skips pointless lookups for keys that do not exist.</p></div>
+          <div class="card"><h3>Consistent hashing</h3><p>Maps keys to nodes so that adding or removing one moves only a small fraction of keys, instead of remapping everything.</p></div>
+        </div>
+
+        <h3>Closing checklist</h3>
+        <p>In the last minutes, these are the dimensions that separate a complete answer from a diagram. Naming even two of them unprompted reads as production experience.</p>
+
+        <div class="checklist">
+          <div class="checklist-item"><span class="check-icon">✓</span> What happens when this component dies? Where is the single point of failure?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> What is the hot key or hot partition, and what happens when it appears?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> Which operations must be idempotent, given that every network call can be retried?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> What do I measure, and what would page someone at 3am?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> How does this behave at 10× the traffic? What breaks first?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> Where does data live, who may read it, and how long is it kept?</div>
+          <div class="checklist-item"><span class="check-icon">✓</span> How does it get deployed and rolled back without downtime?</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>
