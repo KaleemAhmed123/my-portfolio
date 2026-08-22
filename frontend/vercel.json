@@ -25,6 +25,14 @@
   ],
   "rewrites": [
     {
+      "source": "/dev/notes",
+      "destination": "/dev/notes/index.html"
+    },
+    {
+      "source": "/dev/notes/:slug",
+      "destination": "/dev/notes/:slug.html"
+    },
+    {
       "source": "/developer",
       "destination": "/index.html"
     },
